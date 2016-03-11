@@ -1,0 +1,30 @@
+{
+  "name": "webvrapp",
+  "description": "YAWVRB",
+  "version": "0.1.0",
+  "author": "Jeffrey Zitelli (https://github.com/jzitelli)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jzitelli/WebVRApp.git"
+  },
+  "bugs": "https://github.com/jzitelli/WebVRApp/issues",
+  "files": [
+    "LICENSE",
+    "README.md",
+    "WebVRApp.js",
+    "favicon.ico"
+  ],
+  "keywords": [
+    "WebVR",
+    "three.js",
+    "VR",
+    "virtual reality",
+    "Google Cardboard",
+    "WebGL"
+  ],
+  "dependencies": {
+    "three": "git://github.com/jzitelli/three.js.git#dev",
+    "webvr-polyfill": "git://github.com/jzitelli/webvr-polyfill.git#webvr-1.0"
+  }
+}
