@@ -3,19 +3,13 @@ function WebVRApp(scene, config) {
     this.scene = scene;
 
     config = config || {};
+    var rendererOptions = config.rendererOptions || {};
 
     var domElement;
-    if (config.canvasId) {
-        // use an existing canvas
-        domElement = document.getElementById(config.canvasId);
-        if (!domElement) {
-            throw new Error('could not find canvas, id = ' + config.canvasId);
-        }
-        rendererOptions = combineObjects(rendererOptions, {canvas: domElement});
-        this.renderer = new THREE.WebGLRenderer(config.rendererOptions);
+    this.renderer = new THREE.WebGLRenderer(rendererOptions);
+    if (rendererOptions.canvas) {
+        domElement = rendererOptions.canvas;
     } else {
-        // create the canvas
-        this.renderer = new THREE.WebGLRenderer(config.rendererOptions);
         domElement = this.renderer.domElement;
         document.body.appendChild(domElement);
         domElement.id = 'webgl-canvas';
@@ -51,29 +45,33 @@ function WebVRApp(scene, config) {
         }
     }.bind(this);
 
-    var onResetVRSensor  = config.onResetVRSensor;
-    var lastPosition = new THREE.Vector3();
-    this.resetVRSensor = function () {
-        if (this.vrControlsEnabled) {
-            this.vrControls.update(true);
-            lastPosition.copy(this.camera.position);
-            var lastRotation = this.camera.rotation.y;
-            this.vrControls.resetSensor();
-            this.vrControls.update(true);
-            if (onResetVRSensor) {
-                onResetVRSensor(lastRotation, lastPosition);
+    this.resetVRSensor = ( function () {
+        var onResetVRSensor = config.onResetVRSensor;
+        var lastPosition = new THREE.Vector3();
+        return function () {
+            if (this.vrControlsEnabled) {
+                this.vrControls.update(true);
+                lastPosition.copy(this.camera.position);
+                var lastRotation = this.camera.rotation.y;
+                this.vrControls.resetSensor();
+                this.vrControls.update(true);
+                if (onResetVRSensor) {
+                    onResetVRSensor(lastRotation, lastPosition);
+                }
             }
-        }
-    }.bind(this);
+        }.bind(this);
+    } )();
 
-    var wireframeMaterial = new THREE.MeshBasicMaterial({color: 0xeeddaa, wireframe: true});
-    this.toggleWireframe = function () {
-        if (this.scene.overrideMaterial) {
-            this.scene.overrideMaterial = null;
-        } else {
-            this.scene.overrideMaterial = wireframeMaterial;
-        }
-    }.bind(this);
+    this.toggleWireframe = ( function () {
+        var wireframeMaterial = new THREE.MeshBasicMaterial({color: 0xeeddaa, wireframe: true});
+        return function () {
+            if (this.scene.overrideMaterial) {
+                this.scene.overrideMaterial = null;
+            } else {
+                this.scene.overrideMaterial = wireframeMaterial;
+            }
+        }.bind(this);
+    } )();
 
     this.toggleFullscreen = function (options) {
         if (!isFullscreen()) {
