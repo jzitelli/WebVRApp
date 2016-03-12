@@ -3,11 +3,18 @@ function onLoad() {
 
 	var scene = ( function () {
 		var scene = new THREE.Scene();
-		var boxGeom = new THREE.BoxGeometry(1, 1, 1);
-		var material = new THREE.MeshNormalMaterial();
-		var mesh = new THREE.Mesh(boxGeom, material);
-		mesh.position.z = -2;
-		scene.add(mesh);
+
+		var directionalLight = new THREE.DirectionalLight(0xffffff);
+		directionalLight.position.set(2, 2, 2);
+		scene.add(directionalLight);
+
+		var objectLoader = new THREE.ObjectLoader();
+		objectLoader.load('models/desk.json', function (obj) {
+			obj.rotation.y = Math.PI;
+			obj.position.set(0, -3, -3);
+			scene.add(obj);
+		});
+
 		return scene;
 	} )();
 
