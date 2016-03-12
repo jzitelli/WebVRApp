@@ -5,12 +5,11 @@ function WebVRApp(scene, config) {
     config = config || {};
     var rendererOptions = config.rendererOptions || {};
 
-    var domElement;
     this.renderer = new THREE.WebGLRenderer(rendererOptions);
+    var domElement = this.renderer.domElement;
     if (rendererOptions.canvas) {
         domElement = rendererOptions.canvas;
     } else {
-        domElement = this.renderer.domElement;
         document.body.appendChild(domElement);
         domElement.id = 'webgl-canvas';
     }

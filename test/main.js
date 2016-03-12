@@ -7,12 +7,8 @@ function onLoad() {
 		var objectLoader = new THREE.ObjectLoader();
 		objectLoader.load('models/desk.json', function (obj) {
 			obj.rotation.y = Math.PI;
-			obj.position.set(0, -3, -3);
+			obj.position.set(0, -3.75, -2.75);
 			scene.add(obj);
-
-			var directionalLight = new THREE.DirectionalLight(0xffffff);
-			directionalLight.position.set(2, 2, 2);
-			scene.add(directionalLight);
 		});
 
 		return scene;
@@ -23,5 +19,6 @@ function onLoad() {
 	requestAnimationFrame(animate);
 	function animate(t) {
 		app.render();
+		requestAnimationFrame(animate);
 	}
 }
