@@ -7,11 +7,7 @@ var firefox = new webdriver.Builder().forBrowser('firefox').build();
 
 describe('WebVRApp', function () {
 
-	var browser = firefox;
-
-	beforeEach( function (done) {
-		browser.get(server.URL).then(done);
-	} );
+	var browser;
 
 	afterEach( function (done) {
 		// take a screenshot of the page:
@@ -24,8 +20,10 @@ describe('WebVRApp', function () {
 		} );
 	} );
 
-	it('opens', function () {
-		console.log('it opens!');
+	it('opens in Firefox', function () {
+		browser = firefox;
+		browser.get(server.URL);
+		console.log('it opens in Firefox!');
 	});
 
 });

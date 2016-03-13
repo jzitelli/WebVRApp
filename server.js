@@ -4,7 +4,7 @@ var http = require('http'),
     url = require('url');
 
 const PORT = 8000;
-const URL = "http://localhost:" + PORT + "/test/index.html";
+const URL = "http://localhost:" + PORT + "/test/test.html";
 
 function handleRequest(request, response) {
     var pathname = url.parse(request.url).pathname,
@@ -21,7 +21,8 @@ function handleRequest(request, response) {
         response.end();
     });
     readStream.on('error', function () {
-        console.error('error reading ' + filename);
+        console.error('error reading from ' + filename);
+        response.writeHead(404);
         response.end();
     });
     readStream.pipe(response);

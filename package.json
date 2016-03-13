@@ -1,5 +1,5 @@
 {
-  "name": "webvrapp",
+  "name": "yawvrb",
   "description": "YAWVRB",
   "version": "0.1.0",
   "author": "Jeffrey Zitelli (https://github.com/jzitelli)",
@@ -12,7 +12,8 @@
   "files": [
     "LICENSE",
     "README.md",
-    "WebVRApp.js"
+    "WebVRApp.js",
+    "server.js"
   ],
   "keywords": [
     "WebVR",
