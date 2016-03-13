@@ -15,6 +15,7 @@
     "LICENSE",
     "README.md",
     "WebVRApp.js",
+    "WebVRKeyboard.js",
     "favicon.ico",
     "server.js"
   ],
