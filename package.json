@@ -10,9 +10,12 @@
   },
   "bugs": "https://github.com/jzitelli/WebVRApp/issues",
   "files": [
+    "spec/",
+    "test/",
     "LICENSE",
     "README.md",
     "WebVRApp.js",
+    "favicon.ico",
     "server.js"
   ],
   "keywords": [
