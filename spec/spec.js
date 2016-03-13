@@ -30,8 +30,6 @@ describe('WebVRApp', function () {
 			var base64Data = data.replace(/^data:image\/png;base64,/, "");
 			fs.writeFile('test/screenshots/it_opens.png', base64Data, 'base64');
 			done();
-		} ).catch( function (error) {
-			console.error(error);
 		} );
 	} );
 
