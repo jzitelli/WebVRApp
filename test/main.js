@@ -5,7 +5,7 @@ function onLoad() {
 		var scene = new THREE.Scene();
 
 		var objectLoader = new THREE.ObjectLoader();
-		objectLoader.load('models/desk.json', function (obj) {
+		objectLoader.load('test/models/desk.json', function (obj) {
 			obj.rotation.y = Math.PI;
 			obj.position.set(0, -3.75, -2.75);
 			scene.add(obj);

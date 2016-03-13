@@ -27,8 +27,8 @@
     "webvr-polyfill": "git://github.com/jzitelli/webvr-polyfill.git#webvr-1.0"
   },
   "devDependencies": {
-    "jasmine": "^2.4",
-    "selenium-webdriver": "^2.52.0"
+    "jasmine": "latest",
+    "selenium-webdriver": "latest"
   },
   "scripts": {
     "test": "jasmine"
