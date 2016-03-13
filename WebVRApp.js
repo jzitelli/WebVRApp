@@ -135,6 +135,7 @@ function WebVRApp(scene, config) {
     vrButton.style.padding = '10px';
     vrButton.style.background = 0x222222;
     vrButton.style['text-color'] = 0xffffff;
+    document.body.appendChild(vrButton);
 
     var onFullscreenChange = function () {
         if (isRequestingPresent) {
@@ -158,7 +159,7 @@ function WebVRApp(scene, config) {
                     isPresenting = false;
                     vrButton.innerHTML = 'ENTER VR';
                     onResize();
-                }.bind(this) );
+                } );
             }
         }
     }.bind(this);
@@ -202,8 +203,6 @@ function WebVRApp(scene, config) {
     }
 
     vrButton.addEventListener('click', onClick, false);
-
-    document.body.appendChild(vrButton);
 
     var beforeUnload = function () {
         if (isPresenting) {
