@@ -1,4 +1,4 @@
 function WebVRKeyboard() {
-	"use strict";
-	// TODO
+    "use strict";
+    // TODO
 }
