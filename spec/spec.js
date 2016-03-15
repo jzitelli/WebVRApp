@@ -37,9 +37,8 @@ describe('WebVRApp', function () {
 		it('enters fullscreen', function () {
 
 			this.name = 'it_enters_fullscreen';
-			var fsButton = firefox.findElement(webdriver.By.id('fsButton'));
 
-			expect(fsButton).not.toBeNull();
+			var fsButton = firefox.findElement(webdriver.By.id('fsButton'));
 
 			fsButton.click();
 			firefox.sleep(2000); // maybe there is a more robust way, listen to events?
@@ -53,11 +52,24 @@ describe('WebVRApp', function () {
 
 			this.name = 'it_enters_VR';
 
-			var vrButton = firefox.findElement(webdriver.By.id('vrButton'));
-			expect(vrButton).not.toBeNull();
+			firefox.executeScript("window.vrDisplay = null; navigator.getVRDisplays().then( function (displays) { if (displays[0].canPresent) window.vrDisplay = displays[0]; } );");
+			firefox.sleep(500);
 
-			vrButton.click();
-			firefox.sleep(2000);
+			firefox.findElement(webdriver.By.id('vrButton')).then( function (vrButton) {
+				vrButton.click();
+				firefox.sleep(2000);
+				var isPresenting = firefox.executeScript("return window.vrDisplay.isPresenting;");
+
+				expect(isPresenting).toBeTrue();
+
+				done();
+
+			} ).catch( function (error) {
+
+				done();
+
+			} );
+
 
 		}, 20000);
 
