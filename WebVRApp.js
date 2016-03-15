@@ -91,21 +91,22 @@ function WebVRApp(scene, config) {
     if (!vrButton) {
         // no button was specified, so create one
         vrButton = document.createElement('button');
+        vrButton.id = 'vrButton';
         vrButton.innerHTML = 'ENTER VR';
         vrButton.style.position = 'absolute';
         vrButton.style.right = 0;
         vrButton.style.bottom = 0;
-        vrButton.style.margin = '10px';
-        vrButton.style.padding = '10px';
+        vrButton.style.margin = '5px';
+        vrButton.style.padding = '5px';
         vrButton.style.background = 0x222222;
         vrButton.style['text-color'] = 0xffffff;
     }
 
-    var onClick;
+    var supportsWebVR = true;
 
+    var onClick;
     if (window.VRDisplay) {
 
-        document.body.appendChild(vrButton);
         onClick = function () {
             if (!isPresenting) {
                 isRequestingPresent = true;
@@ -123,13 +124,10 @@ function WebVRApp(scene, config) {
                 }.bind(this) );
             }
         }.bind(this);
-        vrButton.addEventListener('click', onClick, false);
 
     } else if (window.HMDVRDevice) {
 
         // i.e. deprecated WebVR API
-
-        document.body.appendChild(vrButton);
         onClick = function () {
             if (!isPresenting) {
                 this.vrEffect.requestPresent().then( function () {
@@ -141,13 +139,15 @@ function WebVRApp(scene, config) {
                 } );
             }
         }.bind(this);
-        vrButton.addEventListener('click', onClick, false);
 
     } else {
-
-        // no VR button is added
+        supportsWebVR = false;
         console.error('WebVR API is not supported');
+    }
 
+    if (supportsWebVR) {
+        vrButton.addEventListener('click', onClick, false);
+        document.body.appendChild(vrButton);
     }
 
     // configure fullscreen button:
@@ -156,12 +156,13 @@ function WebVRApp(scene, config) {
     if (!fsButton) {
         // no button was specified, so create one
         fsButton = document.createElement('button');
+        fsButton.id = 'fsButton';
         fsButton.innerHTML = 'FULLSCREEN';
         fsButton.style.position = 'absolute';
         fsButton.style.right = 0;
-        fsButton.style.bottom = 0;
-        fsButton.style.margin = '10px';
-        fsButton.style.padding = '10px';
+        fsButton.style.bottom = supportsWebVR ? '40px' : 0;
+        fsButton.style.margin = '5px';
+        fsButton.style.padding = '5px';
         fsButton.style.background = 0x222222;
         fsButton.style['text-color'] = 0xfbeefb;
         fsButton.addEventListener('click', this.toggleFullscreen.bind(this), false);

@@ -4,13 +4,13 @@ var fs = require('fs'),
 var server = require('../server.js');
 
 var firefox = new webdriver.Builder().forBrowser('firefox').build();
-
 var chrome;
-try {
-	chrome = new webdriver.Builder().forBrowser('chrome').build();
-} catch (error) {
-	console.error(error);
-}
+
+// try {
+// 	chrome = new webdriver.Builder().forBrowser('chrome').build();
+// } catch (error) {
+// 	console.error(error);
+// }
 
 function writeScreenshot(data, file) {
 	var base64Data = data.replace(/^data:image\/png;base64,/, "");
@@ -21,34 +21,67 @@ function writeScreenshot(data, file) {
 describe('WebVRApp', function () {
 
 	describe('inFirefox', function () {
+
+		beforeEach( function () {
+			firefox.get(server.URL);
+		} );
+
 		afterEach( function (done) {
-			var file = 'test/screenshots/firefox/it_opens.png';
+			var file = 'test/screenshots/firefox/' + this.name + '.png';
 			firefox.takeScreenshot().then( function (data) {
 				writeScreenshot(data, file);
 				done();
 			} );
 		}, 20000);
-		it('opens', function () {
-			firefox.get(server.URL);
-			console.log('it opens in Firefox!');
-		});
+
+		it('enters fullscreen', function () {
+
+			this.name = 'it_enters_fullscreen';
+			var fsButton = firefox.findElement(webdriver.By.id('fsButton'));
+
+			expect(fsButton).not.toBeNull();
+
+			fsButton.click();
+			firefox.sleep(2000); // maybe there is a more robust way, listen to events?
+			var fsElem = firefox.executeScript("return document.mozFullScreenElement;");
+
+			expect(fsElem).not.toBeNull();
+
+		}, 20000);
+
+		it('enters VR', function (done) {
+
+			this.name = 'it_enters_VR';
+
+			var vrButton = firefox.findElement(webdriver.By.id('vrButton'));
+			expect(vrButton).not.toBeNull();
+
+			vrButton.click();
+			firefox.sleep(2000);
+
+		}, 20000);
+
 	});
 
-	if (chrome) {
-		describe('inChrome', function () {
-			afterEach( function (done) {
-				var file = 'test/screenshots/chrome/it_opens.png';
-				chrome.takeScreenshot().then( function (data) {
-					writeScreenshot(data, file);
-					done();
-				} );
-			}, 20000);
-			it('opens', function () {
-				chrome.get(server.URL);
-				console.log('it opens in Chrome!');
-			});
-		});
-	}
+	// if (chrome) {
+	// 	describe('inChrome', function () {
+
+	// 		this.browser = chrome;
+
+	// 		beforeEach( function () {
+	// 			this.browser.get(server.URL);
+	// 		} );
+
+	// 		afterEach( function (done) {
+	// 			var file = 'test/screenshots/chrome/it_opens.png';
+	// 			this.browser.takeScreenshot().then( function (data) {
+	// 				writeScreenshot(data, file);
+	// 				done();
+	// 			} );
+	// 		}, 20000);
+
+	// 	});
+	// }
 
 	afterAll( function () {
 		if (chrome) chrome.quit();
