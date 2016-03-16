@@ -1,5 +1,5 @@
 var fs = require('fs'),
-	webdriver = require('selenium-webdriver');
+    webdriver = require('selenium-webdriver');
 
 var server = require('../server.js');
 
@@ -7,97 +7,98 @@ var firefox = new webdriver.Builder().forBrowser('firefox').build();
 var chrome;
 
 // try {
-// 	chrome = new webdriver.Builder().forBrowser('chrome').build();
+//  chrome = new webdriver.Builder().forBrowser('chrome').build();
 // } catch (error) {
-// 	console.error(error);
+//  console.error(error);
 // }
 
 function writeScreenshot(data, file) {
-	var base64Data = data.replace(/^data:image\/png;base64,/, "");
-	fs.writeFileSync(file, base64Data, 'base64');
-	console.log('wrote %s', file);
+    var base64Data = data.replace(/^data:image\/png;base64,/, "");
+    fs.writeFileSync(file, base64Data, 'base64');
+    console.log('wrote %s', file);
 }
 
 describe('WebVRApp', function () {
 
-	describe('inFirefox', function () {
+    describe('inFirefox', function () {
 
-		beforeEach( function () {
-			firefox.get(server.URL);
-		} );
+        beforeEach( function () {
+            firefox.get(server.TEST_URL);
+        } );
 
-		afterEach( function (done) {
-			var file = 'test/screenshots/firefox/' + this.name + '.png';
-			firefox.takeScreenshot().then( function (data) {
-				writeScreenshot(data, file);
-				done();
-			} );
-		}, 20000);
+        afterEach( function (done) {
+            if (this.screenshotName) {
+                var file = 'test/screenshots/firefox/' + this.screenshotName + '.png';
+                firefox.takeScreenshot().then( function (data) {
+                    writeScreenshot(data, file);
+                    done();
+                } );
+            } else {
+                done();
+            }
+        }, 20000);
 
-		it('enters fullscreen', function () {
+        it('enters fullscreen', function () {
 
-			this.name = 'it_enters_fullscreen';
+            var fsButton = firefox.findElement(webdriver.By.id('fsButton'));
 
-			var fsButton = firefox.findElement(webdriver.By.id('fsButton'));
+            fsButton.click();
+            firefox.sleep(2000); // maybe there is a more robust way, listen to events?
+            var fsElem = firefox.executeScript("return document.mozFullScreenElement;");
 
-			fsButton.click();
-			firefox.sleep(2000); // maybe there is a more robust way, listen to events?
-			var fsElem = firefox.executeScript("return document.mozFullScreenElement;");
+            expect(fsElem).not.toBeNull();
 
-			expect(fsElem).not.toBeNull();
+            this.screenshotName = 'it_enters_fullscreen';
 
-		}, 20000);
+        }, 20000);
 
-		it('enters VR', function (done) {
+        it('enters VR', function (done) {
 
-			this.name = 'it_enters_VR';
+            //firefox.executeScript("window.vrDisplay = null; navigator.getVRDisplays().then( function (displays) { if (displays[0].canPresent) window.vrDisplay = displays[0]; } );");
+            //firefox.sleep(500);
 
-			firefox.executeScript("window.vrDisplay = null; navigator.getVRDisplays().then( function (displays) { if (displays[0].canPresent) window.vrDisplay = displays[0]; } );");
-			firefox.sleep(500);
+            firefox.findElement(webdriver.By.id('vrButton')).then( function (vrButton) {
 
-			firefox.findElement(webdriver.By.id('vrButton')).then( function (vrButton) {
-				vrButton.click();
-				firefox.sleep(2000);
-				var isPresenting = firefox.executeScript("return window.vrDisplay.isPresenting;");
+                vrButton.click();
+                firefox.sleep(2000);
+                var isPresenting = firefox.executeScript("return app.vrDisplay.isPresenting;");
 
-				expect(isPresenting).toBeTrue();
+                expect(isPresenting).toBeTrue();
 
-				done();
+                this.screenshotName = 'it_enters_VR';
 
-			} ).catch( function (error) {
+                done();
 
-				done();
+            } ).catch( function (error) {
 
-			} );
+                // no VR button is present because either:
+                var hasVRDisplay = firefox.executeScript("return app.vrDisplay;");
+                if (hasVRDisplay) {
 
+                    // (a) the VRDisplay can't present
+                    // var canPresent = firefox.executeScript("return app.vrDisplay.canPresent;");
 
-		}, 20000);
+                    // expect(!canPresent).toBeTrue();
 
-	});
+                    done();
 
-	// if (chrome) {
-	// 	describe('inChrome', function () {
+                } else {
 
-	// 		this.browser = chrome;
+                    // (b) no VRDisplay is available
+                    console.warn('no VRDisplay is available');
+                    done();
 
-	// 		beforeEach( function () {
-	// 			this.browser.get(server.URL);
-	// 		} );
+                }
 
-	// 		afterEach( function (done) {
-	// 			var file = 'test/screenshots/chrome/it_opens.png';
-	// 			this.browser.takeScreenshot().then( function (data) {
-	// 				writeScreenshot(data, file);
-	// 				done();
-	// 			} );
-	// 		}, 20000);
+            } );
 
-	// 	});
-	// }
+        }, 20000);
 
-	afterAll( function () {
-		if (chrome) chrome.quit();
-		firefox.quit();
-	} );
+    });
+
+    afterAll( function () {
+        if (chrome) chrome.quit();
+        firefox.quit();
+    } );
 
 });

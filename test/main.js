@@ -1,3 +1,5 @@
+var app;
+
 function onLoad() {
 	"use strict";
 
@@ -14,7 +16,7 @@ function onLoad() {
 		return scene;
 	} )();
 
-	var app = new WebVRApp(scene, {rendererOptions: {canvas: document.getElementById('webgl-canvas')}});
+	app = new WebVRApp(scene, {rendererOptions: {canvas: document.getElementById('webgl-canvas')}});
 
 	requestAnimationFrame(animate);
 	function animate(t) {

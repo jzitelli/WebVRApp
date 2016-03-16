@@ -111,7 +111,7 @@ function WebVRApp(scene, config) {
         vrButton.innerHTML = 'ENTER VR';
         vrButton.style.position = 'absolute';
         vrButton.style.right = 0;
-        vrButton.style.bottom = 0;
+        vrButton.style.bottom = '40px';
         vrButton.style.margin = '0.75vh';
         vrButton.style.padding = '0.75vh';
     }
@@ -122,7 +122,7 @@ function WebVRApp(scene, config) {
 
             if (displays.length > 0) {
                 vrDisplay = displays[0];
-
+                this.vrDisplay = vrDisplay;
                 if (vrDisplay.canPresent) {
                     var onClick = function () {
                         if (!isPresenting) {
@@ -190,11 +190,9 @@ function WebVRApp(scene, config) {
         fsButton.innerHTML = 'FULLSCREEN';
         fsButton.style.position = 'absolute';
         fsButton.style.right = 0;
-        fsButton.style.bottom = supportsWebVR ? '40px' : 0;
-        fsButton.style.margin = '5px';
-        fsButton.style.padding = '5px';
-        fsButton.style.background = 0x222222;
-        fsButton.style['text-color'] = 0xfbeefb;
+        fsButton.style.bottom = 0;
+        fsButton.style.margin = '0.75vh';
+        fsButton.style.padding = '0.75vh';
         fsButton.addEventListener('click', this.toggleFullscreen.bind(this), false);
         document.body.appendChild(fsButton);
     }

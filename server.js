@@ -4,7 +4,7 @@ var http = require('http'),
     url = require('url');
 
 const PORT = 8000;
-const URL = "http://localhost:" + PORT + "/test/test.html";
+const TEST_URL = "http://localhost:" + PORT + "/test/test.html";
 
 function handleRequest(request, response) {
     var pathname = url.parse(request.url).pathname,
@@ -34,6 +34,4 @@ server.listen(PORT, function () {
     console.log("server listening on: http://localhost:%s", PORT);
 });
 
-exports.PORT = PORT;
-exports.URL = URL;
-exports.server = server;
+exports.TEST_URL = TEST_URL;
