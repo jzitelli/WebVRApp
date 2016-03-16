@@ -116,6 +116,8 @@ function WebVRApp(scene, config) {
         vrButton.style.padding = '0.75vh';
     }
 
+    var onClick;
+
     if (navigator.getVRDisplays) {
 
         navigator.getVRDisplays().then( function (displays) {
@@ -124,7 +126,7 @@ function WebVRApp(scene, config) {
                 vrDisplay = displays[0];
                 this.vrDisplay = vrDisplay;
                 if (vrDisplay.canPresent) {
-                    var onClick = function () {
+                    onClick = function () {
                         if (!isPresenting) {
                             isRequestingPresent = true;
                             try {
@@ -155,7 +157,7 @@ function WebVRApp(scene, config) {
         navigator.getVRDevices().then( function (devices) {
 
             if (devices.length > 0) {
-                var onClick = function () {
+                onClick = function () {
                     if (!isPresenting) {
                         this.vrEffect.requestPresent().then( function () {
                             isPresenting = true;
@@ -208,7 +210,7 @@ function WebVRApp(scene, config) {
     window.addEventListener('resize', onResize, false);
 
     function isFullscreen() {
-        return !!(document.FullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
+        return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
     }
 
     function requestFullscreen(options) {
@@ -242,6 +244,13 @@ function WebVRApp(scene, config) {
     var isPresenting = false;
 
     var onFullscreenChange = function () {
+
+        if (isFullscreen()) {
+            requestPointerLock();
+        } else {
+            releasePointerLock();
+        }
+
         if (isRequestingPresent) {
             isRequestingPresent = false;
             if (isFullscreen() && !isPresenting) {
@@ -250,12 +259,11 @@ function WebVRApp(scene, config) {
                     vrButton.innerHTML = 'EXIT VR';
                 } ).catch( function (error) {
                     console.error(error);
-                    vrButton.innerHTML = 'VR ERROR!';
-                    vrButton.style.background = 0x992222;
+                    vrButton.disabled = true;
                     vrButton.removeEventListener('click', onClick);
                 } );
             } else if (!isFullscreen()) {
-                console.error('requestPresent was not performed because fullscreen could not be entered');
+                console.error('requestPresent was not performed because fullscreen could not first be entered');
             }
         } else {
             if (!isFullscreen() && isPresenting) {
@@ -266,19 +274,11 @@ function WebVRApp(scene, config) {
                 } );
             }
         }
+
     }.bind(this);
 
     document.addEventListener(domElement.mozRequestFullScreen ? 'mozfullscreenchange' : 'webkitfullscreenchange',
         onFullscreenChange, false);
-
-    // stop VR presenting when exiting the app:
-    var beforeUnload = function () {
-        if (isPresenting) {
-            this.vrEffect.exitPresent();
-        }
-    }.bind(this);
-    window.addEventListener("beforeunload", beforeUnload, false);
-
 
     function requestPointerLock() {
         if (domElement.requestPointerLock) {
@@ -300,16 +300,12 @@ function WebVRApp(scene, config) {
         }
     }
 
-    // document.addEventListener(fullscreenchange, function ( event ) {
-    //     if (this.vrManager.isVRMode()) {
-    //         this.vrControls.enabled = true;
-    //     }
-    //     var fullscreen = !(document.webkitFullscreenElement === null || document.mozFullScreenElement === null);
-    //     if (!fullscreen) {
-    //         releasePointerLock();
-    //     } else {
-    //         requestPointerLock();
-    //     }
-    // }.bind(this));
+    // stop VR presenting when exiting the app:
+    var beforeUnload = function () {
+        if (isPresenting) {
+            this.vrEffect.exitPresent();
+        }
+    }.bind(this);
+    window.addEventListener("beforeunload", beforeUnload, false);
 
 }
