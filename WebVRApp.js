@@ -293,7 +293,6 @@ function WebVRApp(scene, config) {
     }
 
     function releasePointerLock() {
-        document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock || document.webkitExitPointerLock;
         if (document.exitPointerLock) {
             document.exitPointerLock();
         } else if (document.mozExitPointerLock) {
