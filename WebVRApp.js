@@ -61,7 +61,7 @@ function WebVRApp(scene, config, rendererOptions) {
                     onResetVRSensor(lastRotation, lastPosition);
                 }
             }
-        }.bind(this);
+        };
     } )();
 
     this.toggleFullscreen = function (options) {
@@ -80,7 +80,7 @@ function WebVRApp(scene, config, rendererOptions) {
             } else {
                 this.scene.overrideMaterial = wireframeMaterial;
             }
-        }.bind(this);
+        };
     } )();
 
     this.toggleNormalMaterial = ( function () {
@@ -91,7 +91,7 @@ function WebVRApp(scene, config, rendererOptions) {
             } else {
                 this.scene.overrideMaterial = normalMaterial;
             }
-        }.bind(this);
+        };
     } )();
 
     // WebVR setup
