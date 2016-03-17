@@ -98,11 +98,7 @@ function WebVRApp(scene, config) {
 
     // WebVR setup
 
-    var supportsWebVR = true;
-    var vrDisplay;
-
     // configure VR button:
-
     var vrButton = config.vrButton;
     if (!vrButton) {
         // no button was specified, so create one
@@ -114,9 +110,11 @@ function WebVRApp(scene, config) {
         vrButton.style.bottom = '40px';
         vrButton.style.margin = '0.75vh';
         vrButton.style.padding = '0.75vh';
+        document.body.appendChild(vrButton);
     }
 
-    var onClick;
+    var supportsWebVR = true;
+    var vrDisplay;
 
     if (navigator.getVRDisplays) {
 
@@ -126,7 +124,8 @@ function WebVRApp(scene, config) {
                 vrDisplay = displays[0];
                 this.vrDisplay = vrDisplay;
                 if (vrDisplay.capabilities.canPresent) {
-                    onClick = function () {
+
+                    var onClick = function () {
                         if (!isPresenting) {
                             isRequestingPresent = true;
                             try {
@@ -145,7 +144,6 @@ function WebVRApp(scene, config) {
                     }.bind(this);
 
                     vrButton.addEventListener('click', onClick, false);
-                    document.body.appendChild(vrButton);
                 }
             }
 
@@ -157,7 +155,7 @@ function WebVRApp(scene, config) {
         navigator.getVRDevices().then( function (devices) {
 
             if (devices.length > 0) {
-                onClick = function () {
+                var onClick = function () {
                     if (!isPresenting) {
                         this.vrEffect.requestPresent().then( function () {
                             isPresenting = true;
@@ -170,7 +168,6 @@ function WebVRApp(scene, config) {
                 }.bind(this);
 
                 vrButton.addEventListener('click', onClick, false);
-                document.body.appendChild(vrButton);
             }
 
         }.bind(this) );
