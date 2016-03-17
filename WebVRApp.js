@@ -125,7 +125,7 @@ function WebVRApp(scene, config) {
             if (displays.length > 0) {
                 vrDisplay = displays[0];
                 this.vrDisplay = vrDisplay;
-                if (vrDisplay.canPresent) {
+                if (vrDisplay.capabilities.canPresent) {
                     onClick = function () {
                         if (!isPresenting) {
                             isRequestingPresent = true;
