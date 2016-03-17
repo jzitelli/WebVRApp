@@ -1,10 +1,8 @@
-function WebVRApp(scene, config) {
+function WebVRApp(scene, config, rendererOptions) {
     "use strict";
     this.scene = scene;
 
     config = config || {};
-
-    var rendererOptions = config.rendererOptions || {};
 
     this.renderer = new THREE.WebGLRenderer(rendererOptions);
     var domElement = this.renderer.domElement;
@@ -77,7 +75,7 @@ function WebVRApp(scene, config) {
     this.toggleWireframe = ( function () {
         var wireframeMaterial = new THREE.MeshBasicMaterial({color: 0xeeddaa, wireframe: true});
         return function () {
-            if (this.scene.overrideMaterial) {
+            if (this.scene.overrideMaterial === wireframeMaterial) {
                 this.scene.overrideMaterial = null;
             } else {
                 this.scene.overrideMaterial = wireframeMaterial;
@@ -98,21 +96,6 @@ function WebVRApp(scene, config) {
 
     // WebVR setup
 
-    // configure VR button:
-    var vrButton = config.vrButton;
-    if (!vrButton) {
-        // no button was specified, so create one
-        vrButton = document.createElement('button');
-        vrButton.id = 'vrButton';
-        vrButton.innerHTML = 'ENTER VR';
-        vrButton.style.position = 'absolute';
-        vrButton.style.right = 0;
-        vrButton.style.bottom = '40px';
-        vrButton.style.margin = '0.75vh';
-        vrButton.style.padding = '0.75vh';
-        document.body.appendChild(vrButton);
-    }
-
     var supportsWebVR = true;
     var vrDisplay;
 
@@ -124,6 +107,21 @@ function WebVRApp(scene, config) {
                 vrDisplay = displays[0];
                 this.vrDisplay = vrDisplay;
                 if (vrDisplay.capabilities.canPresent) {
+
+                    // configure VR button:
+                    var vrButton = config.vrButton;
+                    if (!vrButton) {
+                        // no button was specified, so create one
+                        vrButton = document.createElement('button');
+                        vrButton.id = 'vrButton';
+                        vrButton.innerHTML = 'ENTER VR';
+                        vrButton.style.position = 'absolute';
+                        vrButton.style.right = 0;
+                        vrButton.style.bottom = '40px';
+                        vrButton.style.margin = '0.75vh';
+                        vrButton.style.padding = '0.75vh';
+                        document.body.appendChild(vrButton);
+                    }
 
                     var onClick = function () {
                         if (!isPresenting) {
@@ -144,12 +142,13 @@ function WebVRApp(scene, config) {
                     }.bind(this);
 
                     vrButton.addEventListener('click', onClick, false);
+
                 }
             }
 
         }.bind(this) );
 
-    } else if (navigator.getVRDevices) {
+    } /* else if (navigator.getVRDevices) {
 
         console.warn('using the deprecated WebVR API');
         navigator.getVRDevices().then( function (devices) {
@@ -172,7 +171,7 @@ function WebVRApp(scene, config) {
 
         }.bind(this) );
 
-    } else {
+    } */ else {
 
         supportsWebVR = false;
         console.error('WebVR API is not supported');
