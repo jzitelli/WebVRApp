@@ -99,6 +99,23 @@ function WebVRApp(scene, config, rendererOptions) {
     var supportsWebVR = true;
     var vrDisplay;
 
+    var onVRClick = function () {
+        if (!isPresenting) {
+            isRequestingPresent = true;
+            try {
+                this.toggleFullscreen();
+            } catch (error) {
+                console.error(error);
+                isRequestingPresent = false;
+            }
+        } else {
+            this.vrEffect.exitPresent().then( function () {
+                isPresenting = false;
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            }.bind(this) );
+        }
+    }.bind(this);
+
     if (navigator.getVRDisplays) {
 
         navigator.getVRDisplays().then( function (displays) {
@@ -123,25 +140,7 @@ function WebVRApp(scene, config, rendererOptions) {
                         document.body.appendChild(vrButton);
                     }
 
-                    var onClick = function () {
-                        if (!isPresenting) {
-                            isRequestingPresent = true;
-                            try {
-                                this.toggleFullscreen();
-                            } catch (error) {
-                                console.error(error);
-                                isRequestingPresent = false;
-                            }
-                        } else {
-                            this.vrEffect.exitPresent().then( function () {
-                                isPresenting = false;
-                                vrButton.innerHTML = 'ENTER VR';
-                                this.renderer.setSize(window.innerWidth, window.innerHeight);
-                            }.bind(this) );
-                        }
-                    }.bind(this);
-
-                    vrButton.addEventListener('click', onClick, false);
+                    vrButton.addEventListener('click', onVRClick, false);
 
                 }
             }
@@ -191,9 +190,9 @@ function WebVRApp(scene, config, rendererOptions) {
         fsButton.style.bottom = 0;
         fsButton.style.margin = '0.75vh';
         fsButton.style.padding = '0.75vh';
-        fsButton.addEventListener('click', this.toggleFullscreen.bind(this), false);
         document.body.appendChild(fsButton);
     }
+    fsButton.addEventListener('click', this.toggleFullscreen.bind(this), false);
 
     // resize / fullscreen / VR listeners / helper stuff:
 
@@ -252,11 +251,10 @@ function WebVRApp(scene, config, rendererOptions) {
             if (isFullscreen() && !isPresenting) {
                 this.vrEffect.requestPresent().then( function () {
                     isPresenting = true;
-                    vrButton.innerHTML = 'EXIT VR';
                 } ).catch( function (error) {
                     console.error(error);
                     vrButton.disabled = true;
-                    vrButton.removeEventListener('click', onClick);
+                    vrButton.removeEventListener('click', onVRClick);
                 } );
             } else if (!isFullscreen()) {
                 console.error('requestPresent was not performed because fullscreen could not first be entered');
@@ -265,7 +263,6 @@ function WebVRApp(scene, config, rendererOptions) {
             if (!isFullscreen() && isPresenting) {
                 this.vrEffect.exitPresent().then( function () {
                     isPresenting = false;
-                    vrButton.innerHTML = 'ENTER VR';
                     onResize();
                 } );
             }

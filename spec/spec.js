@@ -71,20 +71,19 @@ describe('WebVRApp', function () {
 
             } ).catch( function (error) {
 
-                // no VR button is present because either:
                 var hasVRDisplay = firefox.executeScript("return app.vrDisplay;");
                 if (hasVRDisplay) {
 
-                    // (a) the VRDisplay can't present
-                    // var canPresent = firefox.executeScript("return app.vrDisplay.canPresent;");
+                    // the VRDisplay can't present
+                    var canPresent = firefox.executeScript("return app.vrDisplay.capabilities.canPresent;");
 
-                    // expect(!canPresent).toBeTrue();
+                    expect(!canPresent).toBeTrue();
 
                     done();
 
                 } else {
 
-                    // (b) no VRDisplay is available
+                    // no VRDisplay is available
                     console.warn('no VRDisplay is available');
                     done();
 
