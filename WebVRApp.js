@@ -64,40 +64,17 @@ function WebVRApp(scene, config, rendererOptions) {
         };
     } )().bind(this);
 
-    this.toggleVR = ( function () {
-        if (navigator.getVRDisplays) {
-            return function () {
-                if (!isPresenting) {
-                    isRequestingPresent = true;
-                    try {
-                        this.toggleFullscreen();
-                    } catch (error) {
-                        console.error(error);
-                        isRequestingPresent = false;
-                    }
-                } else {
-                    this.vrEffect.exitPresent().then( function () {
-                        isPresenting = false;
-                        this.renderer.setSize(window.innerWidth, window.innerHeight);
-                    }.bind(this) );
-                }
-            };
-        } else if (navigator.getVRDevices) {
-            return function () {
-                if (!isPresenting) {
-                    this.vrEffect.requestPresent().then( function () {
-                        isPresenting = true;
-                    } );
-                } else {
-                    this.vrEffect.exitPresent().then( function () {
-                        isPresenting = false;
-                    } );
-                }
-            };
+    this.toggleVR = function () {
+        if (!isPresenting) {
+            this.vrEffect.requestPresent().then( function () {
+                isPresenting = true;
+            } );
         } else {
-            return function () { console.error("WebVR API is not supported"); };
+            this.vrEffect.exitPresent().then( function () {
+                isPresenting = false;
+            } );
         }
-    } )().bind(this);
+    }.bind(this);
 
     this.toggleFullscreen = function (options) {
         if (!isFullscreen()) {
@@ -139,13 +116,14 @@ function WebVRApp(scene, config, rendererOptions) {
         // no button was specified, so create one
         vrButton = document.createElement('button');
         vrButton.id = 'vrButton';
-        vrButton.innerHTML = 'ENTER VR';
+        vrButton.innerHTML = 'TOGGLE VR';
         vrButton.style.position = 'absolute';
         vrButton.style.right = 0;
         vrButton.style.bottom = '40px';
         vrButton.style.margin = '0.75vh';
         vrButton.style.padding = '0.75vh';
     }
+    vrButton.addEventListener('click', this.toggleVR, false);
 
     if (navigator.getVRDisplays) {
 
@@ -157,8 +135,9 @@ function WebVRApp(scene, config, rendererOptions) {
                 this.vrDisplay = vrDisplay;
 
                 if (vrDisplay.capabilities.canPresent) {
-                    vrButton.addEventListener('click', this.toggleVR, false);
+
                     if (!config.vrButton) document.body.appendChild(vrButton);
+
                 }
 
             }
@@ -172,7 +151,6 @@ function WebVRApp(scene, config, rendererOptions) {
 
             if (devices.length > 0) {
 
-                vrButton.addEventListener('click', this.toggleVR, false);
                 if (!config.vrButton) document.body.appendChild(vrButton);
 
             }
@@ -192,7 +170,7 @@ function WebVRApp(scene, config, rendererOptions) {
         // no button was specified, so create one
         fsButton = document.createElement('button');
         fsButton.id = 'fsButton';
-        fsButton.innerHTML = 'FULLSCREEN';
+        fsButton.innerHTML = 'TOGGLE FULLSCREEN';
         fsButton.style.position = 'absolute';
         fsButton.style.right = 0;
         fsButton.style.bottom = 0;
@@ -242,8 +220,6 @@ function WebVRApp(scene, config, rendererOptions) {
         }
     }
 
-    var isRequestingPresent = false;
-
     var isPresenting = false;
 
     var onFullscreenChange = function () {
@@ -254,27 +230,7 @@ function WebVRApp(scene, config, rendererOptions) {
             releasePointerLock();
         }
 
-        if (isRequestingPresent) {
-            isRequestingPresent = false;
-            if (isFullscreen() && !isPresenting) {
-                this.vrEffect.requestPresent().then( function () {
-                    isPresenting = true;
-                } ).catch( function (error) {
-                    console.error(error);
-                } );
-            } else if (!isFullscreen()) {
-                console.error('requestPresent was not performed because fullscreen could not first be entered');
-            }
-        } else {
-            if (!isFullscreen() && isPresenting) {
-                this.vrEffect.exitPresent().then( function () {
-                    isPresenting = false;
-                    onResize();
-                } );
-            }
-        }
-
-    }.bind(this);
+    };
 
     document.addEventListener(domElement.mozRequestFullScreen ? 'mozfullscreenchange' : 'webkitfullscreenchange',
         onFullscreenChange, false);
