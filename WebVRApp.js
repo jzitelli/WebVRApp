@@ -99,24 +99,40 @@ function WebVRApp(scene, config, rendererOptions) {
     var supportsWebVR = true;
     var vrDisplay;
 
-    var onVRClick = function () {
-        if (!isPresenting) {
-            isRequestingPresent = true;
-            try {
-                this.toggleFullscreen();
-            } catch (error) {
-                console.error(error);
-                isRequestingPresent = false;
-            }
-        } else {
-            this.vrEffect.exitPresent().then( function () {
-                isPresenting = false;
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
-            }.bind(this) );
-        }
-    }.bind(this);
+    // configure VR button:
+    var vrButton = config.vrButton;
+    if (!vrButton) {
+        // no button was specified, so create one
+        vrButton = document.createElement('button');
+        vrButton.id = 'vrButton';
+        vrButton.innerHTML = 'ENTER VR';
+        vrButton.style.position = 'absolute';
+        vrButton.style.right = 0;
+        vrButton.style.bottom = '40px';
+        vrButton.style.margin = '0.75vh';
+        vrButton.style.padding = '0.75vh';
+    }
+
+    var onVRClick;
 
     if (navigator.getVRDisplays) {
+
+        onVRClick = function () {
+            if (!isPresenting) {
+                isRequestingPresent = true;
+                try {
+                    this.toggleFullscreen();
+                } catch (error) {
+                    console.error(error);
+                    isRequestingPresent = false;
+                }
+            } else {
+                this.vrEffect.exitPresent().then( function () {
+                    isPresenting = false;
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                }.bind(this) );
+            }
+        }.bind(this);
 
         navigator.getVRDisplays().then( function (displays) {
 
@@ -125,20 +141,7 @@ function WebVRApp(scene, config, rendererOptions) {
                 this.vrDisplay = vrDisplay;
                 if (vrDisplay.capabilities.canPresent) {
 
-                    // configure VR button:
-                    var vrButton = config.vrButton;
-                    if (!vrButton) {
-                        // no button was specified, so create one
-                        vrButton = document.createElement('button');
-                        vrButton.id = 'vrButton';
-                        vrButton.innerHTML = 'ENTER VR';
-                        vrButton.style.position = 'absolute';
-                        vrButton.style.right = 0;
-                        vrButton.style.bottom = '40px';
-                        vrButton.style.margin = '0.75vh';
-                        vrButton.style.padding = '0.75vh';
-                        document.body.appendChild(vrButton);
-                    }
+                    if (!config.vrButton) document.body.appendChild(vrButton);
 
                     vrButton.addEventListener('click', onVRClick, false);
 
@@ -147,30 +150,35 @@ function WebVRApp(scene, config, rendererOptions) {
 
         }.bind(this) );
 
-    } /* else if (navigator.getVRDevices) {
+    } else if (navigator.getVRDevices) {
 
         console.warn('using the deprecated WebVR API');
+
+        onVRClick = function () {
+            if (!isPresenting) {
+                this.vrEffect.requestPresent().then( function () {
+                    isPresenting = true;
+                } );
+            } else {
+                this.vrEffect.exitPresent().then( function () {
+                    isPresenting = false;
+                } );
+            }
+        }.bind(this);
+
         navigator.getVRDevices().then( function (devices) {
 
             if (devices.length > 0) {
-                var onClick = function () {
-                    if (!isPresenting) {
-                        this.vrEffect.requestPresent().then( function () {
-                            isPresenting = true;
-                        } );
-                    } else {
-                        this.vrEffect.exitPresent().then( function () {
-                            isPresenting = false;
-                        } );
-                    }
-                }.bind(this);
 
-                vrButton.addEventListener('click', onClick, false);
+                if (!config.vrButton) document.body.appendChild(vrButton);
+
+                vrButton.addEventListener('click', onVRClick, false);
+
             }
 
         }.bind(this) );
 
-    } */ else {
+    } else {
 
         supportsWebVR = false;
         console.error('WebVR API is not supported');
@@ -253,8 +261,8 @@ function WebVRApp(scene, config, rendererOptions) {
                     isPresenting = true;
                 } ).catch( function (error) {
                     console.error(error);
-                    vrButton.disabled = true;
-                    vrButton.removeEventListener('click', onVRClick);
+                    // vrButton.disabled = true;
+                    // vrButton.removeEventListener('click', onVRClick);
                 } );
             } else if (!isFullscreen()) {
                 console.error('requestPresent was not performed because fullscreen could not first be entered');
