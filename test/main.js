@@ -16,7 +16,7 @@ function onLoad() {
 		return scene;
 	} )();
 
-	app = new WebVRApp(scene, {rendererOptions: {canvas: document.getElementById('webgl-canvas')}});
+	app = new WebVRApp(scene, undefined, {canvas: document.getElementById('webgl-canvas')});
 
 	requestAnimationFrame(animate);
 	function animate(t) {
