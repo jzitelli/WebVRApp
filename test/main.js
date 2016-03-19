@@ -6,21 +6,6 @@ function onLoad() {
 	var scene = ( function () {
 		var scene = new THREE.Scene();
 
-		/* var objectLoader = new THREE.ObjectLoader();
-		objectLoader.load('models/desk.json', function (obj) {
-			obj.traverse( function (node) {
-				if (node instanceof THREE.Mesh) {
-					node.geometry.computeFaceNormals();
-					node.material.shading = THREE.FlatShading;
-					node.material.needsUpdate = true;
-				}
-			} );
-			obj.scale.set(0.65, 0.65, 0.65);
-			obj.rotation.y = Math.PI;
-			obj.position.set(0, -2.75, -2);
-			scene.add(obj);
-		}); */
-
 		var textureLoader = new THREE.TextureLoader();
 		var texture = textureLoader.load('models/desk.png');
 		var material = new THREE.MeshBasicMaterial({map: texture});
@@ -44,13 +29,45 @@ function onLoad() {
 		toggleVRControls: {buttons: [WebVRKeyboard.KEYCODES.C], commandDown: app.toggleVRControls},
 		resetVRSensor: {buttons: [WebVRKeyboard.KEYCODES.Z], commandDown: app.resetVRSensor},
 		toggleWireframe: {buttons: [WebVRKeyboard.KEYCODES.NUMBER1], commandDown: app.toggleWireframe},
-		toggleNormalMaterial: {buttons: [WebVRKeyboard.KEYCODES.NUMBER2], commandDown: app.toggleNormalMaterial}
+		toggleNormalMaterial: {buttons: [WebVRKeyboard.KEYCODES.NUMBER2], commandDown: app.toggleNormalMaterial},
+		moveForward: {buttons: [WebVRKeyboard.KEYCODES.W]},
+		moveBackward: {buttons: [WebVRKeyboard.KEYCODES.S]},
+		moveLeft: {buttons: [WebVRKeyboard.KEYCODES.A]},
+		moveRight: {buttons: [WebVRKeyboard.KEYCODES.D]},
+		moveUp: {buttons: [WebVRKeyboard.KEYCODES.E]},
+		moveDown: {buttons: [WebVRKeyboard.KEYCODES.Q]},
+		turnLeft: {buttons: [WebVRKeyboard.KEYCODES.LEFTARROW]},
+		turnRight: {buttons: [WebVRKeyboard.KEYCODES.RIGHTARROW]}
 	});
 
-	var frameCount = 0;
+	var avatar = new THREE.Object3D();
+	avatar.add(app.camera);
+	scene.add(avatar);
+	var heading = 0;
+	function moveAvatar(dt) {
+		var cos = Math.cos(heading),
+			sin = Math.sin(heading);
+		var moveFB = keyboard.moveForward - keyboard.moveBackward,
+			moveRL = keyboard.moveRight - keyboard.moveLeft,
+			moveUD = keyboard.moveUp - keyboard.moveDown,
+			turnLR = keyboard.turnLeft - keyboard.turnRight;
+		if (moveFB || moveRL || moveUD || turnLR) {
+			heading += (turnLR) * dt;
+			avatar.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, heading);
+			avatar.position.z -= ((moveFB) * cos + (moveRL) * sin) * dt;
+			avatar.position.x += ((moveRL) * cos - (moveFB) * sin) * dt;
+			avatar.position.y += moveUD * dt;
+		}
+	}
+
+	var frameCount = 0,
+		lt = 0;
 	function animate(t) {
+		var dt = 0.001 * (t - lt);
 		frameCount++;
 		app.render();
+		moveAvatar(dt);
+		lt = t;
 		requestAnimationFrame(animate);
 	}
 
