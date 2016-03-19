@@ -6,7 +6,7 @@ function onLoad() {
 	var scene = ( function () {
 		var scene = new THREE.Scene();
 
-		var objectLoader = new THREE.ObjectLoader();
+		/* var objectLoader = new THREE.ObjectLoader();
 		objectLoader.load('models/desk.json', function (obj) {
 			obj.traverse( function (node) {
 				if (node instanceof THREE.Mesh) {
@@ -19,6 +19,18 @@ function onLoad() {
 			obj.rotation.y = Math.PI;
 			obj.position.set(0, -2.75, -2);
 			scene.add(obj);
+		}); */
+
+		var textureLoader = new THREE.TextureLoader();
+		var texture = textureLoader.load('models/desk.png');
+		var material = new THREE.MeshBasicMaterial({map: texture});
+
+		var bufferGeometryLoader = new THREE.BufferGeometryLoader();
+		bufferGeometryLoader.load('models/deskBufferGeometry.json', function (geom) {
+			var mesh = new THREE.Mesh(geom, material);
+			mesh.scale.set(0.4, 0.4, 0.4);
+			mesh.position.set(0, -1.8, -3.4);
+			scene.add(mesh);
 		});
 
 		return scene;
