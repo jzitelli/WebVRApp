@@ -7,23 +7,25 @@ function onLoad() {
 		var scene = new THREE.Scene();
 
 		var textureLoader = new THREE.TextureLoader();
-		var texture = textureLoader.load('models/desk.png');
-		var material = new THREE.MeshBasicMaterial({map: texture});
+		var deskTexture = textureLoader.load('models/textures/desk.png');
+		var deskMaterial = new THREE.MeshBasicMaterial({map: deskTexture});
+		var floorTexture = textureLoader.load('models/textures/floor.png');
+		var floorMaterial = new THREE.MeshBasicMaterial({map: floorTexture});
 
-		var bufferGeometryLoader = new THREE.BufferGeometryLoader();
-		bufferGeometryLoader.load('models/deskBufferGeometry.json', function (geom) {
-			var mesh = new THREE.Mesh(geom, material);
-			mesh.scale.set(0.4, 0.4, 0.4);
-			mesh.position.set(0, -1.8, -3.4);
-			scene.add(mesh);
+		var objectLoader = new THREE.ObjectLoader();
+		objectLoader.load("models/deskScene.json", function (obj) {
+			obj.rotation.x = -Math.PI / 2;
+			obj.scale.set(0.4, 0.4, 0.4);
+			obj.children[0].material = deskMaterial;
+			obj.children[1].material = floorMaterial;
+			scene.add(obj);
 		});
-
 		return scene;
 	} )();
 
 	app = new WebVRApp(scene, undefined, {canvas: document.getElementById('webgl-canvas')});
 
-	var keyboard = new WebVRKeyboard(document, {
+	var keyboard = new WebVRKeyboard(window, {
 		toggleFullscreen: {buttons: [WebVRKeyboard.KEYCODES.F], commandDown: app.toggleFullscreen},
 		toggleVR: {buttons: [WebVRKeyboard.KEYCODES.V], commandDown: app.toggleVR},
 		toggleVRControls: {buttons: [WebVRKeyboard.KEYCODES.C], commandDown: app.toggleVRControls},
