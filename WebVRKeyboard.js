@@ -3,10 +3,11 @@ var WebVRKeyboard = ( function () {
 
     function WebVRKeyboard(eventTarget, commands) {
 
-    	eventTarget.addEventListener("keydown", onKeyDown, false);
-    	eventTarget.addEventListener("keyup", onKeyUp, false);
+    	eventTarget.addEventListener("keydown", onKeyDown); //, false);
+    	eventTarget.addEventListener("keyup", onKeyUp); //, false);
 
     	var keyDown = [];
+        this.keyDown = keyDown;
     	var commandDowns = [];
 
     	function onKeyDown(evt) {
@@ -142,6 +143,26 @@ var WebVRKeyboard = ( function () {
         CLOSEBRACKET: 221,
         SINGLEQUOTE: 222
     };
+    WebVRKeyboard.KEYCODES['0'] = WebVRKeyboard.KEYCODES.NUMBER0;
+    WebVRKeyboard.KEYCODES['1'] = WebVRKeyboard.KEYCODES.NUMBER1;
+    WebVRKeyboard.KEYCODES['2'] = WebVRKeyboard.KEYCODES.NUMBER2;
+    WebVRKeyboard.KEYCODES['3'] = WebVRKeyboard.KEYCODES.NUMBER3;
+    WebVRKeyboard.KEYCODES['4'] = WebVRKeyboard.KEYCODES.NUMBER4;
+    WebVRKeyboard.KEYCODES['5'] = WebVRKeyboard.KEYCODES.NUMBER5;
+    WebVRKeyboard.KEYCODES['6'] = WebVRKeyboard.KEYCODES.NUMBER6;
+    WebVRKeyboard.KEYCODES['7'] = WebVRKeyboard.KEYCODES.NUMBER7;
+    WebVRKeyboard.KEYCODES['8'] = WebVRKeyboard.KEYCODES.NUMBER8;
+    WebVRKeyboard.KEYCODES['9'] = WebVRKeyboard.KEYCODES.NUMBER9;
+    WebVRKeyboard.KEYCODES['0'] = WebVRKeyboard.KEYCODES.NUMBER0;
+    WebVRKeyboard.KEYCODES['-'] = WebVRKeyboard.KEYCODES.DASH;
+    WebVRKeyboard.KEYCODES['='] = WebVRKeyboard.KEYCODES.EQUALSIGN;
+    WebVRKeyboard.KEYCODES[';'] = WebVRKeyboard.KEYCODES.SEMICOLON;
+    WebVRKeyboard.KEYCODES["'"] = WebVRKeyboard.KEYCODES.SINGLEQUOTE;
+
+    WebVRKeyboard.CODEKEYS = [];
+    for (var k in WebVRKeyboard.KEYCODES) {
+        WebVRKeyboard.CODEKEYS[WebVRKeyboard.KEYCODES[k]] = k;
+    }
 
     return WebVRKeyboard;
 } )();

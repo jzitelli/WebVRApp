@@ -224,6 +224,9 @@ function WebVRApp(scene, config, rendererOptions) {
 
     var onFullscreenChange = function () {
 
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
         if (isFullscreen()) {
             requestPointerLock();
         } else {
@@ -233,7 +236,7 @@ function WebVRApp(scene, config, rendererOptions) {
     };
 
     document.addEventListener(domElement.mozRequestFullScreen ? 'mozfullscreenchange' : 'webkitfullscreenchange',
-        onFullscreenChange, false);
+        onFullscreenChange);
 
     function requestPointerLock() {
         if (domElement.requestPointerLock) {
