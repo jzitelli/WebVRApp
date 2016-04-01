@@ -35,8 +35,10 @@ function onLoad() {
 
 				scene.add(pointLight);
 
-				obj.scale.set(0.1*5/2, 0.1*5/2, 0.1*5/2);
-				obj.position.y += 1.2;
+				obj.scale.set(0.1*5/3, 0.1*5/3, 0.1*5/3);
+				obj.position.y += 0.83;
+				obj.position.z += 0.2;
+				obj.rotation.x -= Math.PI / 2;
 
 				var keyMesh = {};
 				var keyMaterial = new THREE.MeshLambertMaterial({color: 0xbbbbbb});
@@ -74,8 +76,10 @@ function onLoad() {
 					turnRight: {buttons: [WebVRKeyboard.KEYCODES.RIGHTARROW]}
 				});
 
+				var keyDown = [];
+
 				window.addEventListener("keydown", function (evt) {
-					if (!keyboard.keyDown[evt.keyCode]) {
+					if (!keyDown[evt.keyCode]) {
 						var keyName = WebVRKeyboard.CODEKEYS[evt.keyCode];
 						if (keyName) keyName = keyName.toLowerCase();
 						var mesh = keyMesh[keyName];
@@ -83,15 +87,19 @@ function onLoad() {
 							mesh.position.z -= (keyBB[keyName].max.z - keyBB[keyName].min.z) * 0.01;
 						}
 					}
+					keyDown[evt.keyCode] = true;
 				});
 
 				window.addEventListener("keyup", function (evt) {
-					var keyName = WebVRKeyboard.CODEKEYS[evt.keyCode];
-					if (keyName) keyName = keyName.toLowerCase();
-					var mesh = keyMesh[keyName];
-					if (mesh) {
-						mesh.position.z += (keyBB[keyName].max.z - keyBB[keyName].min.z) * 0.01;
+					if (keyDown[evt.keyCode]) {
+						var keyName = WebVRKeyboard.CODEKEYS[evt.keyCode];
+						if (keyName) keyName = keyName.toLowerCase();
+						var mesh = keyMesh[keyName];
+						if (mesh) {
+							mesh.position.z += (keyBB[keyName].max.z - keyBB[keyName].min.z) * 0.01;
+						}
 					}
+					keyDown[evt.keyCode] = false;
 				});
 
 				scene.add(obj);
