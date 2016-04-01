@@ -4,7 +4,20 @@ function onLoad() {
 	"use strict";
 
 	var avatar = new THREE.Object3D();
+	avatar.position.y = 1.2;
+	avatar.position.z = 0.36;
+
 	var keyboard;
+
+	var selection = avatar;
+	var selectables = [avatar];
+	var cycleSelection = (function () {
+		var i = 0;
+		return function () {
+			i = (i + 1) % selectables.length;
+			selection = selectables[i];
+		};
+	})();
 
 	var scene = ( function () {
 		var scene = new THREE.Scene();
@@ -27,7 +40,9 @@ function onLoad() {
 
 			scene.add(obj);
 
-	        objectLoader.load("/blender/WebVRKeyboard.json", function (obj) {
+	        objectLoader.load("models/WebVRKeyboard.json", function (obj) {
+
+				selectables.push(obj);
 
 				var pointLight = new THREE.PointLight();
 				pointLight.position.y = 7;
@@ -43,7 +58,6 @@ function onLoad() {
 				var keyMesh = {};
 				var keyMaterial = new THREE.MeshLambertMaterial({color: 0xbbbbbb});
 				var keyBB = {};
-				var dz = 0;
 				obj.traverse( function (node) {
 					if (node instanceof THREE.Mesh) {
 						node.material = keyMaterial;
@@ -51,7 +65,6 @@ function onLoad() {
 							node.geometry.computeBoundingBox();
 							keyBB[node.name] = node.geometry.boundingBox;
 							keyMesh[node.name] = node;
-							dz = 0.01 * (node.geometry.boundingBox.max.z - node.geometry.boundingBox.min.z);
 						}
 					}
 				} );
@@ -59,7 +72,8 @@ function onLoad() {
 				app = new WebVRApp(scene, undefined, {canvas: document.getElementById('webgl-canvas')});
 				avatar.add(app.camera);
 
-				keyboard = new WebVRKeyboard(document, {
+				keyboard = new WebVRKeyboard(window, {
+					cycleSelection: {buttons: [WebVRKeyboard.KEYCODES.OPENBRACKET], commandDown: cycleSelection},
 					toggleFullscreen: {buttons: [WebVRKeyboard.KEYCODES.F], commandDown: app.toggleFullscreen},
 					toggleVR: {buttons: [WebVRKeyboard.KEYCODES.V], commandDown: app.toggleVR},
 					toggleVRControls: {buttons: [WebVRKeyboard.KEYCODES.C], commandDown: app.toggleVRControls},
@@ -120,12 +134,12 @@ function onLoad() {
 	var fpsCount = 0;
 	// setInterval(logFPS, tLogFPS);
 	function logFPS() {
-		// console.log('FPS: ' + (frameCount - fpsCount) * (1000 / tLogFPS));
+		console.log('FPS: ' + (frameCount - fpsCount) * (1000 / tLogFPS));
 		fpsCount = frameCount;
 	}
 
 	var heading = 0;
-	function moveAvatar(dt) {
+	function moveSelection(dt) {
 		var moveFB = keyboard.moveForward - keyboard.moveBackward,
 			moveRL = keyboard.moveRight - keyboard.moveLeft,
 			moveUD = keyboard.moveUp - keyboard.moveDown,
@@ -134,10 +148,10 @@ function onLoad() {
 			heading += (turnLR) * dt;
 			var cos = Math.cos(heading),
 				sin = Math.sin(heading);
-			avatar.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, heading);
-			avatar.position.z -= ((moveFB) * cos + (moveRL) * sin) * dt;
-			avatar.position.x += ((moveRL) * cos - (moveFB) * sin) * dt;
-			avatar.position.y += moveUD * dt;
+			selection.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, heading);
+			selection.position.z -= ((moveFB) * cos + (moveRL) * sin) * dt;
+			selection.position.x += ((moveRL) * cos - (moveFB) * sin) * dt;
+			selection.position.y += moveUD * dt;
 		}
 	}
 
@@ -147,7 +161,7 @@ function onLoad() {
 		var dt = 0.001 * (t - lt);
 		frameCount++;
 		app.render();
-		moveAvatar(dt);
+		moveSelection(dt);
 		lt = t;
 		requestAnimationFrame(animate);
 	}
