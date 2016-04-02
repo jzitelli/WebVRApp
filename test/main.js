@@ -73,14 +73,16 @@ function onLoad() {
 				scene.add(pointLight);
 
 	        	var keyboardObject = new THREE.Object3D();
-				keyboardObject.scale.set(0.1, 0.1, 0.1);
-				keyboardObject.position.y += 0.83;
+				keyboardObject.scale.set(0.09, 0.09, 0.09);
+				keyboardObject.position.y += 0.727;
 				keyboardObject.position.z += 0.2;
 				keyboardObject.rotation.x -= Math.PI / 2;
 
 				scene.add(keyboardObject);
 
 				selectables.push(keyboardObject);
+				headings.push(keyboardObject.rotation.y);
+				pitches.push(keyboardObject.rotation.x);
 
 				var keyMaterial = new THREE.MeshLambertMaterial({color: 0xbbbbbb});
 
@@ -92,7 +94,6 @@ function onLoad() {
 					var child = keyboardScene.children[0];
 					if (child instanceof THREE.Mesh) {
 						keyboardScene.remove(child);
-			        	keyboardObject.add(child);
 						child.matrixAutoUpdate = false;
 						child.updateMatrix();
 						child.material = keyMaterial;
@@ -101,6 +102,7 @@ function onLoad() {
 							keyBB[child.name] = child.geometry.boundingBox;
 							keyMesh[child.name] = child;
 						}
+			        	keyboardObject.add(child);
 			        }
 
 				}
@@ -178,6 +180,7 @@ function onLoad() {
 	}
 
 	const RIGHT = new THREE.Vector3(1, 0, 0);
+	const SPEED = 0.3;
 	function moveSelection(dt) {
 		var moveFB = keyboard.moveForward - keyboard.moveBackward,
 			moveRL = keyboard.moveRight - keyboard.moveLeft,
@@ -189,11 +192,13 @@ function onLoad() {
 			pitch -= (turnUD) * dt;
 			var cos = Math.cos(heading),
 				sin = Math.sin(heading);
-			selection.position.z -= ((moveFB) * cos + (moveRL) * sin) * dt;
-			selection.position.x += ((moveRL) * cos - (moveFB) * sin) * dt;
-			selection.position.y += moveUD * dt;
+			selection.position.z -= ((moveFB) * cos + (moveRL) * sin) * dt * SPEED;
+			selection.position.x += ((moveRL) * cos - (moveFB) * sin) * dt * SPEED;
+			selection.position.y += moveUD * dt * SPEED;
 			selection.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, heading);
-			selection.quaternion.multiplyQuaternions(selection.quaternion, (new THREE.Quaternion()).setFromAxisAngle(RIGHT, pitch));
+			//selection.quaternion.multiplyQuaternions(selection.quaternion, (new THREE.Quaternion()).setFromAxisAngle(RIGHT, pitch));
+			selection.updateMatrix();
+			selection.updateMatrixWorld();
 		}
 	}
 
