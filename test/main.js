@@ -37,12 +37,15 @@ function onLoad() {
 
 		var deskTexture = textureLoader.load('models/textures/deskTexture.png');
 		var deskMaterial = new THREE.MeshBasicMaterial({map: deskTexture});
+		var deskObject = new THREE.Object3D();
 
 		var roomTexture = textureLoader.load('models/textures/roomTexture.png');
 		var roomMaterial = new THREE.MeshBasicMaterial({map: roomTexture});
+		var roomObject = new THREE.Object3D();
 
 		var chairTexture = textureLoader.load('models/textures/chairTexture.png');
 		var chairMaterial = new THREE.MeshBasicMaterial({map: chairTexture});
+		var chairObject = new THREE.Object3D();
 
 		var objectLoader = new THREE.ObjectLoader();
 
@@ -50,14 +53,15 @@ function onLoad() {
 
 			deskScene.scale.set(0.254, 0.254, 0.254);
 			deskScene.rotation.x = -Math.PI / 2;
-			deskScene.updateMatrixWorld(true);
+			deskScene.updateMatrix();
+			deskScene.updateMatrixWorld();
 
 			while (deskScene.children.length > 0) {
 				var child = deskScene.children[0];
 				if (child instanceof THREE.Mesh) {
-					deskScene.remove(child);
 					child.matrixAutoUpdate = false;
 					child.matrix.copy(child.matrixWorld);
+					deskScene.remove(child);
 					if (child.name === 'desk') child.material = deskMaterial;
 					else if (child.name === 'chair') child.material = chairMaterial;
 					else child.material = roomMaterial;
@@ -77,12 +81,13 @@ function onLoad() {
 				keyboardObject.position.y += 0.727;
 				keyboardObject.position.z += 0.2;
 				keyboardObject.rotation.x -= Math.PI / 2;
+				keyboardObject.updateMatrix();
 
 				scene.add(keyboardObject);
 
 				selectables.push(keyboardObject);
-				headings.push(keyboardObject.rotation.y);
-				pitches.push(keyboardObject.rotation.x);
+				headings.push(0);
+				pitches.push(-Math.PI / 2);
 
 				var keyMaterial = new THREE.MeshLambertMaterial({color: 0xbbbbbb});
 
@@ -196,7 +201,7 @@ function onLoad() {
 			selection.position.x += ((moveRL) * cos - (moveFB) * sin) * dt * SPEED;
 			selection.position.y += moveUD * dt * SPEED;
 			selection.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, heading);
-			//selection.quaternion.multiplyQuaternions(selection.quaternion, (new THREE.Quaternion()).setFromAxisAngle(RIGHT, pitch));
+			selection.quaternion.multiplyQuaternions(selection.quaternion, (new THREE.Quaternion()).setFromAxisAngle(RIGHT, pitch));
 			selection.updateMatrix();
 			selection.updateMatrixWorld();
 		}
