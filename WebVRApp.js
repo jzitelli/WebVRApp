@@ -3,7 +3,8 @@ function WebVRApp(scene, config, rendererOptions) {
     this.scene = scene;
 
     config = config || {};
-
+    rendererOptions = rendererOptions || {};
+    
     this.renderer = new THREE.WebGLRenderer(rendererOptions);
     var domElement = this.renderer.domElement;
 
@@ -228,7 +229,7 @@ function WebVRApp(scene, config, rendererOptions) {
     };
 
     document.addEventListener(domElement.mozRequestFullScreen ? 'mozfullscreenchange' : 'webkitfullscreenchange',
-        onFullscreenChange);
+        onFullscreenChange, false);
 
     function requestPointerLock() {
         if (domElement.requestPointerLock) {
