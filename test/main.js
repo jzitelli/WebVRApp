@@ -4,19 +4,18 @@ function onLoad() {
 	"use strict";
 
 	var avatar = new THREE.Object3D();
-	avatar.position.y = 1.;
-	avatar.position.z = 0.38;
 
 	var keyboard;
 
 	var heading = 0;
 	var pitch = 0;
+
 	var selection = avatar;
 	var selectables = [avatar];
 	var headings = [heading];
 	var pitches = [pitch];
 
-	var cycleSelection = (function () {
+	var cycleSelection = ( function () {
 		var i = 0;
 		return function () {
 			headings[i] = heading;
@@ -26,12 +25,11 @@ function onLoad() {
 			heading = headings[i];
 			pitch = pitches[i];
 		};
-	})();
+	} )();
 
-	var scene = ( function () {
-		var scene = new THREE.Scene();
+	( function () {
 
-		scene.add(avatar);
+		// load the WebVRDesk scene and start
 
 		var textureLoader = new THREE.TextureLoader();
 
@@ -49,31 +47,39 @@ function onLoad() {
 
 		var objectLoader = new THREE.ObjectLoader();
 
-		objectLoader.load("models/WebVRDesk.json", function (deskScene) {
+		objectLoader.load("models/WebVRDesk.json", function (scene) {
 
-			deskScene.scale.set(0.254, 0.254, 0.254);
-			deskScene.rotation.x = -Math.PI / 2;
-			deskScene.updateMatrix();
-			deskScene.updateMatrixWorld();
+			avatar.position.y = 1.;
+			avatar.position.z = 0.38;
+			scene.add(avatar);
 
-			while (deskScene.children.length > 0) {
-				var child = deskScene.children[0];
+			scene.position.set(0, 0, 0);
+			scene.rotation.set(0, 0, 0);
+			scene.scale.set(1, 1, 1);
+			scene.updateMatrix();
+			scene.updateMatrixWorld();
+			
+			var matrix = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(-0.5 * Math.PI, 0, 0));
+			matrix.multiply(new THREE.Matrix4().makeScale(0.254, 0.254, 0.254));
+
+			scene.children.forEach( function (child) {
+				child.updateMatrix();
+				child.matrixAutoUpdate = false;
+				child.matrix.multiply(matrix);
+				child.updateMatrixWorld(true);
 				if (child instanceof THREE.Mesh) {
-					child.matrixAutoUpdate = false;
-					child.matrix.copy(child.matrixWorld);
-					deskScene.remove(child);
 					if (child.name === 'desk') child.material = deskMaterial;
 					else if (child.name === 'chair') child.material = chairMaterial;
 					else child.material = roomMaterial;
-					scene.add(child);
 				}
-			}
+			} );
 
 	        objectLoader.load("models/WebVRKeyboard.json", function (keyboardScene) {
 
 				var pointLight = new THREE.PointLight();
 				pointLight.position.y = 7;
 				pointLight.position.z = 2;
+
 				scene.add(pointLight);
 
 	        	var keyboardObject = new THREE.Object3D();
@@ -98,7 +104,6 @@ function onLoad() {
 
 					var child = keyboardScene.children[0];
 					if (child instanceof THREE.Mesh) {
-						keyboardScene.remove(child);
 						child.matrixAutoUpdate = false;
 						child.updateMatrix();
 						child.material = keyMaterial;
@@ -110,30 +115,19 @@ function onLoad() {
 			        	keyboardObject.add(child);
 			        }
 
+					keyboardScene.remove(child);
+
 				}
 
 				app = new WebVRApp(scene, undefined, {canvas: document.getElementById('webgl-canvas')});
+
 				avatar.add(app.camera);
 
-				keyboard = new WebVRKeyboard(window, {
-					cycleSelection: {buttons: [WebVRKeyboard.KEYCODES.OPENBRACKET], commandDown: cycleSelection},
-					toggleFullscreen: {buttons: [WebVRKeyboard.KEYCODES.F], commandDown: app.toggleFullscreen},
-					toggleVR: {buttons: [WebVRKeyboard.KEYCODES.V], commandDown: app.toggleVR},
-					toggleVRControls: {buttons: [WebVRKeyboard.KEYCODES.C], commandDown: app.toggleVRControls},
-					resetVRSensor: {buttons: [WebVRKeyboard.KEYCODES.Z], commandDown: app.resetVRSensor},
-					toggleWireframe: {buttons: [WebVRKeyboard.KEYCODES.NUMBER1], commandDown: app.toggleWireframe},
-					toggleNormalMaterial: {buttons: [WebVRKeyboard.KEYCODES.NUMBER2], commandDown: app.toggleNormalMaterial},
-					moveForward: {buttons: [WebVRKeyboard.KEYCODES.W]},
-					moveBackward: {buttons: [WebVRKeyboard.KEYCODES.S]},
-					moveLeft: {buttons: [WebVRKeyboard.KEYCODES.A]},
-					moveRight: {buttons: [WebVRKeyboard.KEYCODES.D]},
-					moveUp: {buttons: [WebVRKeyboard.KEYCODES.E]},
-					moveDown: {buttons: [WebVRKeyboard.KEYCODES.Q]},
-					turnLeft: {buttons: [WebVRKeyboard.KEYCODES.LEFTARROW]},
-					turnRight: {buttons: [WebVRKeyboard.KEYCODES.RIGHTARROW]},
-					turnUp: {buttons: [WebVRKeyboard.KEYCODES.UPARROW]},
-					turnDown: {buttons: [WebVRKeyboard.KEYCODES.DOWNARROW]}
-				});
+	        	var keyboardCommands = { cycleSelection: {buttons: [WebVRKeyboard.KEYCODES.OPENBRACKET], commandDown: cycleSelection} };
+	        	for (var k in WebVRKeyboard.STANDARD_COMMANDS) {
+	        		keyboardCommands[k] = WebVRKeyboard.STANDARD_COMMANDS[k];
+	        	}
+				keyboard = new WebVRKeyboard(window, WebVRKeyboard.STANDARD_COMMANDS);
 
 				var keyDown = [];
 
@@ -143,7 +137,8 @@ function onLoad() {
 						if (keyName) keyName = keyName.toLowerCase();
 						var mesh = keyMesh[keyName];
 						if (mesh) {
-							mesh.position.z -= (keyBB[keyName].max.z - keyBB[keyName].min.z) * 0.01;
+							var dz = (keyBB[keyName].max.z - keyBB[keyName].min.z) * 0.01;
+							mesh.position.z -= dz;
 							mesh.updateMatrix();
 						}
 					}
@@ -156,7 +151,8 @@ function onLoad() {
 						if (keyName) keyName = keyName.toLowerCase();
 						var mesh = keyMesh[keyName];
 						if (mesh) {
-							mesh.position.z += (keyBB[keyName].max.z - keyBB[keyName].min.z) * 0.01;
+							var dz = (keyBB[keyName].max.z - keyBB[keyName].min.z) * 0.01;
+							mesh.position.z += dz;
 							mesh.updateMatrix();
 						}
 					}
@@ -168,15 +164,13 @@ function onLoad() {
 			});
 
 		});
-
-		return scene;
 	} )();
 
 	function onReady() {
 		requestAnimationFrame(animate);
 	}
 
-	var tLogFPS = 2000;
+	var tLogFPS = 1000;
 	var fpsCount = 0;
 	// setInterval(logFPS, tLogFPS);
 	function logFPS() {
@@ -186,7 +180,8 @@ function onLoad() {
 
 	const RIGHT = new THREE.Vector3(1, 0, 0);
 	const SPEED = 0.3;
-	function moveSelection(dt) {
+	var pitchQuat = new THREE.Quaternion();
+	function moveFromKeyboard(dt) {
 		var moveFB = keyboard.moveForward - keyboard.moveBackward,
 			moveRL = keyboard.moveRight - keyboard.moveLeft,
 			moveUD = keyboard.moveUp - keyboard.moveDown,
@@ -200,8 +195,8 @@ function onLoad() {
 			selection.position.z -= ((moveFB) * cos + (moveRL) * sin) * dt * SPEED;
 			selection.position.x += ((moveRL) * cos - (moveFB) * sin) * dt * SPEED;
 			selection.position.y += moveUD * dt * SPEED;
-			selection.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, heading);
-			selection.quaternion.multiplyQuaternions(selection.quaternion, (new THREE.Quaternion()).setFromAxisAngle(RIGHT, pitch));
+			selection.quaternion.multiplyQuaternions(selection.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, heading),
+			                                         pitchQuat.setFromAxisAngle(RIGHT, pitch));
 			selection.updateMatrix();
 			selection.updateMatrixWorld();
 		}
@@ -213,7 +208,7 @@ function onLoad() {
 		var dt = 0.001 * (t - lt);
 		frameCount++;
 		app.render();
-		moveSelection(dt);
+		moveFromKeyboard(dt);
 		lt = t;
 		requestAnimationFrame(animate);
 	}

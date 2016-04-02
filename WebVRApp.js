@@ -60,6 +60,8 @@ function WebVRApp(scene, config, rendererOptions) {
         };
     } )().bind(this);
 
+    var isPresenting = false;
+
     this.toggleVR = function () {
         if (!isPresenting) {
             this.vrEffect.requestPresent().then( function () {
@@ -176,15 +178,13 @@ function WebVRApp(scene, config, rendererOptions) {
     }
     fsButton.addEventListener('click', this.toggleFullscreen, false);
 
-    // resize / fullscreen / VR listeners / helper stuff:
+    // resize, fullscreen/VR listener functions and other useful functions:
 
     var onResize = function () {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     }.bind(this);
-
-    window.addEventListener('resize', onResize, false);
 
     function isFullscreen() {
         return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
@@ -216,8 +216,6 @@ function WebVRApp(scene, config, rendererOptions) {
         }
     }
 
-    var isPresenting = false;
-
     var onFullscreenChange = function () {
 
         if (isFullscreen()) {
@@ -227,9 +225,6 @@ function WebVRApp(scene, config, rendererOptions) {
         }
 
     };
-
-    document.addEventListener(domElement.mozRequestFullScreen ? 'mozfullscreenchange' : 'webkitfullscreenchange',
-        onFullscreenChange, false);
 
     function requestPointerLock() {
         if (domElement.requestPointerLock) {
@@ -251,13 +246,18 @@ function WebVRApp(scene, config, rendererOptions) {
         }
     }
 
-    // stop VR presenting when exiting the app:
     var beforeUnload = function () {
+        // stop VR presenting when exiting the app
         if (isPresenting) {
             this.vrEffect.exitPresent();
         }
     }.bind(this);
 
+    // add standard event listeners
+
+    window.addEventListener('resize', onResize, false);
+    document.addEventListener(domElement.mozRequestFullScreen ? 'mozfullscreenchange' : 'webkitfullscreenchange',
+        onFullscreenChange, false);
     window.addEventListener("beforeunload", beforeUnload, false);
 
 }
