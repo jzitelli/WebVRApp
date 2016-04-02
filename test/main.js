@@ -2,6 +2,7 @@ var app;
 
 function onLoad() {
 	"use strict";
+	const RIGHT = new THREE.Vector3(1, 0, 0);
 
 	var avatar = new THREE.Object3D();
 
@@ -9,6 +10,9 @@ function onLoad() {
 
 	var heading = 0;
 	var pitch = 0;
+	var pitchQuat = new THREE.Quaternion().setFromAxisAngle(RIGHT, pitch);
+
+	avatar.quaternion.multiplyQuaternions(avatar.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, heading), pitchQuat);
 
 	var selection = avatar;
 	var selectables = [avatar];
@@ -49,24 +53,17 @@ function onLoad() {
 
 		objectLoader.load("models/WebVRDesk.json", function (scene) {
 
-			avatar.position.y = 1.;
-			avatar.position.z = 0.38;
-			scene.add(avatar);
-
 			scene.position.set(0, 0, 0);
 			scene.rotation.set(0, 0, 0);
 			scene.scale.set(1, 1, 1);
 			scene.updateMatrix();
-			scene.updateMatrixWorld();
-			
+
 			var matrix = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(-0.5 * Math.PI, 0, 0));
 			matrix.multiply(new THREE.Matrix4().makeScale(0.254, 0.254, 0.254));
-
 			scene.children.forEach( function (child) {
 				child.updateMatrix();
 				child.matrixAutoUpdate = false;
-				child.matrix.multiply(matrix);
-				child.updateMatrixWorld(true);
+				child.matrix.multiplyMatrices(matrix, child.matrix);
 				if (child instanceof THREE.Mesh) {
 					if (child.name === 'desk') child.material = deskMaterial;
 					else if (child.name === 'chair') child.material = chairMaterial;
@@ -103,6 +100,7 @@ function onLoad() {
 				while (keyboardScene.children.length > 0) {
 
 					var child = keyboardScene.children[0];
+					keyboardScene.remove(child);
 					if (child instanceof THREE.Mesh) {
 						child.matrixAutoUpdate = false;
 						child.updateMatrix();
@@ -115,11 +113,14 @@ function onLoad() {
 			        	keyboardObject.add(child);
 			        }
 
-					keyboardScene.remove(child);
-
 				}
 
 				app = new WebVRApp(scene, undefined, {canvas: document.getElementById('webgl-canvas')});
+
+				avatar.position.y = 1.;
+				avatar.position.z = 0.38;
+
+				scene.add(avatar);
 
 				avatar.add(app.camera);
 
@@ -159,6 +160,8 @@ function onLoad() {
 					keyDown[evt.keyCode] = false;
 				}, false);
 
+				scene.updateMatrixWorld(true);
+
 				onReady();
 
 			});
@@ -178,9 +181,7 @@ function onLoad() {
 		fpsCount = frameCount;
 	}
 
-	const RIGHT = new THREE.Vector3(1, 0, 0);
 	const SPEED = 0.3;
-	var pitchQuat = new THREE.Quaternion();
 	function moveFromKeyboard(dt) {
 		var moveFB = keyboard.moveForward - keyboard.moveBackward,
 			moveRL = keyboard.moveRight - keyboard.moveLeft,
