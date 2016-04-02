@@ -115,7 +115,7 @@ function onLoad() {
 
 				}
 
-				app = new WebVRApp(scene, undefined, {canvas: document.getElementById('webgl-canvas')});
+				app = new WebVRApp(scene, {vrCanvas: document.createElement('canvas')}, {canvas: document.getElementById('webgl-canvas')});
 
 				avatar.position.y = 1.;
 				avatar.position.z = 0.38;

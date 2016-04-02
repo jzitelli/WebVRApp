@@ -18,45 +18,30 @@
         padding: 0;
       }
       #webgl-canvas {
+        box-sizing: border-box;
         position: absolute;
+        left: 0;
+        top: 0;
         width: 100%;
         height: 100%;
         margin: 0;
         padding: 0;
-        border: 0;
       }
     </style>
 
     <script>
   var WebVRConfig = {
-
-      // Forces availability of VR mode, even for non-mobile devices.
       // FORCE_ENABLE_VR: true, // Default: false.
-
-      // Complementary filter coefficient. 0 for accelerometer, 1 for gyro.
       K_FILTER: 0.98, // Default: 0.98.
-
-      // How far into the future to predict during fast motion.
       PREDICTION_TIME_S: 0.02, // Default: 0.050s.
-
-      // Flag to disable touch panner. In case you have your own touch controls
       //TOUCH_PANNER_DISABLED: true, // Default: false.
-
-      // Enable yaw panning only, disabling roll and pitch. This can be useful
-      // for panoramas with nothing interesting above or below.
       //YAW_ONLY: true, // Default: false.
-
-      // To disable keyboard and mouse controls, if you want to use your own
-      // implementation.
       // MOUSE_KEYBOARD_CONTROLS_DISABLED: true, // Default: false.
       KEYBOARD_CONTROLS_DISABLED: true,
-
-      // Prevent the polyfill from initializing immediately. Requiures the app
-      // to call InitializeWebVRPolyfill() before it can be used.
-      // DEFER_INITIALIZATION: true, // Default: false.
+      DEFER_INITIALIZATION: true, // Default: false.
       //ENABLE_DEPRECATED_API: true, // Default: false.
+      // DIRTY_SUBMIT_FRAME_BINDINGS: true, // Default: false.
       BUFFER_SCALE: 0.5 // Default: 1.0.
-      // DIRTY_SUBMIT_FRAME_BINDINGS: true // Default: false.
     };
     </script>
 

@@ -4,7 +4,7 @@ function WebVRApp(scene, config, rendererOptions) {
 
     config = config || {};
     rendererOptions = rendererOptions || {};
-    
+
     this.renderer = new THREE.WebGLRenderer(rendererOptions);
     var domElement = this.renderer.domElement;
 
@@ -60,20 +60,6 @@ function WebVRApp(scene, config, rendererOptions) {
         };
     } )().bind(this);
 
-    var isPresenting = false;
-
-    this.toggleVR = function () {
-        if (!isPresenting) {
-            this.vrEffect.requestPresent().then( function () {
-                isPresenting = true;
-            } );
-        } else {
-            this.vrEffect.exitPresent().then( function () {
-                isPresenting = false;
-            } );
-        }
-    }.bind(this);
-
     this.toggleFullscreen = function (options) {
         if (!isFullscreen()) {
             requestFullscreen(options);
@@ -106,9 +92,46 @@ function WebVRApp(scene, config, rendererOptions) {
 
     // WebVR setup
 
+    var isPresenting = false;
+
     this.vrDisplay = null;
 
+    this.toggleVR = function () {
+        if (!isPresenting) {
+            this.vrEffect.requestPresent().then( function () {
+                isPresenting = true;
+                requestPointerLock();
+                presentingElement.style.display = "block";
+            } );
+        } else {
+            this.vrEffect.exitPresent().then( function () {
+                isPresenting = false;
+                releasePointerLock();
+                presentingElement.style.display = "none";
+            } );
+        }
+    }.bind(this);
+
+    // configure VR presenting element (for non-mirrored usage)
+
+    var presentingElement = document.createElement('div');
+    presentingElement.style.position = "absolute";
+    presentingElement.style.width = "100%";
+    presentingElement.style.height = "100%";
+    presentingElement.style.left = '0';
+    presentingElement.style.top = '0';
+    presentingElement.style.paddingTop = '24vh';
+    presentingElement.style.color = '#773';
+    presentingElement.style.backgroundColor = '#333';
+    presentingElement.style['z-index'] = 1;
+    presentingElement.style['text-align'] = 'center';
+    presentingElement.style.display = "none";
+    document.body.appendChild(presentingElement);
+    presentingElement.innerHTML = "<h2>VR CONTENT IS BEING PRESENTED ON THE VR DISPLAY</h2><h2>CLICK INSIDE THIS WINDOW TO RETURN TO NORMAL</h2>";
+    presentingElement.addEventListener('click', this.toggleVR, false);
+
     // configure VR button:
+
     var vrButton = config.vrButton;
     if (!vrButton) {
         // no button was specified, so create one
