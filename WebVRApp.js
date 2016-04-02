@@ -16,11 +16,6 @@ function WebVRApp(scene, config, rendererOptions) {
     this.renderer.setPixelRatio(devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-    if (config.useShadowMap) {
-        this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = config.shadowMapType || this.renderer.shadowMap.type;
-    }
-
     this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     this.camera.matrixAutoUpdate = true;
 
@@ -224,9 +219,6 @@ function WebVRApp(scene, config, rendererOptions) {
 
     var onFullscreenChange = function () {
 
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
         if (isFullscreen()) {
             requestPointerLock();
         } else {
