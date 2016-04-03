@@ -12,8 +12,14 @@ function onLoadExtended() {
 
 		// set up paintable surface for GfxTablet
 		var gfxTabletStuff = addGfxTablet(2560, 1600);
-		gfxTabletStuff.paintableMaterial;
-		gfxTabletStuff.cursor;
+
+		var gfxTabletGeom = new THREE.PlaneBufferGeometry(2560/1600, 1);
+		var gfxTabletMesh = new THREE.Mesh(gfxTabletGeom, gfxTabletStuff.paintableMaterial);
+		gfxTabletMesh.add(gfxTabletStuff.cursor);
+		gfxTabletMesh.position.y = 0.5;
+		app.scene.add(gfxTabletMesh);
+
+		YAWVRB.selectables.push(gfxTabletMesh);
 
 		requestAnimationFrame(animate);
 
