@@ -1,12 +1,17 @@
-var app;
+var YAWVRB = {};
 
-function onLoad() {
+function onLoad(onLoadLoad) {
 	"use strict";
 	const RIGHT = new THREE.Vector3(1, 0, 0);
 
+	var app;
 	var avatar = new THREE.Object3D();
 
-	var keyboard;
+	var keyboardCommands = { cycleSelection: {buttons: [WebVRKeyboard.KEYCODES.OPENBRACKET], commandDown: cycleSelection} };
+	for (var k in WebVRKeyboard.STANDARD_COMMANDS) {
+		keyboardCommands[k] = WebVRKeyboard.STANDARD_COMMANDS[k];
+	}
+	var keyboard = new WebVRKeyboard(window, keyboardCommands);
 
 	var heading = 0;
 	var pitch = 0;
@@ -30,6 +35,30 @@ function onLoad() {
 			pitch = pitches[i];
 		};
 	} )();
+
+	const MOVESPEED = 0.3;
+
+	YAWVRB.moveFromKeyboard = moveFromKeyboard;
+	function moveFromKeyboard(dt) {
+		var moveFB = keyboard.moveForward - keyboard.moveBackward,
+			moveRL = keyboard.moveRight - keyboard.moveLeft,
+			moveUD = keyboard.moveUp - keyboard.moveDown,
+			turnLR = keyboard.turnLeft - keyboard.turnRight,
+			turnUD = keyboard.turnUp - keyboard.turnDown;
+		if (moveFB || moveRL || moveUD || turnLR || turnUD) {
+			heading += (turnLR) * dt;
+			pitch -= (turnUD) * dt;
+			var cos = Math.cos(heading),
+				sin = Math.sin(heading);
+			selection.position.z -= ((moveFB) * cos + (moveRL) * sin) * dt * MOVESPEED;
+			selection.position.x += ((moveRL) * cos - (moveFB) * sin) * dt * MOVESPEED;
+			selection.position.y += moveUD * dt * MOVESPEED;
+			selection.quaternion.multiplyQuaternions(selection.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, heading),
+			                                         pitchQuat.setFromAxisAngle(RIGHT, pitch));
+			selection.updateMatrix();
+			selection.updateMatrixWorld();
+		}
+	}
 
 	( function () {
 
@@ -57,6 +86,16 @@ function onLoad() {
 			scene.rotation.set(0, 0, 0);
 			scene.scale.set(1, 1, 1);
 			scene.updateMatrix();
+
+			avatar.position.y = 1.;
+			avatar.position.z = 0.38;
+
+			scene.add(avatar);
+
+			app = new WebVRApp(scene, {avatar: avatar}, {canvas: document.getElementById('webgl-canvas')});
+			YAWVRB.app = app;
+
+			avatar.add(app.camera);
 
 			var matrix = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(-0.5 * Math.PI, 0, 0));
 			matrix.multiply(new THREE.Matrix4().makeScale(0.254, 0.254, 0.254));
@@ -115,21 +154,6 @@ function onLoad() {
 
 				}
 
-				app = new WebVRApp(scene, undefined, {canvas: document.getElementById('webgl-canvas')});
-
-				avatar.position.y = 1.;
-				avatar.position.z = 0.38;
-
-				scene.add(avatar);
-
-				avatar.add(app.camera);
-
-	        	var keyboardCommands = { cycleSelection: {buttons: [WebVRKeyboard.KEYCODES.OPENBRACKET], commandDown: cycleSelection} };
-	        	for (var k in WebVRKeyboard.STANDARD_COMMANDS) {
-	        		keyboardCommands[k] = WebVRKeyboard.STANDARD_COMMANDS[k];
-	        	}
-				keyboard = new WebVRKeyboard(window, keyboardCommands);
-
 				var keyDown = [];
 
 				window.addEventListener("keydown", function (evt) {
@@ -162,16 +186,13 @@ function onLoad() {
 
 				scene.updateMatrixWorld(true);
 
-				onReady();
+				if (onLoadLoad) onLoadLoad(app)
+				else requestAnimationFrame(animate);
 
 			});
 
 		});
 	} )();
-
-	function onReady() {
-		requestAnimationFrame(animate);
-	}
 
 	var tLogFPS = 1000;
 	var fpsCount = 0;
@@ -179,28 +200,6 @@ function onLoad() {
 	function logFPS() {
 		console.log('FPS: ' + (frameCount - fpsCount) * (1000 / tLogFPS));
 		fpsCount = frameCount;
-	}
-
-	const SPEED = 0.3;
-	function moveFromKeyboard(dt) {
-		var moveFB = keyboard.moveForward - keyboard.moveBackward,
-			moveRL = keyboard.moveRight - keyboard.moveLeft,
-			moveUD = keyboard.moveUp - keyboard.moveDown,
-			turnLR = keyboard.turnLeft - keyboard.turnRight,
-			turnUD = keyboard.turnUp - keyboard.turnDown;
-		if (moveFB || moveRL || moveUD || turnLR || turnUD) {
-			heading += (turnLR) * dt;
-			pitch -= (turnUD) * dt;
-			var cos = Math.cos(heading),
-				sin = Math.sin(heading);
-			selection.position.z -= ((moveFB) * cos + (moveRL) * sin) * dt * SPEED;
-			selection.position.x += ((moveRL) * cos - (moveFB) * sin) * dt * SPEED;
-			selection.position.y += moveUD * dt * SPEED;
-			selection.quaternion.multiplyQuaternions(selection.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, heading),
-			                                         pitchQuat.setFromAxisAngle(RIGHT, pitch));
-			selection.updateMatrix();
-			selection.updateMatrixWorld();
-		}
 	}
 
 	var frameCount = 0,

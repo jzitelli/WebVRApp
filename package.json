@@ -33,10 +33,12 @@
   },
   "devDependencies": {
     "jasmine": "latest",
-    "selenium-webdriver": "latest"
+    "selenium-webdriver": "latest",
+    "leapjs": "0.6.4"
   },
   "optionalDependencies": {
-    "gfxtablet": "git://github.com/jzitelli/GfxTablet.js.git"
+    "gfxtablet": "git://github.com/jzitelli/GfxTablet.js.git",
+    "cannon": "git://github.com/jzitelli/cannon.js.git#dev"
   },
   "scripts": {
     "test": "jasmine"

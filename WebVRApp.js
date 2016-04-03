@@ -3,6 +3,9 @@ function WebVRApp(scene, config, rendererOptions) {
     this.scene = scene;
 
     config = config || {};
+
+    this.avatar = config.avatar;
+
     rendererOptions = rendererOptions || {};
 
     this.renderer = new THREE.WebGLRenderer(rendererOptions);
