@@ -258,24 +258,6 @@
             stickShadowMesh.visible = false;
         }
 
-
-        var tipCollisionCounter = 0;
-        tipBody.addEventListener(CANNON.Body.COLLIDE_EVENT_NAME, function (evt) {
-            // TODO: move this function definition elsewhere, pass as option
-            tipCollisionCounter++;
-            if (tipCollisionCounter === 1) {
-                setTimeout(function () {
-                    POOLVR.synthSpeaker.speak("You moved a ball.  Good job.");
-                }, 250);
-            }
-            else if (tipCollisionCounter === 16) {
-                setTimeout(function () {
-                    POOLVR.synthSpeaker.speak("You are doing a great job.");
-                }, 3000);
-            }
-        });
-
-
         function updateToolPostStep() {
             stickMesh.position.copy(tipBody.interpolatedPosition);
             stickMesh.position.applyMatrix4(toolRoot.matrixWorldInverse);
@@ -287,7 +269,6 @@
                 //stickShadowMesh.updateMatrixWorld();
             }
         }
-
 
         var deadtime = 0;
 
@@ -483,8 +464,7 @@
             updateTool:         updateTool,
             updateToolPostStep: updateToolPostStep,
             moveToolRoot:       moveToolRoot,
-            updateToolMapping:  updateToolMapping,
-            updateHands:        updateHands
+            updateToolMapping:  updateToolMapping
         };
     }
 

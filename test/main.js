@@ -5,13 +5,8 @@ function onLoad(onLoadLoad) {
 	const RIGHT = new THREE.Vector3(1, 0, 0);
 
 	var app;
-	var avatar = new THREE.Object3D();
 
-	var keyboardCommands = { cycleSelection: {buttons: [WebVRKeyboard.KEYCODES.OPENBRACKET], commandDown: cycleSelection} };
-	for (var k in WebVRKeyboard.STANDARD_COMMANDS) {
-		keyboardCommands[k] = WebVRKeyboard.STANDARD_COMMANDS[k];
-	}
-	var keyboard = new WebVRKeyboard(window, keyboardCommands);
+	var avatar = new THREE.Object3D();
 
 	var heading = 0;
 	var pitch = 0;
@@ -20,9 +15,12 @@ function onLoad(onLoadLoad) {
 	avatar.quaternion.multiplyQuaternions(avatar.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, heading), pitchQuat);
 
 	var selection = avatar;
+
 	var selectables = [avatar];
 	var headings = [heading];
 	var pitches = [pitch];
+
+	YAWVRB.selectables = selectables;
 
 	var cycleSelection = ( function () {
 		var i = 0;
@@ -31,10 +29,18 @@ function onLoad(onLoadLoad) {
 			pitches[i] = pitch;
 			i = (i + 1) % selectables.length;
 			selection = selectables[i];
+			if (headings[i] === undefined) headings[i] = 0;
+			if (pitches[i] === undefined) pitches[i] = 0;
 			heading = headings[i];
 			pitch = pitches[i];
 		};
 	} )();
+
+	var keyboardCommands = { cycleSelection: {buttons: [WebVRKeyboard.KEYCODES.OPENBRACKET], commandDown: cycleSelection} };
+	for (var k in WebVRKeyboard.STANDARD_COMMANDS) {
+		keyboardCommands[k] = WebVRKeyboard.STANDARD_COMMANDS[k];
+	}
+	var keyboard = new WebVRKeyboard(window, keyboardCommands);
 
 	const MOVESPEED = 0.3;
 
@@ -58,6 +64,25 @@ function onLoad(onLoadLoad) {
 			selection.updateMatrix();
 			selection.updateMatrixWorld();
 		}
+	}
+
+	var tLogFPS = 1000;
+	var fpsCount = 0;
+	// setInterval(logFPS, tLogFPS);
+	function logFPS() {
+		console.log('FPS: ' + (frameCount - fpsCount) * (1000 / tLogFPS));
+		fpsCount = frameCount;
+	}
+
+	var frameCount = 0,
+		lt = 0;
+	function animate(t) {
+		var dt = 0.001 * (t - lt);
+		frameCount++;
+		app.render();
+		moveFromKeyboard(dt);
+		lt = t;
+		requestAnimationFrame(animate);
 	}
 
 	( function () {
@@ -193,24 +218,5 @@ function onLoad(onLoadLoad) {
 
 		});
 	} )();
-
-	var tLogFPS = 1000;
-	var fpsCount = 0;
-	// setInterval(logFPS, tLogFPS);
-	function logFPS() {
-		console.log('FPS: ' + (frameCount - fpsCount) * (1000 / tLogFPS));
-		fpsCount = frameCount;
-	}
-
-	var frameCount = 0,
-		lt = 0;
-	function animate(t) {
-		var dt = 0.001 * (t - lt);
-		frameCount++;
-		app.render();
-		moveFromKeyboard(dt);
-		lt = t;
-		requestAnimationFrame(animate);
-	}
 
 }
