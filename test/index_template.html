@@ -34,15 +34,15 @@
     <script>
     var WebVRConfig = {
       //ENABLE_DEPRECATED_API: true, // Default: false.
-      //FORCE_ENABLE_VR: true, // Default: false.
+      FORCE_ENABLE_VR: true, // Default: false.
       //K_FILTER: 0.98, // Default: 0.98.
       PREDICTION_TIME_S: 0.02, // Default: 0.050s.
       //TOUCH_PANNER_DISABLED: true, // Default: false.
       //YAW_ONLY: true, // Default: false.
       //MOUSE_KEYBOARD_CONTROLS_DISABLED: true, // Default: false.
       KEYBOARD_CONTROLS_DISABLED: true,
-      DEFER_INITIALIZATION: true, // Default: false.
-      DIRTY_SUBMIT_FRAME_BINDINGS: true, // Default: false.
+      //DEFER_INITIALIZATION: true, // Default: false.
+      //DIRTY_SUBMIT_FRAME_BINDINGS: true, // Default: false.
       BUFFER_SCALE: 0.5 // Default: 1.0.
     };
     </script>
@@ -61,18 +61,20 @@
 
     <script src="/node_modules/webvr-polyfill/build/webvr-polyfill.js"></script>
 
-
     <script src="/WebVRApp.js"></script>
     <script src="/WebVRKeyboard.js"></script>
-
-    <script src="/test/main.js"></script>
+    <script src="/WebVRAppUtils.js"></script>
 
     <script src="/node_modules/leapjs/leap-0.6.4.min.js"></script>
     <script src="/node_modules/cannon/build/cannon.min.js"></script>
-    <script src="/WebVRLeap.js"></script>
+
+    <script src="/WebVRLeapMotion.js"></script>
 
     <script src="/node_modules/gfxtablet/src/GfxTablet.js"></script>
 
+    <script src="/WebVRGfxTablet.js"></script>
+
+    <script src="/test/main.js"></script>
     <script src="/test/extended.js"></script>
 
   </body>

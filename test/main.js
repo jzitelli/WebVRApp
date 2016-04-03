@@ -1,4 +1,4 @@
-var YAWVRB = {};
+var YAWVRBTEST = {};
 
 function onLoad(onLoadLoad) {
 	"use strict";
@@ -7,63 +7,41 @@ function onLoad(onLoadLoad) {
 	var app;
 
 	var avatar = new THREE.Object3D();
+	avatar.matrixAutoUpdate = false;
 
 	var heading = 0;
 	var pitch = 0;
 
 	var pitchQuat = new THREE.Quaternion().setFromAxisAngle(RIGHT, pitch);
 
-	var selection = avatar;
+	var objectSelector = new WebVRAppUtils.ObjectSelector();
+	objectSelector.addSelectable(avatar);
 
-	var selectables = [avatar];
-	var headings = [heading];
-	var pitches = [pitch];
+	YAWVRBTEST.objectSelector = objectSelector;
 
-	YAWVRB.selectables = selectables;
-
-	var cycleSelection = ( function () {
-		var i = 0;
-		return function () {
-			headings[i] = heading;
-			pitches[i] = pitch;
-			i = (i + 1) % selectables.length;
-			selection = selectables[i];
-			if (headings[i] === undefined) headings[i] = 0;
-			if (pitches[i] === undefined) pitches[i] = 0;
-			heading = headings[i];
-			pitch = pitches[i];
-		};
-	} )();
-
-	var keyboardCommands = { cycleSelection: {buttons: [WebVRKeyboard.KEYCODES.OPENBRACKET], commandDown: cycleSelection} };
+	var keyboardCommands = {
+		cycleSelection: {buttons: [WebVRKeyboard.KEYCODES.OPENBRACKET], commandDown: objectSelector.cycleSelection}
+	};
 	for (var k in WebVRKeyboard.STANDARD_COMMANDS) {
 		keyboardCommands[k] = WebVRKeyboard.STANDARD_COMMANDS[k];
 	}
+
 	var keyboard = new WebVRKeyboard(window, keyboardCommands);
 
-	const MOVESPEED = 0.3;
-
-	YAWVRB.moveFromKeyboard = moveFromKeyboard;
-	function moveFromKeyboard(dt) {
-		var moveFB = keyboard.moveForward - keyboard.moveBackward,
-			moveRL = keyboard.moveRight - keyboard.moveLeft,
-			moveUD = keyboard.moveUp - keyboard.moveDown,
-			turnLR = keyboard.turnLeft - keyboard.turnRight,
-			turnUD = keyboard.turnUp - keyboard.turnDown;
-		if (moveFB || moveRL || moveUD || turnLR || turnUD) {
-			heading += (turnLR) * dt;
-			pitch -= (turnUD) * dt;
-			var cos = Math.cos(heading),
-				sin = Math.sin(heading);
-			selection.position.z -= ((moveFB) * cos + (moveRL) * sin) * dt * MOVESPEED;
-			selection.position.x += ((moveRL) * cos - (moveFB) * sin) * dt * MOVESPEED;
-			selection.position.y += moveUD * dt * MOVESPEED;
-			selection.quaternion.multiplyQuaternions(selection.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, heading),
-			                                         pitchQuat.setFromAxisAngle(RIGHT, pitch));
-			selection.updateMatrix();
-			selection.updateMatrixWorld();
-		}
+	function readKeyboardMovement() {
+		return {
+			moveFB: keyboard.moveForward - keyboard.moveBackward,
+			moveRL: keyboard.moveRight - keyboard.moveLeft,
+			moveUD: keyboard.moveUp - keyboard.moveDown,
+			turnLR: keyboard.turnLeft - keyboard.turnRight,
+			turnUD: keyboard.turnUp - keyboard.turnDown
+		};
 	}
+
+	YAWVRBTEST.moveByKeyboard = function (dt) {
+		var km = readKeyboardMovement();
+		objectSelector.moveByKeyboard(dt, km.moveFB, km.moveRL, km.moveUD, km.turnLR, km.turnUD);
+	};
 
 	var tLogFPS = 1000;
 	var fpsCount = 0;
@@ -79,7 +57,7 @@ function onLoad(onLoadLoad) {
 		var dt = 0.001 * (t - lt);
 		frameCount++;
 		app.render();
-		moveFromKeyboard(dt);
+		YAWVRBTEST.moveByKeyboard(dt);
 		lt = t;
 		requestAnimationFrame(animate);
 	}
@@ -112,7 +90,7 @@ function onLoad(onLoadLoad) {
 			scene.updateMatrix();
 
 			app = new WebVRApp(scene, {avatar: avatar}, {canvas: document.getElementById('webgl-canvas')});
-			YAWVRB.app = app;
+			YAWVRBTEST.app = app;
 
 			var matrix = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(-0.5 * Math.PI, 0, 0));
 			matrix.multiply(new THREE.Matrix4().makeScale(0.254, 0.254, 0.254));
@@ -153,9 +131,10 @@ function onLoad(onLoadLoad) {
 
 				scene.add(keyboardObject);
 
-				selectables.push(keyboardObject);
-				headings.push(0);
-				pitches.push(-Math.PI / 2);
+				// selectables.push(keyboardObject);
+				// headings.push(0);
+				// pitches.push(-Math.PI / 2);
+				objectSelector.addSelectable(keyboardObject);
 
 				var keyMaterial = new THREE.MeshLambertMaterial({color: 0xbbbbbb});
 

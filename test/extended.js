@@ -3,23 +3,18 @@ function onLoadExtended() {
 
 	onLoad( function () {
 
-		var app = YAWVRB.app;
+		var app = YAWVRBTEST.app;
 
 		var world = new CANNON.World();
 
-		var leapTool = WebVRLeap.makeTool(app.avatar, world);
-		YAWVRB.selectables.push(leapTool.toolRoot);
+		var leapTool = WebVRLeapMotion.makeTool(world);
+		app.avatar.add(leapTool.toolRoot);
 
-		// set up paintable surface for GfxTablet
-		var gfxTabletStuff = addGfxTablet(2560, 1600);
+		var gfxTablet = new WebVRGfxTablet();
+		app.scene.add(gfxTablet.mesh);
 
-		var gfxTabletGeom = new THREE.PlaneBufferGeometry(2560/1600, 1);
-		var gfxTabletMesh = new THREE.Mesh(gfxTabletGeom, gfxTabletStuff.paintableMaterial);
-		gfxTabletMesh.add(gfxTabletStuff.cursor);
-		gfxTabletMesh.position.y = 0.5;
-		app.scene.add(gfxTabletMesh);
-
-		YAWVRB.selectables.push(gfxTabletMesh);
+		YAWVRBTEST.objectSelector.addSelectable(leapTool.toolRoot);
+		YAWVRBTEST.objectSelector.addSelectable(gfxTablet.mesh);
 
 		requestAnimationFrame(animate);
 
@@ -38,7 +33,7 @@ function onLoadExtended() {
 
 			leapTool.updateToolPostStep(dt);
 
-			YAWVRB.moveFromKeyboard(dt);
+			YAWVRBTEST.moveByKeyboard(dt);
 
 			leapTool.updateToolMapping();
 

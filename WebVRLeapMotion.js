@@ -1,9 +1,7 @@
 ( function () {
     "use strict";
-    function makeTool(parent, options) {
+    function makeTool(options) {
         /*************************************
-
-        parent: THREE.Object3D
 
         returns: stuff
 
@@ -15,10 +13,11 @@
 
         // coordinate transformations are performed via three.js scene graph
         var toolRoot = new THREE.Object3D();
+        toolRoot.matrixAutoUpdate = false;
+
         var LEAP2METERS = 0.001;
         var METERS2LEAP = 1000;
         toolRoot.scale.set(LEAP2METERS, LEAP2METERS, LEAP2METERS);
-        parent.add(toolRoot);
 
         // parse options:
 
@@ -89,6 +88,7 @@
 
         // interaction box visual guide:
         var interactionBoxRoot = new THREE.Object3D();
+        interactionBoxRoot.matrixAutoUpdate = false;
         toolRoot.add(interactionBoxRoot);
 
         var interactionPlaneMaterial = new THREE.MeshBasicMaterial({color: 0x00dd44, transparent: true, opacity: interactionPlaneOpacity});
@@ -115,6 +115,8 @@
         boxGeom.dispose();
         var leapMaterial = new THREE.MeshLambertMaterial({color: 0x777777});
         var leapMesh = new THREE.Mesh(leapGeom, leapMaterial);
+        leapMesh.matrixAutoUpdate = false;
+
         leapMesh.position.y = METERS2LEAP*IN2METER*0.25;
         leapMesh.updateMatrix();
         toolRoot.add(leapMesh);
@@ -129,6 +131,7 @@
         stickGeom = bufferGeom;
         var stickMaterial = new THREE.MeshLambertMaterial({color: stickColor, transparent: true});
         var stickMesh = new THREE.Mesh(stickGeom, stickMaterial);
+        stickMesh.matrixAutoUpdate = false;
         stickMesh.castShadow = true;
         toolRoot.add(stickMesh);
 
@@ -137,8 +140,8 @@
         if (!useShadowMap) {
             var shadowMaterial = options.shadowMaterial || new THREE.MeshBasicMaterial({color: 0xffff00});
             stickShadowMesh = new THREE.ShadowMesh(stickMesh, shadowMaterial);
-            var shadowPlane = new THREE.Plane(UP, 0);
-            var shadowLightPosition = new THREE.Vector4(0, 5, 0, 0.01);
+            var shadowPlane = new THREE.Plane(THREE.Object3D.DefaultUp, 0.5);
+            var shadowLightPosition = new THREE.Vector4(0.2, 5, 0, 0.01);
             stickShadowMesh.updateShadowMatrix(shadowPlane, shadowLightPosition);
         }
 
@@ -177,6 +180,8 @@
         // hands don't necessarily correspond the left / right labels, but doesn't matter to me because they look indistinguishable
         var leftRoot = new THREE.Object3D(),
             rightRoot = new THREE.Object3D();
+        leftRoot.matrixAutoUpdate  = false;
+        rightRoot.matrixAutoUpdate = false;
         var handRoots = [leftRoot, rightRoot];
         toolRoot.add(leftRoot);
         toolRoot.add(rightRoot);
@@ -272,49 +277,11 @@
 
         var deadtime = 0;
 
-        function moveToolRoot(keyboard, gamepad, dt) {
-            var toolDrive = 0;
-            var toolFloat = 0;
-            var toolStrafe = 0;
-            var rotateToolCW = 0;
-            if (keyboard) {
-                toolDrive += keyboard.getValue("moveToolForwards") - keyboard.getValue("moveToolBackwards");
-                toolFloat += keyboard.getValue("moveToolUp") - keyboard.getValue("moveToolDown");
-                toolStrafe += keyboard.getValue("moveToolRight") - keyboard.getValue("moveToolLeft");
-                rotateToolCW += keyboard.getValue("rotateToolCW") - keyboard.getValue("rotateToolCCW");
-            }
-            if (gamepad) {
-                if (parent.toolMode) {
-                    toolFloat += gamepad.getValue("toolFloat");
-                    toolStrafe += gamepad.getValue("toolStrafe");
-                } else {
-                    toolDrive -= gamepad.getValue("toolDrive");
-                    rotateToolCW -= gamepad.getValue("toolStrafe");
-                }
-            }
-            if ((toolDrive !== 0) || (toolStrafe !== 0) || (toolFloat !== 0) || (rotateToolCW !== 0)) {
-                toolRoot.position.x +=  0.16 * dt * toolStrafe;
-                toolRoot.position.z += -0.16 * dt * toolDrive;
-                toolRoot.position.y +=  0.16 * dt * toolFloat;
-                toolRoot.heading -= 0.15 * dt * rotateToolCW;
-                toolRoot.quaternion.setFromAxisAngle(UP, toolRoot.heading);
-
-                toolRoot.updateMatrix();
-
-                if (interactionBoxRoot.visible === false) {
-                    interactionBoxRoot.visible = true;
-                    interactionPlaneMaterial.opacity = interactionPlaneOpacity;
-                }
-
-                deadtime = 0;
-
-            }
-        }
-
         var direction = new THREE.Vector3();
         var position = new THREE.Vector3();
         var velocity = new THREE.Vector3();
         var quaternion = new THREE.Quaternion();
+
         var lastFrameID;
 
         function updateTool(dt) {
@@ -322,7 +289,7 @@
             deadtime += dt;
 
             var frame = leapController.frame();
-            if (frame.valid && frame.id != lastFrameID) {
+            if (frame.valid && frame.id !== lastFrameID) {
 
                 lastFrameID = frame.id;
 
@@ -463,12 +430,11 @@
             tipBody:            tipBody,
             updateTool:         updateTool,
             updateToolPostStep: updateToolPostStep,
-            moveToolRoot:       moveToolRoot,
             updateToolMapping:  updateToolMapping
         };
     }
 
-    window.WebVRLeap = {};
-    window.WebVRLeap.makeTool = makeTool;
+    window.WebVRLeapMotion = {};
+    window.WebVRLeapMotion.makeTool = makeTool;
 
 } )();
