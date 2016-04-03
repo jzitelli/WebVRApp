@@ -37,21 +37,21 @@ function onLoad() {
 
 		var textureLoader = new THREE.TextureLoader();
 
-		var deskTexture = textureLoader.load('models/textures/deskTexture.png');
+		var deskTexture = textureLoader.load('/test/models/textures/deskTexture.png');
 		var deskMaterial = new THREE.MeshBasicMaterial({map: deskTexture});
 		var deskObject = new THREE.Object3D();
 
-		var roomTexture = textureLoader.load('models/textures/roomTexture.png');
+		var roomTexture = textureLoader.load('/test/models/textures/roomTexture.png');
 		var roomMaterial = new THREE.MeshBasicMaterial({map: roomTexture});
 		var roomObject = new THREE.Object3D();
 
-		var chairTexture = textureLoader.load('models/textures/chairTexture.png');
+		var chairTexture = textureLoader.load('/test/models/textures/chairTexture.png');
 		var chairMaterial = new THREE.MeshBasicMaterial({map: chairTexture});
 		var chairObject = new THREE.Object3D();
 
 		var objectLoader = new THREE.ObjectLoader();
 
-		objectLoader.load("models/WebVRDesk.json", function (scene) {
+		objectLoader.load("/test/models/WebVRDesk.json", function (scene) {
 
 			scene.position.set(0, 0, 0);
 			scene.rotation.set(0, 0, 0);
@@ -71,7 +71,7 @@ function onLoad() {
 				}
 			} );
 
-	        objectLoader.load("models/WebVRKeyboard.json", function (keyboardScene) {
+	        objectLoader.load("/test/models/WebVRKeyboard.json", function (keyboardScene) {
 
 				var pointLight = new THREE.PointLight();
 				pointLight.position.y = 7;
@@ -115,7 +115,7 @@ function onLoad() {
 
 				}
 
-				app = new WebVRApp(scene, {vrCanvas: document.createElement('canvas')}, {canvas: document.getElementById('webgl-canvas')});
+				app = new WebVRApp(scene, undefined, {canvas: document.getElementById('webgl-canvas')});
 
 				avatar.position.y = 1.;
 				avatar.position.z = 0.38;
@@ -128,7 +128,7 @@ function onLoad() {
 	        	for (var k in WebVRKeyboard.STANDARD_COMMANDS) {
 	        		keyboardCommands[k] = WebVRKeyboard.STANDARD_COMMANDS[k];
 	        	}
-				keyboard = new WebVRKeyboard(window, WebVRKeyboard.STANDARD_COMMANDS);
+				keyboard = new WebVRKeyboard(window, keyboardCommands);
 
 				var keyDown = [];
 
