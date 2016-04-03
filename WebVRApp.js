@@ -163,11 +163,7 @@ function WebVRApp(scene, config, rendererOptions) {
                 vrDisplay = displays[0];
                 this.vrDisplay = vrDisplay;
 
-                if (vrDisplay.capabilities.canPresent) {
-
-                    if (!config.vrButton) document.body.appendChild(vrButton);
-
-                }
+                if (!config.vrButton) document.body.appendChild(vrButton);
 
             }
 

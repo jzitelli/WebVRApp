@@ -10,9 +10,8 @@ function onLoad(onLoadLoad) {
 
 	var heading = 0;
 	var pitch = 0;
-	var pitchQuat = new THREE.Quaternion().setFromAxisAngle(RIGHT, pitch);
 
-	avatar.quaternion.multiplyQuaternions(avatar.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, heading), pitchQuat);
+	var pitchQuat = new THREE.Quaternion().setFromAxisAngle(RIGHT, pitch);
 
 	var selection = avatar;
 
@@ -112,15 +111,8 @@ function onLoad(onLoadLoad) {
 			scene.scale.set(1, 1, 1);
 			scene.updateMatrix();
 
-			avatar.position.y = 1.;
-			avatar.position.z = 0.38;
-
-			scene.add(avatar);
-
 			app = new WebVRApp(scene, {avatar: avatar}, {canvas: document.getElementById('webgl-canvas')});
 			YAWVRB.app = app;
-
-			avatar.add(app.camera);
 
 			var matrix = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(-0.5 * Math.PI, 0, 0));
 			matrix.multiply(new THREE.Matrix4().makeScale(0.254, 0.254, 0.254));
@@ -134,6 +126,15 @@ function onLoad(onLoadLoad) {
 					else child.material = roomMaterial;
 				}
 			} );
+
+			avatar.position.y = 1.;
+			avatar.position.z = 0.38;
+			avatar.quaternion.multiplyQuaternions(avatar.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, heading), pitchQuat);
+			avatar.updateMatrix();
+
+			scene.add(avatar);
+
+			avatar.add(app.camera);
 
 	        objectLoader.load("/test/models/WebVRKeyboard.json", function (keyboardScene) {
 
