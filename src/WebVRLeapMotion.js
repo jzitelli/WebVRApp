@@ -45,7 +45,7 @@
         var toolTimeA = options.toolTimeA || 0.25;
         var toolTimeB = options.toolTimeB || toolTimeA + 1.5;
 
-        var minConfidence = options.minConfidence || 0.3;
+        var minConfidence = options.minConfidence || 0.13;
 
         var interactionPlaneOpacity = options.interactionPlaneOpacity || 0.23;
 
