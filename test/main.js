@@ -8,11 +8,9 @@ function onLoad(onLoadLoad) {
 
 	var avatar = new THREE.Object3D();
 	avatar.matrixAutoUpdate = false;
-
-	var heading = 0;
-	var pitch = 0;
-
-	var pitchQuat = new THREE.Quaternion().setFromAxisAngle(RIGHT, pitch);
+	avatar.position.y = 1.;
+	avatar.position.z = 0.38;
+	avatar.updateMatrix();
 
 	var objectSelector = new WebVRAppUtils.ObjectSelector();
 	objectSelector.addSelectable(avatar);
@@ -20,7 +18,9 @@ function onLoad(onLoadLoad) {
 	YAWVRBTEST.objectSelector = objectSelector;
 
 	var keyboardCommands = {
-		cycleSelection: {buttons: [WebVRKeyboard.KEYCODES.OPENBRACKET], commandDown: objectSelector.cycleSelection}
+		cycleSelection: {buttons: [WebVRKeyboard.KEYCODES.OPENBRACKET], commandDown: objectSelector.cycleSelection},
+		toggleVR: {buttons: [WebVRKeyboard.KEYCODES.V], commandDown: function () { app.toggleVR(); }},
+		resetVRSensor: {buttons: [WebVRKeyboard.KEYCODES.Z], commandDown: function () { app.resetVRSensor(); }}
 	};
 	for (var k in WebVRKeyboard.STANDARD_COMMANDS) {
 		keyboardCommands[k] = WebVRKeyboard.STANDARD_COMMANDS[k];
@@ -49,17 +49,6 @@ function onLoad(onLoadLoad) {
 	function logFPS() {
 		console.log('FPS: ' + (frameCount - fpsCount) * (1000 / tLogFPS));
 		fpsCount = frameCount;
-	}
-
-	var frameCount = 0,
-		lt = 0;
-	function animate(t) {
-		var dt = 0.001 * (t - lt);
-		frameCount++;
-		app.render();
-		YAWVRBTEST.moveByKeyboard(dt);
-		lt = t;
-		requestAnimationFrame(animate);
 	}
 
 	( function () {
@@ -105,11 +94,6 @@ function onLoad(onLoadLoad) {
 				}
 			} );
 
-			avatar.position.y = 1.;
-			avatar.position.z = 0.38;
-			avatar.quaternion.multiplyQuaternions(avatar.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, heading), pitchQuat);
-			avatar.updateMatrix();
-
 			scene.add(avatar);
 
 			avatar.add(app.camera);
@@ -131,9 +115,6 @@ function onLoad(onLoadLoad) {
 
 				scene.add(keyboardObject);
 
-				// selectables.push(keyboardObject);
-				// headings.push(0);
-				// pitches.push(-Math.PI / 2);
 				objectSelector.addSelectable(keyboardObject);
 
 				var keyMaterial = new THREE.MeshLambertMaterial({color: 0xbbbbbb});
@@ -191,9 +172,19 @@ function onLoad(onLoadLoad) {
 
 				scene.updateMatrixWorld(true);
 
+				var frameCount = 0,
+					lt = 0;
+				function animate(t) {
+					var dt = 0.001 * (t - lt);
+					frameCount++;
+					app.render();
+					YAWVRBTEST.moveByKeyboard(dt);
+					lt = t;
+					requestAnimationFrame(animate);
+				}
+
 				if (onLoadLoad) onLoadLoad(app)
 				else requestAnimationFrame(animate);
-
 			});
 
 		});

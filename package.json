@@ -11,17 +11,19 @@
   "bugs": "https://github.com/jzitelli/yawvrb.js/issues",
   "files": [
     "spec/",
+    "src/",
     "test/",
     "LICENSE",
     "README.md",
-    "WebVRApp.js",
-    "WebVRKeyboard.js",
     "favicon.ico",
     "server.js"
   ],
   "keywords": [
     "WebVR",
     "three.js",
+    "cannon.js",
+    "Leap Motion",
+    "GfxTablet",
     "VR",
     "virtual reality",
     "Google Cardboard",
@@ -33,10 +35,10 @@
   },
   "devDependencies": {
     "jasmine": "latest",
-    "selenium-webdriver": "latest",
-    "leapjs": "0.6.4"
+    "selenium-webdriver": "latest"
   },
   "optionalDependencies": {
+    "leapjs": "0.6.4",
     "gfxtablet": "git://github.com/jzitelli/GfxTablet.js.git",
     "cannon": "git://github.com/jzitelli/cannon.js.git#dev"
   },
