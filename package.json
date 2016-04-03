@@ -35,6 +35,9 @@
     "jasmine": "latest",
     "selenium-webdriver": "latest"
   },
+  "optionalDependencies": {
+    "gfxtablet": "git://github.com/jzitelli/GfxTablet.js.git"
+  },
   "scripts": {
     "test": "jasmine"
   }
