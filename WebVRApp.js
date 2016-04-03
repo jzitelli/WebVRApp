@@ -92,22 +92,27 @@ function WebVRApp(scene, config, rendererOptions) {
 
     // WebVR setup
 
-    var isPresenting = false;
-
     this.vrDisplay = null;
+    var isPresenting = false;
+    var useDeprecatedWebVR = false;
+    var vrDisplay;
 
     this.toggleVR = function () {
         if (!isPresenting) {
             this.vrEffect.requestPresent().then( function () {
                 isPresenting = true;
-                requestPointerLock();
-                presentingElement.style.display = "block";
+                if (!useDeprecatedWebVR && vrDisplay.capabilities.canPresent) {
+                    presentingElement.style.display = "block";
+                    requestPointerLock();
+                }
             } );
         } else {
             this.vrEffect.exitPresent().then( function () {
                 isPresenting = false;
-                releasePointerLock();
-                presentingElement.style.display = "none";
+                if (!useDeprecatedWebVR && vrDisplay.capabilities.canPresent) {
+                    presentingElement.style.display = "none";
+                    releasePointerLock();
+                }
             } );
         }
     }.bind(this);
@@ -121,16 +126,16 @@ function WebVRApp(scene, config, rendererOptions) {
     presentingElement.style.left = '0';
     presentingElement.style.top = '0';
     presentingElement.style.paddingTop = '24vh';
-    presentingElement.style.color = '#773';
-    presentingElement.style.backgroundColor = '#333';
+    presentingElement.style.color = '#993';
+    presentingElement.style.backgroundColor = '#433';
     presentingElement.style['z-index'] = 1;
     presentingElement.style['text-align'] = 'center';
     presentingElement.style.display = "none";
-    document.body.appendChild(presentingElement);
     presentingElement.innerHTML = "<h2>VR CONTENT IS BEING PRESENTED ON THE VR DISPLAY</h2><h2>CLICK INSIDE THIS WINDOW TO RETURN TO NORMAL</h2>";
+    document.body.appendChild(presentingElement);
     presentingElement.addEventListener('click', this.toggleVR, false);
 
-    // configure VR button:
+    // configure VR button
 
     var vrButton = config.vrButton;
     if (!vrButton) {
@@ -152,7 +157,7 @@ function WebVRApp(scene, config, rendererOptions) {
 
             if (displays.length > 0) {
 
-                var vrDisplay = displays[0];
+                vrDisplay = displays[0];
                 this.vrDisplay = vrDisplay;
 
                 if (vrDisplay.capabilities.canPresent) {
@@ -168,6 +173,7 @@ function WebVRApp(scene, config, rendererOptions) {
     } else if (navigator.getVRDevices) {
 
         console.warn('using the deprecated WebVR API');
+        useDeprecatedWebVR = true;
         navigator.getVRDevices().then( function (devices) {
 
             if (devices.length > 0) {
@@ -209,6 +215,17 @@ function WebVRApp(scene, config, rendererOptions) {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     }.bind(this);
 
+    var onFullscreenChange = function () {
+        onResize();
+        if (useDeprecatedWebVR) {
+            if (isFullscreen()) {
+                requestPointerLock();
+            } else {
+                releasePointerLock();
+            }
+        }
+    };
+
     function isFullscreen() {
         return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
     }
@@ -238,16 +255,6 @@ function WebVRApp(scene, config, rendererOptions) {
             console.warn('exitFullscreen is not supported');
         }
     }
-
-    var onFullscreenChange = function () {
-
-        if (isFullscreen()) {
-            requestPointerLock();
-        } else {
-            releasePointerLock();
-        }
-
-    };
 
     function requestPointerLock() {
         if (domElement.requestPointerLock) {
