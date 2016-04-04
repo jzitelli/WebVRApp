@@ -24,19 +24,12 @@ function onLoadExtended() {
 		function animate(t) {
 			var dt = 0.001 * (t - lt);
 			frameCount++;
-
 			leapTool.updateTool(dt);
-
 			app.render();
-
 			world.step(Math.min(dt, 1/60), dt, 10);
-
 			leapTool.updateToolPostStep(dt);
-
 			YAWVRBTEST.moveByKeyboard(dt);
-
 			leapTool.updateToolMapping();
-
 			lt = t;
 			requestAnimationFrame(animate);
 		}
