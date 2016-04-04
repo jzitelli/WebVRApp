@@ -11,7 +11,7 @@ function onLoad(onLoadLoad) {
 	var app;
 
 	var avatar = new THREE.Object3D();
-	avatar.position.y = 1.77;
+	avatar.position.y = 0.22;
 	avatar.updateMatrix();
 
 	var objectSelector = new WebVRAppUtils.ObjectSelector();
@@ -210,8 +210,6 @@ function onLoad(onLoadLoad) {
 
 			} )();
 
-			scene.updateMatrixWorld(true);
-
 			var frameCount = 0,
 				lt = 0;
 			function animate(t) {
@@ -222,6 +220,8 @@ function onLoad(onLoadLoad) {
 				lt = t;
 				requestAnimationFrame(animate);
 			}
+
+			scene.updateMatrixWorld(true);
 
 			if (onLoadLoad) onLoadLoad(app)
 			else requestAnimationFrame(animate);

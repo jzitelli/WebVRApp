@@ -11,10 +11,15 @@ function onLoadExtended() {
 		app.avatar.add(leapTool.toolRoot);
 
 		var gfxTablet = new WebVRGfxTablet();
-		app.scene.add(gfxTablet.mesh);
+		app.avatar.add(gfxTablet.mesh);
+		gfxTablet.mesh.position.y = -0.1;
+		gfxTablet.mesh.position.z = -0.4;
+		gfxTablet.mesh.updateMatrix();
 
 		YAWVRBTEST.objectSelector.addSelectable(leapTool.toolRoot);
 		YAWVRBTEST.objectSelector.addSelectable(gfxTablet.mesh);
+
+		app.scene.updateMatrixWorld(true);
 
 		requestAnimationFrame(animate);
 
