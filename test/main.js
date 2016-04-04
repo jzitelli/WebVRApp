@@ -2,14 +2,16 @@ var YAWVRBTEST = {};
 
 function onLoad(onLoadLoad) {
 	"use strict";
+
+	THREE.Object3D.DefaultMatrixAutoUpdate = false;
+
 	const RIGHT = new THREE.Vector3(1, 0, 0);
-	const INCH2METER = 0.254;
+	const INCH2METER = 0.0254;
 
 	var app;
 
 	var avatar = new THREE.Object3D();
 	avatar.position.y = 1.77;
-	// avatar.position.z = 1.8;
 	avatar.updateMatrix();
 
 	var objectSelector = new WebVRAppUtils.ObjectSelector();
@@ -43,6 +45,7 @@ function onLoad(onLoadLoad) {
 
 	YAWVRBTEST.moveByKeyboard = function (dt) {
 		var km = readKeyboardMovement();
+		if (objectSelector.selection === avatar) km.turnUD = 0;
 		objectSelector.moveByKeyboard(dt, km.moveFB, km.moveRL, km.moveUD, km.turnLR, km.turnUD);
 	};
 
@@ -73,23 +76,23 @@ function onLoad(onLoadLoad) {
 
 		objectLoader.load("/test/models/WebVRDesk.json", function (scene) {
 
-			app = new WebVRApp(scene, {avatar: avatar}, {canvas: document.getElementById('webgl-canvas')});
-			YAWVRBTEST.app = app;
-
 			// var matrix = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(-0.5 * Math.PI, 0, 0));
 			// matrix.multiply(new THREE.Matrix4().makeScale(INCH2METER, INCH2METER, INCH2METER));
-			var matrix = new THREE.Matrix4().makeScale(INCH2METER, INCH2METER, INCH2METER);
+			var matrix = new THREE.Matrix4().makeScale(0.1, 0.1, 0.1);
+
 			for (var i = 0, l = scene.children.length; i < l; i++) {
 				var child = scene.children[i];
-				child.updateMatrix();
-				child.matrix.multiplyMatrices(matrix, child.matrix);
-				child.matrixAutoUpdate = false;
 				if (child instanceof THREE.Mesh) {
+					child.updateMatrix();
+					child.matrix.multiplyMatrices(matrix, child.matrix);
 					if (child.name === 'desk') child.material = deskMaterial;
 					else if (child.name === 'chair') child.material = chairMaterial;
 					else child.material = roomMaterial;
 				}
 			}
+
+			app = new WebVRApp(scene, {avatar: avatar}, {canvas: document.getElementById('webgl-canvas')});
+			YAWVRBTEST.app = app;
 
 			scene.add(avatar);
 
@@ -99,56 +102,83 @@ function onLoad(onLoadLoad) {
 
 				// create visual keyboard:
 
-				var pointLight = new THREE.PointLight();
-				pointLight.position.y = 7;
-				pointLight.position.z = 2;
-
-				scene.add(pointLight);
-
 	        	var keyboardObject = new THREE.Object3D();
-				keyboardObject.matrixAutoUpdate = false;
-				keyboardObject.position.y = 1.2;
-				keyboardObject.position.z = 1;
+				avatar.add(keyboardObject);
+				keyboardObject.position.z = -12 * INCH2METER;
+				keyboardObject.position.y = -5 * INCH2METER;
 				keyboardObject.updateMatrix();
-
-				scene.add(keyboardObject);
 
 				objectSelector.addSelectable(keyboardObject);
 
+				var keyMaterial = new THREE.MeshLambertMaterial({color: 0xbbbbbb});
+
 				const keyDelta = INCH2METER * 0.75;
-				const keyHeight = INCH2METER * 0.25;
+				const keyHeight = INCH2METER * 0.3;
 				const keyTravel = keyHeight * 0.7;
 
 				var regularKeyGeom = new THREE.BoxBufferGeometry(0.95 * keyDelta, keyHeight, 0.95 * keyDelta);
 
-				var spacebarWidth = 0.95 * INCH2METER * 4.75;
-				var spacebarGeom = new THREE.BoxBufferGeometry(spacebarWidth, keyHeight, 0.95 * keyDelta);
-
-				var keyMaterial = new THREE.MeshLambertMaterial({color: 0xbbbbbb});
+				var i, j; // i = 0 at upper number key row, 4 at bottom row, -1 at function key row;
+				          // j = 0 at start (left) of row, increments for each key until the end of the row.
+				var row, char;
+				var mesh;
 
 				var keyMesh = {};
-
-				// regular keys:
-				const ROWS = [
+				// regular-sized keys:
+				const REGULAR_ROWS = [
 					"`1234567890-=",
 					"qwertyuiop[]",
 					"asdfghjkl;'",
 					"zxcvbnm,./"
 				];
-
-				ROWS.forEach( function (row, i) {
-					for (var j = 0; j < row.length; j++) {
-						var char = row[j];
-						var mesh = new THREE.Mesh(regularKeyGeom, keyMaterial);
+				for (i = 0; i < REGULAR_ROWS.length; i++) {
+					row = REGULAR_ROWS[i];
+					for (j = 0; j < row.length; j++) {
+						char = row[j];
+						mesh = new THREE.Mesh(regularKeyGeom, keyMaterial);
 						mesh.name = char;
-						mesh.matrixAutoUpdate = false;
-						mesh.position.z = i * keyDelta;
-						mesh.position.x = j * keyDelta;
-						mesh.updateMatrix();
+						mesh.position.z = 0.5 * keyDelta + i * keyDelta;
+						mesh.position.x = 0.5 * keyDelta + j * keyDelta;
 						keyMesh[char] = mesh;
 						keyboardObject.add(mesh);
 					}
-				} );
+				}
+
+				// the *crazy* bottom row:
+				var controlWidth = INCH2METER * 1.5,
+					windowsWidth = controlWidth,
+					altWidth     = controlWidth;
+				var controlGeom = new THREE.BoxBufferGeometry(0.95 * controlWidth, keyHeight, 0.95 * keyDelta),
+					windowsGeom = controlGeom,
+					altGeom     = controlGeom;
+				var spacebarWidth = 0.95 * INCH2METER * 4.75;
+				var spacebarGeom = new THREE.BoxBufferGeometry(0.95 * spacebarWidth, keyHeight, 0.95 * keyDelta);
+
+				mesh = new THREE.Mesh(controlGeom, keyMaterial);
+				mesh.position.z = 4.5 * keyDelta;
+				mesh.position.x = 0.5 * controlWidth;
+				keyMesh['lcontrol'] = mesh;
+				keyboardObject.add(mesh);
+
+				mesh = mesh.clone();
+				mesh.position.x += 0.5 * (controlWidth + windowsWidth);
+				keyMesh['lwindows'] = mesh;
+				keyboardObject.add(mesh);
+
+				mesh = mesh.clone();
+				mesh.position.x += 0.5 * (windowsWidth + altWidth);
+				keyMesh['lalt'] = mesh;
+				keyboardObject.add(mesh);
+
+				mesh = new THREE.Mesh(spacebarGeom, keyMaterial);
+				mesh.position.z = 4.5 * keyDelta;
+				mesh.position.x = keyMesh['lalt'].position.x + 0.5 * (altWidth + spacebarWidth);
+				keyMesh['spacebar'] = mesh;
+				keyboardObject.add(mesh);
+
+				for (var k in keyMesh) {
+					keyMesh[k].updateMatrix();
+				}
 
 				var keyDown = [];
 
@@ -197,5 +227,5 @@ function onLoad(onLoadLoad) {
 			else requestAnimationFrame(animate);
 		});
 
-	} )();
+	} )();;
 }

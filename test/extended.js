@@ -7,7 +7,7 @@ function onLoadExtended() {
 
 		var world = new CANNON.World();
 
-		var leapTool = WebVRLeapMotion.makeTool(world);
+		var leapTool = WebVRLeapMotion.makeTool(world, {host: '192.168.1.200'});
 		app.avatar.add(leapTool.toolRoot);
 
 		var gfxTablet = new WebVRGfxTablet();

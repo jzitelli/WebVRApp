@@ -4,11 +4,10 @@ var WebVRAppUtils = ( function () {
 	function ObjectSelector() {
 
 		var selectables = [];
-		// var selected = [];
 		var headings = [];
 		var pitches = [];
 
-		var selection;
+		this.selection;
 		var heading = 0;
 		var pitch = 0;
 
@@ -16,8 +15,8 @@ var WebVRAppUtils = ( function () {
 			selectables.push(obj);
 			pitches.push(obj.rotation.x);
 			headings.push(obj.rotation.y);
-			if (!selection) selection = obj;
-		};
+			if (!this.selection) this.selection = obj;
+		}.bind(this);
 
 		this.cycleSelection = ( function () {
 			var i = 0;
@@ -25,11 +24,11 @@ var WebVRAppUtils = ( function () {
 				headings[i] = heading;
 				pitches[i] = pitch;
 				i = (i + 1) % selectables.length;
-				selection = selectables[i];
+				this.selection = selectables[i];
 				heading = headings[i];
 				pitch = pitches[i];
 			};
-		} )();
+		} )().bind(this);
 
 
 		const MOVESPEED = 0.3;
@@ -37,6 +36,7 @@ var WebVRAppUtils = ( function () {
 		var pitchQuat = new THREE.Quaternion();
 
 		this.moveByKeyboard = function (dt, moveFB, moveRL, moveUD, turnLR, turnUD) {
+			var selection = this.selection;
 			if (!selection) return;
 			if (moveFB || moveRL || moveUD || turnLR || turnUD) {
 				heading += (turnLR) * dt;
@@ -51,11 +51,11 @@ var WebVRAppUtils = ( function () {
 				selection.updateMatrix();
 				selection.updateMatrixWorld();
 			}
-		};
+		}.bind(this);
 
 		this.showSelectionInfo = function () {
-
-		};
+			// TODO
+		}.bind(this);
 
 	}
 
