@@ -53,6 +53,10 @@ var WebVRAppUtils = ( function () {
 			}
 		};
 
+		this.showSelectionInfo = function () {
+
+		};
+
 	}
 
 	return {
