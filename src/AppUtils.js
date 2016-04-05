@@ -55,9 +55,21 @@ YAWVRB.AppUtils = ( function () {
 			}
 		}.bind(this);
 
-		this.showSelectionInfo = function () {
+		this.showInfo = function () {
 			// TODO
 		}.bind(this);
+
+		this.saveAllTransforms = function (key) {
+			key = key || 'YAWVRB_TRANSFORMS';
+			var val = {};
+			selectables.forEach( function (object, i) {
+				val[object.name || object.uuid] = {
+					heading: headings[i],
+					pitch: pitches[i],
+					position: object.position.toArray()
+				};
+			} );
+		};
 
 	}
 
