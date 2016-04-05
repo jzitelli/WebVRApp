@@ -209,30 +209,32 @@ function onLoad() {
             var world = new CANNON.World();
 
             // local leap motion controller:
-            var leapTool = WebVRLeapMotion.makeTool();
+            var leapTool = WebVRLeapMotion.makeTool({toolColor: 0xbb9999, handColor: 0x99bbbb});
             avatar.add(leapTool.toolRoot);
             world.add(leapTool.toolBody);
             YAWVRBTEST.objectSelector.addSelectable(leapTool.toolRoot);
             leapTool.leapController.connect();
 
             // remote leap motion controller:
-            var leapToolRemote = WebVRLeapMotion.makeTool({host: '192.168.1.200'});
+            var leapToolRemote = WebVRLeapMotion.makeTool({toolColor: 0x99bb99, handColor: 0xbb99bb, host: '192.168.1.200'});
             leapToolRemote.toolRoot.position.x += 0.3;
             avatar.add(leapToolRemote.toolRoot);
             world.add(leapToolRemote.toolBody);
             YAWVRBTEST.objectSelector.addSelectable(leapToolRemote.toolRoot);
             leapToolRemote.leapController.connect();
 
-            var gfxTablet = new WebVRGfxTablet(2560, 1600, 2);
+            var gfxTablet = new WebVRGfxTablet(2560, 1600);
             avatar.add(gfxTablet.mesh);
-            gfxTablet.mesh.position.set(-0.2, -0.1, -0.4);
+            gfxTablet.mesh.position.set(-0.2, -0.1, -0.05);
+            gfxTablet.mesh.rotation.y = 0.5 * Math.PI;
+            //gfxTablet.mesh.rotation.x = -0.125 * Math.PI;
             gfxTablet.mesh.updateMatrix();
-            gfxTablet.cursor.updateMatrix();
             YAWVRBTEST.objectSelector.addSelectable(gfxTablet.mesh);
 
             scene.updateMatrixWorld(true);
 
             leapTool.updateToolMapping();
+            leapToolRemote.updateToolMapping();
 
             requestAnimationFrame(animate);
 
