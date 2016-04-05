@@ -15,24 +15,24 @@ function onLoad() {
     avatar.position.z = -0.28
     avatar.updateMatrix();
 
-    var objectSelector = new WebVRAppUtils.ObjectSelector();
+    var objectSelector = new YAWVRB.AppUtils.ObjectSelector();
 
     YAWVRBTEST.objectSelector = objectSelector;
 
     objectSelector.addSelectable(avatar);
 
     var keyboardCommands = {
-        toggleVR: {buttons: [WebVRKeyboard.KEYCODES.V], commandDown: function () { app.toggleVR(); }},
-        resetVRSensor: {buttons: [WebVRKeyboard.KEYCODES.Z], commandDown: function () { app.resetVRSensor(); }},
-        cycleSelection: {buttons: [WebVRKeyboard.KEYCODES.OPENBRACKET], commandDown: objectSelector.cycleSelection},
-        toggleWireframe: {buttons: [WebVRKeyboard.KEYCODES.NUMBER1], commandDown: function () { app.toggleWireframe(); }},
-        toggleNormalMaterial: {buttons: [WebVRKeyboard.KEYCODES.NUMBER2], commandDown: function () { app.toggleNormalMaterial(); }}
+        toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: function () { app.toggleVR(); }},
+        resetVRSensor: {buttons: [YAWVRB.Keyboard.KEYCODES.Z], commandDown: function () { app.resetVRSensor(); }},
+        cycleSelection: {buttons: [YAWVRB.Keyboard.KEYCODES.OPENBRACKET], commandDown: objectSelector.cycleSelection},
+        toggleWireframe: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER1], commandDown: function () { app.toggleWireframe(); }},
+        toggleNormalMaterial: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER2], commandDown: function () { app.toggleNormalMaterial(); }}
     };
-    for (var k in WebVRKeyboard.STANDARD_COMMANDS) {
-        keyboardCommands[k] = WebVRKeyboard.STANDARD_COMMANDS[k];
+    for (var k in YAWVRB.Keyboard.STANDARD_COMMANDS) {
+        keyboardCommands[k] = YAWVRB.Keyboard.STANDARD_COMMANDS[k];
     }
 
-    var keyboard = new WebVRKeyboard(window, keyboardCommands);
+    var keyboard = new YAWVRB.Keyboard(window, keyboardCommands);
 
     function readKeyboardMovement() {
         return {
@@ -87,7 +87,7 @@ function onLoad() {
                 }
             }
 
-            app = new WebVRApp(scene, {avatar: avatar}, {canvas: document.getElementById('webgl-canvas')});
+            app = new YAWVRB.App(scene, {}, {canvas: document.getElementById('webgl-canvas')});
             YAWVRBTEST.app = app;
 
             scene.add(avatar);
@@ -114,7 +114,7 @@ function onLoad() {
 
                 var regularKeyGeom = new THREE.BoxBufferGeometry(0.95 * keyDelta, keyHeight, 0.95 * keyDelta);
 
-                var i, j; // i = 0 at upper number key row, 4 at bottom row, -1 at function key row;
+                var i, j; // i = 0 at upper number key row, 4 at bottom row, 5 (or -1) at function key row;
                           // j = 0 at start (left) of row, increments for each key until the end of the row.
                 var row, char;
                 var mesh;
@@ -180,7 +180,7 @@ function onLoad() {
 
                 window.addEventListener("keydown", function (evt) {
                     if (!keyDown[evt.keyCode]) {
-                        var keyName = WebVRKeyboard.CODEKEYS[evt.keyCode];
+                        var keyName = YAWVRB.Keyboard.CODEKEYS[evt.keyCode];
                         if (keyName) keyName = keyName.toLowerCase();
                         var mesh = keyMesh[keyName];
                         if (mesh) {
@@ -193,7 +193,7 @@ function onLoad() {
 
                 window.addEventListener("keyup", function (evt) {
                     if (keyDown[evt.keyCode]) {
-                        var keyName = WebVRKeyboard.CODEKEYS[evt.keyCode];
+                        var keyName = YAWVRB.Keyboard.CODEKEYS[evt.keyCode];
                         if (keyName) keyName = keyName.toLowerCase();
                         var mesh = keyMesh[keyName];
                         if (mesh) {
@@ -209,21 +209,21 @@ function onLoad() {
             var world = new CANNON.World();
 
             // local leap motion controller:
-            var leapTool = WebVRLeapMotion.makeTool({toolColor: 0xbb9999, handColor: 0x99bbbb});
+            var leapTool = YAWVRB.LeapMotion.makeTool({toolColor: 0xbb9999, handColor: 0x99bbbb});
             avatar.add(leapTool.toolRoot);
             world.add(leapTool.toolBody);
             YAWVRBTEST.objectSelector.addSelectable(leapTool.toolRoot);
             leapTool.leapController.connect();
 
             // remote leap motion controller:
-            var leapToolRemote = WebVRLeapMotion.makeTool({toolColor: 0x99bb99, handColor: 0xbb99bb, host: '192.168.1.200'});
+            var leapToolRemote = YAWVRB.LeapMotion.makeTool({toolColor: 0x99bb99, handColor: 0xbb99bb, host: '192.168.1.200'});
             leapToolRemote.toolRoot.position.x += 0.3;
             avatar.add(leapToolRemote.toolRoot);
             world.add(leapToolRemote.toolBody);
             YAWVRBTEST.objectSelector.addSelectable(leapToolRemote.toolRoot);
             leapToolRemote.leapController.connect();
 
-            var gfxTablet = new WebVRGfxTablet(2560, 1600);
+            var gfxTablet = new YAWVRB.GfxTablet(2560, 1600);
             avatar.add(gfxTablet.mesh);
             gfxTablet.mesh.position.set(-0.2, -0.1, -0.05);
             gfxTablet.mesh.rotation.y = 0.5 * Math.PI;

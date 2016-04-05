@@ -43,6 +43,7 @@
     "cannon": "git://github.com/jzitelli/cannon.js.git#dev"
   },
   "scripts": {
-    "test": "jasmine"
+    "test": "jasmine",
+    "start": "cd ./test && python tornado_server.py"
   }
 }

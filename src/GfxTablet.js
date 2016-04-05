@@ -1,7 +1,9 @@
-var WebVRGfxTablet = ( function () {
+window.YAWVRB = window.YAWVRB || {};
+
+YAWVRB.GfxTablet = ( function () {
 	"use strict";
 	const INCH2METERS = 0.0254;
-	function WebVRGfxTablet(xRes, yRes, width, height) {
+	function GfxTablet(xRes, yRes, width, height) {
 		xRes = xRes || 2560;
 		yRes = yRes || 1600;
 		width = width || 8.5 * INCH2METERS;
@@ -21,5 +23,5 @@ var WebVRGfxTablet = ( function () {
 		this.mesh = mesh;
 		this.cursor = cursor;
 	}
-	return WebVRGfxTablet;
+	return GfxTablet;
 } )();

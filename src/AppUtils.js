@@ -1,5 +1,10 @@
-var WebVRAppUtils = ( function () {
+window.YAWVRB = window.YAWVRB || {};
+
+YAWVRB.AppUtils = ( function () {
 	"use strict";
+
+	const UP = THREE.Object3D.DefaultUp;
+	const RIGHT = new THREE.Vector3(1, 0, 0);
 
 	function ObjectSelector() {
 
@@ -30,9 +35,7 @@ var WebVRAppUtils = ( function () {
 			};
 		} )().bind(this);
 
-
 		const MOVESPEED = 0.3;
-		const RIGHT = new THREE.Vector3(1, 0, 0);
 		var pitchQuat = new THREE.Quaternion();
 
 		this.moveByKeyboard = function (dt, moveFB, moveRL, moveUD, turnLR, turnUD) {
@@ -46,8 +49,7 @@ var WebVRAppUtils = ( function () {
 				selection.position.z -= dt * MOVESPEED * ((moveFB) * cos + (moveRL) * sin);
 				selection.position.x += dt * MOVESPEED * ((moveRL) * cos - (moveFB) * sin);
 				selection.position.y += dt * MOVESPEED * moveUD;
-				selection.quaternion.multiplyQuaternions(selection.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, heading),
-				                                   pitchQuat.setFromAxisAngle(RIGHT, pitch));
+				selection.quaternion.multiplyQuaternions(selection.quaternion.setFromAxisAngle(UP, heading), pitchQuat.setFromAxisAngle(RIGHT, pitch));
 				selection.updateMatrix();
 				selection.updateMatrixWorld();
 			}

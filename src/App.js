@@ -1,10 +1,10 @@
-function WebVRApp(scene, config, rendererOptions) {
+window.YAWVRB = window.YAWVRB || {};
+
+YAWVRB.App = function (scene, config, rendererOptions) {
     "use strict";
     this.scene = scene;
 
     config = config || {};
-
-    this.avatar = config.avatar;
 
     rendererOptions = rendererOptions || {};
 

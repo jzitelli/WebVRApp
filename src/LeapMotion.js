@@ -1,27 +1,37 @@
-/* To connect to remote controllers, add to Leap Motion config.json: "websockets_allow_remote": true
-   Windows firewall will probably also block connections by default. */
 
-var WebVRLeapMotion = ( function () {
+/*
+
+   To connect to remote Leap Motion controllers, add this to the host's Leap Motion config.json:
+
+     "websockets_allow_remote": true
+
+*/
+
+window.YAWVRB = window.YAWVRB || {};
+
+YAWVRB.LeapMotion = ( function () {
     "use strict";
 
     const INCH2METERS = 0.0254;
     const LEAP2METERS = 0.001;
     const METERS2LEAP = 1000;
     const UP = THREE.Object3D.DefaultUp;
+    const RIGHT = new THREE.Vector3(1, 0, 0);
     const FORWARD = new THREE.Vector3(0, 0, -1);
 
     const DEFAULT_OPTIONS = {
-        rotation: 0,
+        rotation: [0, 0, 0],
         position: [0, -0.42, -0.42],
-        toolLength: 0.5,
-        toolRadius: 0.013,
+        toolLength: 0.4,
+        toolRadius: 0.01,
         toolMass: 0.04,
         tipShape: 'Cylinder',
         tipRadius: 0.013,
+        interactionPlaneOpacity: 0.22,
         timeA: 0.25,
         timeB: 0.25 + 1.5,
         minConfidence: 0.13,
-        interactionPlaneOpacity: 0.22,
+        interactionBoxColor: 0x99eebb,
         toolColor: 0xeebb99,
         tipColor: 0x99bbee,
         handColor: 0x113399,
@@ -44,12 +54,13 @@ var WebVRLeapMotion = ( function () {
         var toolRoot = new THREE.Object3D();
         toolRoot.scale.set(LEAP2METERS, LEAP2METERS, LEAP2METERS);
 
-        toolRoot.quaternion.setFromAxisAngle(UP, options.rotation);
+        toolRoot.quaternion.multiplyQuaternions(toolRoot.quaternion.setFromAxisAngle(UP, options.rotation[1]), (new THREE.Quaternion()).setFromAxisAngle(RIGHT, options.rotation[0]));
+
         toolRoot.position.fromArray(options.position);
 
         // set up / connect to leap controller:
 
-        var leapController = new Leap.Controller({background: false,
+        var leapController = new Leap.Controller({background: true,
                                                   host: options.host, port: options.port});
 
         // leap motion event callbacks:
@@ -79,7 +90,7 @@ var WebVRLeapMotion = ( function () {
         var interactionBoxRoot = new THREE.Object3D();
         toolRoot.add(interactionBoxRoot);
 
-        var interactionPlaneMaterial = new THREE.MeshBasicMaterial({color: 0x00dd44, transparent: true, opacity: options.interactionPlaneOpacity});
+        var interactionPlaneMaterial = new THREE.MeshBasicMaterial({color: options.interactionBoxColor, transparent: true, opacity: options.interactionPlaneOpacity});
         var interactionPlaneGeom = new THREE.PlaneBufferGeometry(METERS2LEAP, METERS2LEAP);
 
         var interactionPlaneMesh = new THREE.Mesh(interactionPlaneGeom, interactionPlaneMaterial);

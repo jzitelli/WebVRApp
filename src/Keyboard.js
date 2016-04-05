@@ -1,7 +1,9 @@
-var WebVRKeyboard = ( function () {
+window.YAWVRB = window.YAWVRB || {};
+
+YAWVRB.Keyboard = ( function () {
     "use strict";
 
-    function WebVRKeyboard(eventTarget, commands) {
+    function Keyboard(eventTarget, commands) {
 
     	eventTarget.addEventListener("keydown", onKeyDown, false);
     	eventTarget.addEventListener("keyup", onKeyUp, false);
@@ -41,7 +43,7 @@ var WebVRKeyboard = ( function () {
 
     }
 
-    WebVRKeyboard.KEYCODES = {
+    Keyboard.KEYCODES = {
         BACKSPACE: 8,
         TAB: 9,
         ENTER: 13,
@@ -143,45 +145,45 @@ var WebVRKeyboard = ( function () {
         SINGLEQUOTE: 222
     };
 
-    WebVRKeyboard.KEYCODES['1'] = WebVRKeyboard.KEYCODES.NUMBER1;
-    WebVRKeyboard.KEYCODES['2'] = WebVRKeyboard.KEYCODES.NUMBER2;
-    WebVRKeyboard.KEYCODES['3'] = WebVRKeyboard.KEYCODES.NUMBER3;
-    WebVRKeyboard.KEYCODES['4'] = WebVRKeyboard.KEYCODES.NUMBER4;
-    WebVRKeyboard.KEYCODES['5'] = WebVRKeyboard.KEYCODES.NUMBER5;
-    WebVRKeyboard.KEYCODES['6'] = WebVRKeyboard.KEYCODES.NUMBER6;
-    WebVRKeyboard.KEYCODES['7'] = WebVRKeyboard.KEYCODES.NUMBER7;
-    WebVRKeyboard.KEYCODES['8'] = WebVRKeyboard.KEYCODES.NUMBER8;
-    WebVRKeyboard.KEYCODES['9'] = WebVRKeyboard.KEYCODES.NUMBER9;
-    WebVRKeyboard.KEYCODES['0'] = WebVRKeyboard.KEYCODES.NUMBER0;
-    WebVRKeyboard.KEYCODES['-'] = WebVRKeyboard.KEYCODES.DASH;
-    WebVRKeyboard.KEYCODES['='] = WebVRKeyboard.KEYCODES.EQUALSIGN;
-    WebVRKeyboard.KEYCODES[';'] = WebVRKeyboard.KEYCODES.SEMICOLON;
-    WebVRKeyboard.KEYCODES["'"] = WebVRKeyboard.KEYCODES.SINGLEQUOTE;
-    WebVRKeyboard.KEYCODES["\\"] = WebVRKeyboard.KEYCODES.BACKSLASH;
-    WebVRKeyboard.KEYCODES["["] = WebVRKeyboard.KEYCODES.OPENBRACKET;
-    WebVRKeyboard.KEYCODES["]"] = WebVRKeyboard.KEYCODES.CLOSEBRACKET;
-    WebVRKeyboard.KEYCODES["`"] = WebVRKeyboard.KEYCODES.GRAVEACCENT;
-    WebVRKeyboard.KEYCODES["/"] = WebVRKeyboard.KEYCODES.FORWARDSLASH;
-    WebVRKeyboard.KEYCODES["."] = WebVRKeyboard.KEYCODES.PERIOD;
-    WebVRKeyboard.KEYCODES[","] = WebVRKeyboard.KEYCODES.COMMA;
+    Keyboard.KEYCODES['1'] = Keyboard.KEYCODES.NUMBER1;
+    Keyboard.KEYCODES['2'] = Keyboard.KEYCODES.NUMBER2;
+    Keyboard.KEYCODES['3'] = Keyboard.KEYCODES.NUMBER3;
+    Keyboard.KEYCODES['4'] = Keyboard.KEYCODES.NUMBER4;
+    Keyboard.KEYCODES['5'] = Keyboard.KEYCODES.NUMBER5;
+    Keyboard.KEYCODES['6'] = Keyboard.KEYCODES.NUMBER6;
+    Keyboard.KEYCODES['7'] = Keyboard.KEYCODES.NUMBER7;
+    Keyboard.KEYCODES['8'] = Keyboard.KEYCODES.NUMBER8;
+    Keyboard.KEYCODES['9'] = Keyboard.KEYCODES.NUMBER9;
+    Keyboard.KEYCODES['0'] = Keyboard.KEYCODES.NUMBER0;
+    Keyboard.KEYCODES['-'] = Keyboard.KEYCODES.DASH;
+    Keyboard.KEYCODES['='] = Keyboard.KEYCODES.EQUALSIGN;
+    Keyboard.KEYCODES[';'] = Keyboard.KEYCODES.SEMICOLON;
+    Keyboard.KEYCODES["'"] = Keyboard.KEYCODES.SINGLEQUOTE;
+    Keyboard.KEYCODES["\\"] = Keyboard.KEYCODES.BACKSLASH;
+    Keyboard.KEYCODES["["] = Keyboard.KEYCODES.OPENBRACKET;
+    Keyboard.KEYCODES["]"] = Keyboard.KEYCODES.CLOSEBRACKET;
+    Keyboard.KEYCODES["`"] = Keyboard.KEYCODES.GRAVEACCENT;
+    Keyboard.KEYCODES["/"] = Keyboard.KEYCODES.FORWARDSLASH;
+    Keyboard.KEYCODES["."] = Keyboard.KEYCODES.PERIOD;
+    Keyboard.KEYCODES[","] = Keyboard.KEYCODES.COMMA;
 
-    WebVRKeyboard.CODEKEYS = [];
-    for (var k in WebVRKeyboard.KEYCODES) {
-        WebVRKeyboard.CODEKEYS[WebVRKeyboard.KEYCODES[k]] = k;
+    Keyboard.CODEKEYS = [];
+    for (var k in Keyboard.KEYCODES) {
+        Keyboard.CODEKEYS[Keyboard.KEYCODES[k]] = k;
     }
 
-    WebVRKeyboard.STANDARD_COMMANDS = {
-        moveForward: {buttons: [WebVRKeyboard.KEYCODES.W]},
-        moveBackward: {buttons: [WebVRKeyboard.KEYCODES.S]},
-        moveLeft: {buttons: [WebVRKeyboard.KEYCODES.A]},
-        moveRight: {buttons: [WebVRKeyboard.KEYCODES.D]},
-        moveUp: {buttons: [WebVRKeyboard.KEYCODES.E]},
-        moveDown: {buttons: [WebVRKeyboard.KEYCODES.Q]},
-        turnLeft: {buttons: [WebVRKeyboard.KEYCODES.LEFTARROW]},
-        turnRight: {buttons: [WebVRKeyboard.KEYCODES.RIGHTARROW]},
-        turnUp: {buttons: [WebVRKeyboard.KEYCODES.UPARROW]},
-        turnDown: {buttons: [WebVRKeyboard.KEYCODES.DOWNARROW]}
+    Keyboard.STANDARD_COMMANDS = {
+        moveForward: {buttons: [Keyboard.KEYCODES.W]},
+        moveBackward: {buttons: [Keyboard.KEYCODES.S]},
+        moveLeft: {buttons: [Keyboard.KEYCODES.A]},
+        moveRight: {buttons: [Keyboard.KEYCODES.D]},
+        moveUp: {buttons: [Keyboard.KEYCODES.E]},
+        moveDown: {buttons: [Keyboard.KEYCODES.Q]},
+        turnLeft: {buttons: [Keyboard.KEYCODES.LEFTARROW]},
+        turnRight: {buttons: [Keyboard.KEYCODES.RIGHTARROW]},
+        turnUp: {buttons: [Keyboard.KEYCODES.UPARROW]},
+        turnDown: {buttons: [Keyboard.KEYCODES.DOWNARROW]}
     };
 
-    return WebVRKeyboard;
+    return Keyboard;
 } )();
