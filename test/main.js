@@ -1,17 +1,18 @@
 var YAWVRBTEST = {};
 
-function onLoad(onLoadLoad) {
+function onLoad() {
 	"use strict";
 
 	THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
 	const RIGHT = new THREE.Vector3(1, 0, 0);
-	const INCH2METER = 0.0254;
+	const INCH2METERS = 0.0254;
 
 	var app;
 
 	var avatar = new THREE.Object3D();
-	avatar.position.y = 0.22;
+	avatar.position.y = 1.2;
+	avatar.position.z = -0.28
 	avatar.updateMatrix();
 
 	var objectSelector = new WebVRAppUtils.ObjectSelector();
@@ -76,15 +77,10 @@ function onLoad(onLoadLoad) {
 
 		objectLoader.load("/test/models/WebVRDesk.json", function (scene) {
 
-			// var matrix = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(-0.5 * Math.PI, 0, 0));
-			// matrix.multiply(new THREE.Matrix4().makeScale(INCH2METER, INCH2METER, INCH2METER));
-			var matrix = new THREE.Matrix4().makeScale(0.1, 0.1, 0.1);
-
-			for (var i = 0, l = scene.children.length; i < l; i++) {
+			for (var i = 0; i < scene.children.length; i++) {
 				var child = scene.children[i];
+				child.updateMatrix();
 				if (child instanceof THREE.Mesh) {
-					child.updateMatrix();
-					child.matrix.multiplyMatrices(matrix, child.matrix);
 					if (child.name === 'desk') child.material = deskMaterial;
 					else if (child.name === 'chair') child.material = chairMaterial;
 					else child.material = roomMaterial;
@@ -104,16 +100,16 @@ function onLoad(onLoadLoad) {
 
 	        	var keyboardObject = new THREE.Object3D();
 				avatar.add(keyboardObject);
-				keyboardObject.position.z = -12 * INCH2METER;
-				keyboardObject.position.y = -5 * INCH2METER;
+				keyboardObject.position.z = -12 * INCH2METERS;
+				keyboardObject.position.y = -5 * INCH2METERS;
 				keyboardObject.updateMatrix();
 
 				objectSelector.addSelectable(keyboardObject);
 
 				var keyMaterial = new THREE.MeshLambertMaterial({color: 0xbbbbbb});
 
-				const keyDelta = INCH2METER * 0.75;
-				const keyHeight = INCH2METER * 0.3;
+				const keyDelta = INCH2METERS * 0.75;
+				const keyHeight = INCH2METERS * 0.3;
 				const keyTravel = keyHeight * 0.7;
 
 				var regularKeyGeom = new THREE.BoxBufferGeometry(0.95 * keyDelta, keyHeight, 0.95 * keyDelta);
@@ -145,13 +141,13 @@ function onLoad(onLoadLoad) {
 				}
 
 				// the *crazy* bottom row:
-				var controlWidth = INCH2METER * 1.5,
+				var controlWidth = INCH2METERS * 1.5,
 					windowsWidth = controlWidth,
 					altWidth     = controlWidth;
 				var controlGeom = new THREE.BoxBufferGeometry(0.95 * controlWidth, keyHeight, 0.95 * keyDelta),
 					windowsGeom = controlGeom,
 					altGeom     = controlGeom;
-				var spacebarWidth = 0.95 * INCH2METER * 4.75;
+				var spacebarWidth = 0.95 * INCH2METERS * 4.75;
 				var spacebarGeom = new THREE.BoxBufferGeometry(0.95 * spacebarWidth, keyHeight, 0.95 * keyDelta);
 
 				mesh = new THREE.Mesh(controlGeom, keyMaterial);
@@ -210,21 +206,43 @@ function onLoad(onLoadLoad) {
 
 			} )();
 
+			//var leapTool = WebVRLeapMotion.makeTool();
+			var leapTool = WebVRLeapMotion.makeTool({host: '192.168.1.200'});
+			var world = new CANNON.World();
+			app.avatar.add(leapTool.toolRoot);
+			world.add(leapTool.toolBody);
+			YAWVRBTEST.objectSelector.addSelectable(leapTool.toolRoot);
+
+	        leapTool.leapController.connect();
+
+			var gfxTablet = new WebVRGfxTablet();
+			app.avatar.add(gfxTablet.mesh);
+			gfxTablet.mesh.position.y = -0.1;
+			gfxTablet.mesh.position.z = -0.4;
+			gfxTablet.mesh.updateMatrix();
+			YAWVRBTEST.objectSelector.addSelectable(gfxTablet.mesh);
+
+			scene.updateMatrixWorld(true);
+
+			leapTool.updateToolMapping();
+
+			requestAnimationFrame(animate);
+
 			var frameCount = 0,
 				lt = 0;
 			function animate(t) {
 				var dt = 0.001 * (t - lt);
 				frameCount++;
+				leapTool.updateTool(dt);
 				app.render();
+				world.step(Math.min(dt, 1/60), dt, 10);
+				leapTool.updateToolPostStep();
 				YAWVRBTEST.moveByKeyboard(dt);
+				leapTool.updateToolMapping();
 				lt = t;
 				requestAnimationFrame(animate);
 			}
 
-			scene.updateMatrixWorld(true);
-
-			if (onLoadLoad) onLoadLoad(app)
-			else requestAnimationFrame(animate);
 		});
 
 	} )();;
