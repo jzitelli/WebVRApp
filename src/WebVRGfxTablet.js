@@ -1,18 +1,19 @@
 var WebVRGfxTablet = ( function () {
 	"use strict";
-	function WebVRGfxTablet() {
-
-		// set up WebSocket, paintable surface for GfxTablet
-
-		var gfxTabletStuff = addGfxTablet(2560, 1600);
-
-		// create VR visuals
-
-		var gfxTabletGeom = new THREE.PlaneBufferGeometry(2560 / 1600 / 8, 1 / 8);
-		var gfxTabletMesh = new THREE.Mesh(gfxTabletGeom, gfxTabletStuff.paintableMaterial);
-		gfxTabletMesh.add(gfxTabletStuff.cursor);
-		gfxTabletMesh.position.y = 1.5;
-		this.mesh = gfxTabletMesh;
+	const INCH2METERS = 0.0254;
+	function WebVRGfxTablet(width, height, downScale) {
+		// set up WebSocket, paintable surface for GfxTablet:
+		var gfxTabletStuff = GFXTABLET.addGfxTablet(width, height, downScale);
+		// create VR visuals:
+		var mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), gfxTabletStuff.paintableMaterial);
+		mesh.scale.x = 8.5 * INCH2METERS;
+		mesh.scale.y = 5.25 * INCH2METERS;
+		var cursor = gfxTabletStuff.cursor;
+		cursor.scale.x = 0.016 / mesh.scale.x;
+		cursor.scale.y = 0.016 / mesh.scale.y;
+		mesh.add(cursor);
+		this.mesh = mesh;
+		this.cursor = cursor;
 	}
 	return WebVRGfxTablet;
 } )();

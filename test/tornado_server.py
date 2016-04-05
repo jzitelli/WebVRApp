@@ -27,8 +27,7 @@ if os.path.exists(GFXTABLET_DIR):
 
 class MainHandler(RequestHandler):
     def get(self):
-        #self.render(os.path.join(ROOT_DIR, "test", "index_template.html"))
-        self.render("index_template.html")
+        self.render("index.html")
 
 
 
