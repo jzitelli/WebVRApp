@@ -23,8 +23,13 @@ YAWVRB.Mouse = ( function () {
 
 		function onMouseMove(evt) {
 			var aspect = window.innerWidth / window.innerHeight;
-			pointerMesh.position.x = -0.5 + evt.clientX / window.innerWidth;
-			pointerMesh.position.y =  (0.5 - evt.clientY / window.innerHeight) / aspect;
+			if (document.pointerLockElement) {
+				pointerMesh.position.x += evt.movementX / window.innerWidth;
+				pointerMesh.position.y -= evt.movementY / window.innerHeight / aspect;
+			} else {
+				pointerMesh.position.x = -0.5 + evt.screenX / window.innerWidth;
+				pointerMesh.position.y =  (0.5 - evt.screenY / window.innerHeight) / aspect;
+			}
 			pointerMesh.updateMatrix();
 		}
 		eventTarget.addEventListener("mousemove", onMouseMove, false);

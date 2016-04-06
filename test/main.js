@@ -1,10 +1,33 @@
+var URL_PARAMS = (function () {
+    "use strict";
+    var params = {};
+    location.search.substr(1).split("&").forEach( function(item) {
+        var k = item.split("=")[0],
+            v = decodeURIComponent(item.split("=")[1]);
+        if (k in params) {
+            params[k].push(v);
+        } else {
+            params[k] = [v];
+        }
+    } );
+    for (var k in params) {
+        if (params[k].length === 1)
+            params[k] = params[k][0];
+        if (params[k] === 'true')
+            params[k] = true;
+        else if (params[k] === 'false')
+            params[k] = false;
+    }
+    return params;
+})();
+
 function onLoad() {
     "use strict";
 
     THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
-    const RIGHT = new THREE.Vector3(1, 0, 0);
     const INCH2METERS = 0.0254;
+    const RIGHT = new THREE.Vector3(1, 0, 0);
 
     var canvas = document.getElementById('webgl-canvas');
 
@@ -17,10 +40,15 @@ function onLoad() {
 
     var objectSelector = new YAWVRB.AppUtils.ObjectSelector();
 
-    var mouse = new YAWVRB.Mouse(canvas);
+    var mouse = new YAWVRB.Mouse({eventTarget: window});
     avatar.add(mouse.pointerMesh);
-    mouse.pointerMesh.position.z = -0.3;
+    mouse.pointerMesh.position.z = -0.4;
     mouse.pointerMesh.updateMatrix();
+
+    var gamepadCommands = {
+        resetVRSensor: {buttons: [YAWVRB.Gamepad.BUTTONS.back], commandDown: function () { app.resetVRSensor(); }}
+    };
+    var gamepad = new YAWVRB.Gamepad(gamepadCommands);
 
     var keyboardCommands = {
         toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: function () { app.toggleVR(); }},
@@ -49,8 +77,8 @@ function onLoad() {
     leapTool.leapController.connect();
 
     // remote leap motion controller:
-    var leapToolRemote = YAWVRB.LeapMotion.makeTool({toolColor: 0x99bb99, handColor: 0xbb99bb, host: '192.168.1.200'});
-    leapToolRemote.toolRoot.position.x += 0.3;
+    var leapToolRemote = YAWVRB.LeapMotion.makeTool({toolColor: 0x99bb99, handColor: 0xbb99bb, host: URL_PARAMS.remoteLeapHost || '192.168.1.201'});
+    leapToolRemote.toolRoot.position.x -= 32 * INCH2METERS;
     leapToolRemote.toolRoot.updateMatrix();
     avatar.add(leapToolRemote.toolRoot);
     world.add(leapToolRemote.toolBody);
@@ -58,9 +86,9 @@ function onLoad() {
 
     var gfxTablet = new YAWVRB.GfxTablet(2560, 1600);
     avatar.add(gfxTablet.mesh);
-    gfxTablet.mesh.position.set(-0.2, -0.1, -0.05);
+    gfxTablet.mesh.position.set(-0.32, -0.3, -0.05);
     gfxTablet.mesh.rotation.y = 0.5 * Math.PI;
-    //gfxTablet.mesh.rotation.x = -0.125 * Math.PI;
+    gfxTablet.mesh.quaternion.multiply((new THREE.Quaternion()).setFromAxisAngle(RIGHT, -0.125 * Math.PI));
     gfxTablet.mesh.updateMatrix();
 
     objectSelector.addSelectable(avatar);
@@ -139,6 +167,7 @@ function onLoad() {
             function animate(t) {
                 var dt = 0.001 * (t - lt);
                 frameCount++;
+                gamepad.update();
                 leapTool.updateTool(dt);
                 leapToolRemote.updateTool(dt);
                 app.render();

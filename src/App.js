@@ -66,8 +66,10 @@ YAWVRB.App = function (scene, config, rendererOptions) {
     this.toggleFullscreen = function (options) {
         if (!isFullscreen()) {
             requestFullscreen(options);
+            if (!useDeprecatedWebVR) requestPointerLock();
         } else {
             exitFullscreen();
+            if (!useDeprecatedWebVR) releasePointerLock();
         }
     };
 
@@ -104,7 +106,7 @@ YAWVRB.App = function (scene, config, rendererOptions) {
         if (!isPresenting) {
             this.vrEffect.requestPresent().then( function () {
                 isPresenting = true;
-                if (!useDeprecatedWebVR && vrDisplay.capabilities.canPresent) {
+                if (!useDeprecatedWebVR && vrDisplay.capabilities.canPresent && vrDisplay.capabilities.hasExternalDisplay) {
                     presentingElement.style.display = "block";
                     requestPointerLock();
                 }
@@ -112,9 +114,9 @@ YAWVRB.App = function (scene, config, rendererOptions) {
         } else {
             this.vrEffect.exitPresent().then( function () {
                 isPresenting = false;
-                if (!useDeprecatedWebVR && vrDisplay.capabilities.canPresent) {
+                if (!useDeprecatedWebVR && vrDisplay.capabilities.canPresent && vrDisplay.capabilities.hasExternalDisplay) {
                     presentingElement.style.display = "none";
-                    releasePointerLock();
+                    releasePointerLock()
                 }
             } );
         }
