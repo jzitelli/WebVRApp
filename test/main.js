@@ -112,14 +112,6 @@ function onLoad() {
         }
     }
 
-    var tLogFPS = 1000;
-    var fpsCount = 0;
-    // setInterval(logFPS, tLogFPS);
-    function logFPS() {
-        console.log('FPS: ' + (frameCount - fpsCount) * (1000 / tLogFPS));
-        fpsCount = frameCount;
-    }
-
     ( function () {
 
         // load the WebVRDesk scene and start

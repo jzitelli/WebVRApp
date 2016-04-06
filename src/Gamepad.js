@@ -52,10 +52,15 @@ YAWVRB.Gamepad = ( function () {
 
 		this.update = function () {
 			if (!gamepad) return;
-			for (var i = 1; i < gamepad.buttons.length; i++) {
+			for (var i = 0; i < gamepad.buttons.length; i++) {
 				var gpButton = gamepad.buttons[i];
-				var pressed = gpButton.pressed;
-				if (pressed) {
+
+				var pressed;
+				if (gpButton === 1) pressed = true;
+				else if (gpButton === 0) pressed = false;
+				else pressed = gpButton.pressed;
+
+				if (pressed && !buttonPressed[i]) {
 					console.log('pressed %d', i);
 					if (commandDowns[i]) commandDowns[i]();
 				} else if (!pressed && buttonPressed[i]) {
@@ -66,7 +71,12 @@ YAWVRB.Gamepad = ( function () {
 			}
 		};
 
-		var initialGamepad = navigator.getGamepads()[0];
+		var initialGamepad;
+		if (navigator.webkitGetGamepads) {
+			initialGamepad = navigator.webkitGetGamepads()[0];
+		} else {
+			initialGamepad = navigator.getGamepads()[0];
+		}
 		if (initialGamepad && initialGamepad.buttons.length > 0) {
 			gamepad = initialGamepad;
 		}

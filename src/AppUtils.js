@@ -35,10 +35,6 @@ YAWVRB.AppUtils = ( function () {
 			};
 		} )().bind(this);
 
-		this.showInfo = function () {
-			// TODO
-		}.bind(this);
-
 		const MOVESPEED = 0.3;
 		var pitchQuat = new THREE.Quaternion();
 
@@ -98,8 +94,48 @@ YAWVRB.AppUtils = ( function () {
 		};
 	}
 
+	var displayText = ( function () {
+		const DEFAULT_OPTIONS = {
+			object: YAWVRB.DEADSCENE,
+			position: [0,0,0],
+			rotation: [0,0,0],
+			coordSystem: 'local'
+		};
+		var textMeshes = {};
+		var quadGeom = new THREE.PlaneBufferGeometry(1, 1);
+		function displayText(text, options) {
+			options = options || {};
+			for (var kwarg in DEFAULT_OPTIONS) {
+				if (options[kwarg] === undefined) options[kwarg] = DEFAULT_OPTIONS[options[kwarg]];
+			}
+			var mesh = textMeshes[{text, options}.toString()];
+			if (!mesh) {
+				mesh = new THREE.Mesh(quadGeom);
+				if (options.coordSystem === 'local') {
+					options.object.add(mesh);
+					mesh.position.fromArray(options.position);
+					//mesh.rotation.fromArray(options.rotation);
+				}
+			}
+		}
+		return displayText;
+	} )();
+
+	var logFPS = ( function () {
+		var tLogFPS = 1000;
+	    var fpsCount = 0;
+	    // setInterval(logFPS, tLogFPS);
+	    function logFPS() {
+	        console.log('FPS: ' + (frameCount - fpsCount) * (1000 / tLogFPS));
+	        fpsCount = frameCount;
+	    }
+	    return logFPS;
+	} )();
+
 	return {
-		ObjectSelector: ObjectSelector
+		ObjectSelector: ObjectSelector,
+		displayText: displayText,
+		logFPS: logFPS
 	};
 
 } )();
