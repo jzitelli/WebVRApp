@@ -35,6 +35,10 @@ YAWVRB.AppUtils = ( function () {
 			};
 		} )().bind(this);
 
+		this.showInfo = function () {
+			// TODO
+		}.bind(this);
+
 		const MOVESPEED = 0.3;
 		var pitchQuat = new THREE.Quaternion();
 
@@ -55,22 +59,43 @@ YAWVRB.AppUtils = ( function () {
 			}
 		}.bind(this);
 
-		this.showInfo = function () {
-			// TODO
-		}.bind(this);
-
 		this.saveAllTransforms = function (key) {
+			if (!window.localStorage) {
+				console.error('platform does not support localStorage');
+				return;
+			}
 			key = key || 'YAWVRB_TRANSFORMS';
-			var val = {};
+			var transforms = {};
 			selectables.forEach( function (object, i) {
-				val[object.name || object.uuid] = {
-					heading: headings[i],
-					pitch: pitches[i],
-					position: object.position.toArray()
-				};
+				if (object.name) {
+					transforms[object.name] = {
+						heading: headings[i],
+						pitch: pitches[i],
+						position: object.position.toArray()
+					};
+				}
 			} );
+			window.localStorage[key] = transforms;
 		};
 
+		this.loadTransforms = function (key) {
+			if (!window.localStorage) {
+				console.error('platform does not support localStorage');
+				return;
+			}
+			key = key || 'YAWVRB_TRANSFORMS';
+			var transforms = window.localStorage[key];
+			selectables.forEach( function (object, i) {
+				if (object.name && transforms[object.name]) {
+					var transform = transforms[object.name];
+					headings[i] = transform.heading;
+					pitches[i] = transform.pitch;
+					object.position.fromArray(transform.position);
+					object.quaternion.setFromAxisAngle(UP, transform.heading).multiply(pitchQuat.setFromAxisAngle(RIGHT, transform.pitch));
+					object.updateMatrix();
+				}
+			} );
+		};
 	}
 
 	return {

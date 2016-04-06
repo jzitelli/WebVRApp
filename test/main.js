@@ -1,5 +1,3 @@
-var YAWVRBTEST = {};
-
 function onLoad() {
     "use strict";
 
@@ -7,6 +5,8 @@ function onLoad() {
 
     const RIGHT = new THREE.Vector3(1, 0, 0);
     const INCH2METERS = 0.0254;
+
+    var canvas = document.getElementById('webgl-canvas');
 
     var app;
 
@@ -17,9 +17,10 @@ function onLoad() {
 
     var objectSelector = new YAWVRB.AppUtils.ObjectSelector();
 
-    YAWVRBTEST.objectSelector = objectSelector;
-
-    objectSelector.addSelectable(avatar);
+    var mouse = new YAWVRB.Mouse(canvas);
+    avatar.add(mouse.pointerMesh);
+    mouse.pointerMesh.position.z = -0.3;
+    mouse.pointerMesh.updateMatrix();
 
     var keyboardCommands = {
         toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: function () { app.toggleVR(); }},
@@ -33,22 +34,55 @@ function onLoad() {
     }
 
     var keyboard = new YAWVRB.Keyboard(window, keyboardCommands);
+    var keyboardObject = keyboard.object;
+    keyboardObject.position.z = -12 * INCH2METERS;
+    keyboardObject.position.y = -5 * INCH2METERS;
+    keyboardObject.updateMatrix();
+    avatar.add(keyboardObject);
 
-    function readKeyboardMovement() {
-        return {
-            moveFB: keyboard.moveForward - keyboard.moveBackward,
-            moveRL: keyboard.moveRight - keyboard.moveLeft,
-            moveUD: keyboard.moveUp - keyboard.moveDown,
-            turnLR: keyboard.turnLeft - keyboard.turnRight,
-            turnUD: keyboard.turnUp - keyboard.turnDown
-        };
-    }
+    var world = new CANNON.World();
 
-    YAWVRBTEST.moveByKeyboard = function (dt) {
+    // local leap motion controller:
+    var leapTool = YAWVRB.LeapMotion.makeTool({toolColor: 0xbb9999, handColor: 0x99bbbb});
+    avatar.add(leapTool.toolRoot);
+    world.add(leapTool.toolBody);
+    leapTool.leapController.connect();
+
+    // remote leap motion controller:
+    var leapToolRemote = YAWVRB.LeapMotion.makeTool({toolColor: 0x99bb99, handColor: 0xbb99bb, host: '192.168.1.200'});
+    leapToolRemote.toolRoot.position.x += 0.3;
+    leapToolRemote.toolRoot.updateMatrix();
+    avatar.add(leapToolRemote.toolRoot);
+    world.add(leapToolRemote.toolBody);
+    leapToolRemote.leapController.connect();
+
+    var gfxTablet = new YAWVRB.GfxTablet(2560, 1600);
+    avatar.add(gfxTablet.mesh);
+    gfxTablet.mesh.position.set(-0.2, -0.1, -0.05);
+    gfxTablet.mesh.rotation.y = 0.5 * Math.PI;
+    //gfxTablet.mesh.rotation.x = -0.125 * Math.PI;
+    gfxTablet.mesh.updateMatrix();
+
+    objectSelector.addSelectable(avatar);
+    objectSelector.addSelectable(keyboardObject);
+    objectSelector.addSelectable(leapTool.toolRoot);
+    objectSelector.addSelectable(leapToolRemote.toolRoot);
+    objectSelector.addSelectable(gfxTablet.mesh);
+
+    function moveByKeyboard(dt) {
         var km = readKeyboardMovement();
         if (objectSelector.selection === avatar) km.turnUD = 0;
         objectSelector.moveByKeyboard(dt, km.moveFB, km.moveRL, km.moveUD, km.turnLR, km.turnUD);
-    };
+        function readKeyboardMovement() {
+            return {
+                moveFB: keyboard.moveForward - keyboard.moveBackward,
+                moveRL: keyboard.moveRight - keyboard.moveLeft,
+                moveUD: keyboard.moveUp - keyboard.moveDown,
+                turnLR: keyboard.turnLeft - keyboard.turnRight,
+                turnUD: keyboard.turnUp - keyboard.turnDown
+            };
+        }
+    }
 
     var tLogFPS = 1000;
     var fpsCount = 0;
@@ -87,46 +121,11 @@ function onLoad() {
                 }
             }
 
-            app = new YAWVRB.App(scene, {}, {canvas: document.getElementById('webgl-canvas')});
-            YAWVRBTEST.app = app;
+            app = new YAWVRB.App(scene, {}, {canvas: canvas});
 
             scene.add(avatar);
 
             avatar.add(app.camera);
-
-            var keyboardObject = keyboard.object;
-            keyboardObject.position.z = -12 * INCH2METERS;
-            keyboardObject.position.y = -5 * INCH2METERS;
-            keyboardObject.updateMatrix();
-
-            avatar.add(keyboardObject);
-
-            objectSelector.addSelectable(keyboardObject);
-
-            var world = new CANNON.World();
-
-            // local leap motion controller:
-            var leapTool = YAWVRB.LeapMotion.makeTool({toolColor: 0xbb9999, handColor: 0x99bbbb});
-            avatar.add(leapTool.toolRoot);
-            world.add(leapTool.toolBody);
-            YAWVRBTEST.objectSelector.addSelectable(leapTool.toolRoot);
-            leapTool.leapController.connect();
-
-            // remote leap motion controller:
-            var leapToolRemote = YAWVRB.LeapMotion.makeTool({toolColor: 0x99bb99, handColor: 0xbb99bb, host: '192.168.1.200'});
-            leapToolRemote.toolRoot.position.x += 0.3;
-            avatar.add(leapToolRemote.toolRoot);
-            world.add(leapToolRemote.toolBody);
-            YAWVRBTEST.objectSelector.addSelectable(leapToolRemote.toolRoot);
-            leapToolRemote.leapController.connect();
-
-            var gfxTablet = new YAWVRB.GfxTablet(2560, 1600);
-            avatar.add(gfxTablet.mesh);
-            gfxTablet.mesh.position.set(-0.2, -0.1, -0.05);
-            gfxTablet.mesh.rotation.y = 0.5 * Math.PI;
-            //gfxTablet.mesh.rotation.x = -0.125 * Math.PI;
-            gfxTablet.mesh.updateMatrix();
-            YAWVRBTEST.objectSelector.addSelectable(gfxTablet.mesh);
 
             scene.updateMatrixWorld(true);
 
@@ -146,7 +145,7 @@ function onLoad() {
                 world.step(Math.min(dt, 1/60), dt, 10);
                 leapTool.updateToolPostStep();
                 leapToolRemote.updateToolPostStep();
-                YAWVRBTEST.moveByKeyboard(dt);
+                moveByKeyboard(dt);
                 leapTool.updateToolMapping();
                 leapToolRemote.updateToolMapping();
                 lt = t;
