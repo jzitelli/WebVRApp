@@ -20,15 +20,16 @@ YAWVRB.Gamepad = ( function () {
                 enumerable: true,
                 get: getState.bind(this, buttons, axes)
             });
+            var i;
     		var commandDown = commands[name].commandDown;
     		if (commandDown) {
-    			for (var i = 0; i < buttons.length; i++) {
+    			for (i = 0; i < buttons.length; i++) {
 	    			commandDowns[buttons[i]] = commandDown;
 	    		}
     		}
     		var commandUp = commands[name].commandUp;
     		if (commandUp) {
-    			for (var i = 0; i < buttons.length; i++) {
+    			for (i = 0; i < buttons.length; i++) {
 	    			commandUps[buttons[i]] = commandUp;
 	    		}
     		}
@@ -62,6 +63,7 @@ YAWVRB.Gamepad = ( function () {
 				else if (gpButton === 0) pressed = false;
 				else pressed = gpButton.pressed; // || gpButton.value;
 				if (pressed && !buttonPressed[i]) {
+					console.log('pressed %d', i);
 					if (commandDowns[i]) commandDowns[i]();
 				} else if (!pressed && buttonPressed[i]) {
 					if (commandUps[i]) commandUps[i]();
