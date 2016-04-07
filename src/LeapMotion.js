@@ -112,7 +112,7 @@ YAWVRB.LeapMotion = ( function () {
         var leapGeom = new THREE.BufferGeometry();
         leapGeom.fromGeometry(boxGeom);
         boxGeom.dispose();
-        var leapMaterial = new THREE.MeshLambertMaterial({color: leapColor});
+        var leapMaterial = new THREE.MeshLambertMaterial({color: options.leapColor});
         var leapMesh = new THREE.Mesh(leapGeom, leapMaterial);
         leapMesh.position.y = METERS2LEAP*INCH2METERS*0.25;
         toolRoot.add(leapMesh);
