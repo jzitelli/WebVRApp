@@ -36,12 +36,12 @@ YAWVRB.Gamepad = ( function () {
     	}
 
     	function getState(buttons, axes) {
-    		if (!gamepad) return;
+    		if (!gamepad) return 0;
     		var i;
     		if (buttons) {
 	    		for (i = 0; i < buttons.length; i++) {
 	    			var button = gamepad.buttons[buttons[i]];
-	    			if (button.pressed) return button.value;
+	    			if (button && button.pressed) return button.value;
 	    		}
 	    		return 0;
 	    	} else if (axes) {
@@ -59,11 +59,16 @@ YAWVRB.Gamepad = ( function () {
 			for (var i = 0; i < gamepad.buttons.length; i++) {
 				var gpButton = gamepad.buttons[i];
 				var pressed;
-				if (gpButton === 1) pressed = true;
-				else if (gpButton === 0) pressed = false;
-				else pressed = gpButton.pressed; // || gpButton.value;
+				if (gpButton === 1) {
+					pressed = true;
+				} else if (gpButton === 0) {
+					pressed = false;
+				} else if (gpButton) {
+					pressed = gpButton.pressed; // || gpButton.value;
+				} else {
+					continue;
+				}
 				if (pressed && !buttonPressed[i]) {
-					console.log('pressed %d', i);
 					if (commandDowns[i]) commandDowns[i]();
 				} else if (!pressed && buttonPressed[i]) {
 					if (commandUps[i]) commandUps[i]();
@@ -86,12 +91,13 @@ YAWVRB.Gamepad = ( function () {
 			if (e.gamepad.buttons.length > 0) {
 				gamepad = e.gamepad;
 				console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.", gamepad.index, gamepad.id, gamepad.buttons.length, gamepad.axes.length);
+				window.gamepad = gamepad;
 			}
 		}
-		window.addEventListener("gamepadconnected", onGamepadConnected);
+		window.addEventListener("gamepadconnected", onGamepadConnected.bind(this));
 
 		function onGamepadDisconnected(e) {
-			if (gamepad && e.gamepad.id === gamepad.id) {
+			if (gamepad) {
 			    gamepad = null;
 			    console.log("Gamepad disconnected from index %d: %s", e.gamepad.index, e.gamepad.id);
 			}
@@ -125,6 +131,21 @@ YAWVRB.Gamepad = ( function () {
 	    left: 14,
 	    right: 15
 	};
+
+	// for firefox on linux?
+	// Gamepad.BUTTONS = {
+	//     A: 0,
+	//     B: 1,
+	//     X: 2,
+	//     Y: 3,
+	//     leftBumper: 4,
+	//     rightBumper: 5,
+	//     back: 6,
+	//     start: 7,
+	//     power: 8,
+	//     leftStick: 9,
+	//     rightStick: 10
+	// };
 
 	return Gamepad;
 } )();
