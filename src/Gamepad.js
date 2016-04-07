@@ -29,33 +29,34 @@ YAWVRB.Gamepad = ( function () {
     		var commandUp = commands[name].commandUp;
     		if (commandUp) {
     			for (var i = 0; i < buttons.length; i++) {
-	    			commandUps[buttons[i]] = commandUps;
+	    			commandUps[buttons[i]] = commandUp;
 	    		}
     		}
     	}
 
     	function getState(buttons, axes) {
+    		if (!gamepad) return;
     		var i;
     		if (buttons) {
 	    		for (i = 0; i < buttons.length; i++) {
 	    			var button = gamepad.buttons[buttons[i]];
 	    			if (button.pressed) return button.value;
 	    		}
+	    		return 0;
 	    	} else if (axes) {
 	    		for (i = 0; i < axes.length; i++) {
 	    			var value = gamepad.axes[axes[i]];
-	    			if (Math.abs(value) > DEADZONE) return value;
+	    			if (value && Math.abs(value) > DEADZONE) return value;
 	    		}
+	    		return 0;
 	    	}
-	    	return null;
+	    	return 0;
     	}
-    	var _ = true;
+
 		this.update = function () {
 			if (!gamepad) return;
-			if (_) console.log(gamepad);
 			for (var i = 0; i < gamepad.buttons.length; i++) {
 				var gpButton = gamepad.buttons[i];
-				if (_) console.log(gamepad.buttons[i]);
 				var pressed;
 				if (gpButton === 1) pressed = true;
 				else if (gpButton === 0) pressed = false;
@@ -67,7 +68,6 @@ YAWVRB.Gamepad = ( function () {
 				}
 				buttonPressed[i] = pressed;
 			}
-			_ = false;
 		};
 
 		var initialGamepad;
