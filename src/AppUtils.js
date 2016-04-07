@@ -92,8 +92,8 @@ YAWVRB.AppUtils = ( function () {
 	var displayText = ( function () {
 		const DEFAULT_OPTIONS = {
 			object: YAWVRB.DEADSCENE,
-			position: [0,0,0],
-			rotation: [0,0,0],
+			position: [0, 0, 0.1],
+			quaternion: [0, 0, 0, 1],
 			coordSystem: 'local'
 		};
 		var textMeshes = {};
@@ -101,16 +101,41 @@ YAWVRB.AppUtils = ( function () {
 		function displayText(text, options) {
 			options = options || {};
 			for (var kwarg in DEFAULT_OPTIONS) {
-				if (options[kwarg] === undefined) options[kwarg] = DEFAULT_OPTIONS[options[kwarg]];
+				if (options[kwarg] === undefined) options[kwarg] = DEFAULT_OPTIONS[kwarg];
 			}
-			var mesh = textMeshes[{text, options}.toString()];
+			var key = {text, options}.toString();
+			var mesh = textMeshes[key];
 			if (!mesh) {
-				mesh = new THREE.Mesh(quadGeom);
+                var canvas = document.createElement('canvas');
+                canvas.width = 128;
+                canvas.height = 64;
+                var aspect = canvas.width / canvas.height;
+                var ctx = canvas.getContext('2d');
+				ctx.strokeStyle = 'rgb(23, 23, 23)';
+    	        ctx.font = "34px serif";
+				//var textMetrics = ctx.measureText(text);
+                // canvas.width = textMetrics.width;
+	            var texture = new THREE.Texture(canvas, THREE.UVMapping, THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
+            	var material = new THREE.MeshBasicMaterial({color: 0xffffff, map: texture, transparent: true});
+				mesh = new THREE.Mesh(quadGeom, material);
+
+    	        ctx.strokeRect(0, 0, canvas.width, canvas.height);
+	            ctx.fillStyle = 'rgba(23, 23, 23, 0.3)';
+    	        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+	            ctx.fillStyle = 'rgb(255, 23, 23)';
+				ctx.fillText(text, 0, 48);
+
+        	    material.map.needsUpdate = true;
 				if (options.coordSystem === 'local') {
 					options.object.add(mesh);
 					mesh.position.fromArray(options.position);
-					//mesh.rotation.fromArray(options.rotation);
+					mesh.quaternion.fromArray(options.quaternion);
+					var worldScale = options.object.getWorldScale();
+	        	    mesh.scale.set(aspect * 0.125 / worldScale.x, 0.125 / worldScale.y, 1 / worldScale.z);
+					mesh.updateMatrix();
 				}
+				textMeshes[key] = mesh;
 			}
 		}
 		return displayText;
