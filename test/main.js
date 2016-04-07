@@ -46,7 +46,6 @@ function onLoad() {
     keyboardObject.updateMatrix();
     avatar.add(keyboardObject);
 
-    YAWVRB.AppUtils.displayText('keyboard', {object: keyboardObject});
 
     var world = new CANNON.World();
 
@@ -70,7 +69,9 @@ function onLoad() {
     gfxTablet.mesh.quaternion.setFromAxisAngle(UP, 0.5 * Math.PI).multiply((new THREE.Quaternion()).setFromAxisAngle(RIGHT, -0.125 * Math.PI));
     gfxTablet.mesh.updateMatrix();
 
-    YAWVRB.AppUtils.displayText('GfxTablet', {object: gfxTablet.mesh});
+    YAWVRB.AppUtils.displayText('GfxTablet', {object: gfxTablet.mesh, position: [0, 0.25, -0.05]});
+    YAWVRB.AppUtils.displayText('Keyboard', {object: keyboardObject});
+    YAWVRB.AppUtils.displayText('Leap Motion #1', {object: leapTool.toolRoot});
 
     objectSelector.addSelectable(avatar);
     objectSelector.addSelectable(keyboardObject);

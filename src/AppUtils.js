@@ -87,12 +87,12 @@ YAWVRB.AppUtils = ( function () {
 		};
 	}
 
-	YAWVRB.DEADSCENE = YAWVRB.DEADSCENE || new THREE.Scene();
-
 	var displayText = ( function () {
+		YAWVRB.DEADSCENE = YAWVRB.DEADSCENE || new THREE.Scene();
+		YAWVRB.DEADSCENE.name = 'DEADSCENE';
 		const DEFAULT_OPTIONS = {
 			object: YAWVRB.DEADSCENE,
-			position: [0, 0, 0.1],
+			position: [0, 0.05, -0.05],
 			quaternion: [0, 0, 0, 1],
 			coordSystem: 'local'
 		};
@@ -103,27 +103,28 @@ YAWVRB.AppUtils = ( function () {
 			for (var kwarg in DEFAULT_OPTIONS) {
 				if (options[kwarg] === undefined) options[kwarg] = DEFAULT_OPTIONS[kwarg];
 			}
-			var key = {text, options}.toString();
+			var uuid = options.object.uuid;
+			var key = JSON.stringify({text, uuid});
 			var mesh = textMeshes[key];
 			if (!mesh) {
                 var canvas = document.createElement('canvas');
                 canvas.width = 128;
                 canvas.height = 64;
-                var aspect = canvas.width / canvas.height;
                 var ctx = canvas.getContext('2d');
-				ctx.strokeStyle = 'rgb(23, 23, 23)';
-    	        ctx.font = "34px serif";
-				//var textMetrics = ctx.measureText(text);
-                // canvas.width = textMetrics.width;
+				// ctx.strokeStyle = 'rgb(23, 23, 23)';
+    	        ctx.font = "28px serif";
+				// var textMetrics = ctx.measureText(text);
+                // canvas.width = textMetrics.width / 0.5;
+                var aspect = canvas.width / canvas.height;
 	            var texture = new THREE.Texture(canvas, THREE.UVMapping, THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
             	var material = new THREE.MeshBasicMaterial({color: 0xffffff, map: texture, transparent: true});
 				mesh = new THREE.Mesh(quadGeom, material);
 
-    	        ctx.strokeRect(0, 0, canvas.width, canvas.height);
-	            ctx.fillStyle = 'rgba(23, 23, 23, 0.3)';
-    	        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    	        // ctx.strokeRect(0, 0, canvas.width, canvas.height);
+	            // ctx.fillStyle = 'rgba(23, 23, 23, 0.3)';
+    	        // ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-	            ctx.fillStyle = 'rgb(255, 23, 23)';
+	            ctx.fillStyle = 'rgb(255, 72, 23)';
 				ctx.fillText(text, 0, 48);
 
         	    material.map.needsUpdate = true;
