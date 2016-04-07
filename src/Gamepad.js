@@ -49,33 +49,32 @@ YAWVRB.Gamepad = ( function () {
 	    	}
 	    	return null;
     	}
-
+    	var _ = true;
 		this.update = function () {
 			if (!gamepad) return;
+			if (_) console.log(gamepad);
 			for (var i = 0; i < gamepad.buttons.length; i++) {
 				var gpButton = gamepad.buttons[i];
-
+				if (_) console.log(gamepad.buttons[i]);
 				var pressed;
 				if (gpButton === 1) pressed = true;
 				else if (gpButton === 0) pressed = false;
-				else pressed = gpButton.pressed;
-
+				else pressed = gpButton.pressed; // || gpButton.value;
 				if (pressed && !buttonPressed[i]) {
-					console.log('pressed %d', i);
 					if (commandDowns[i]) commandDowns[i]();
 				} else if (!pressed && buttonPressed[i]) {
-					console.log('depressed %d', i);
 					if (commandUps[i]) commandUps[i]();
 				}
 				buttonPressed[i] = pressed;
 			}
+			_ = false;
 		};
 
 		var initialGamepad;
-		if (navigator.webkitGetGamepads) {
-			initialGamepad = navigator.webkitGetGamepads()[0];
-		} else {
+		if (navigator.getGamepads) {
 			initialGamepad = navigator.getGamepads()[0];
+		} else if (navigator.webkitGetGamepads) {
+			initialGamepad = navigator.webkitGetGamepads()[0];
 		}
 		if (initialGamepad && initialGamepad.buttons.length > 0) {
 			gamepad = initialGamepad;
@@ -107,22 +106,22 @@ YAWVRB.Gamepad = ( function () {
 	};
 
 	Gamepad.BUTTONS = {
-	    A: 1,
-	    B: 2,
-	    X: 3,
-	    Y: 4,
-	    leftBumper: 5,
-	    rightBumper: 6,
-	    leftTrigger: 7,
-	    rightTrigger: 8,
-	    back: 9,
-	    start: 10,
-	    leftStick: 11,
-	    rightStick: 12,
-	    up: 13,
-	    down: 14,
-	    left: 15,
-	    right: 16
+	    A: 0,
+	    B: 1,
+	    X: 2,
+	    Y: 3,
+	    leftBumper: 4,
+	    rightBumper: 5,
+	    leftTrigger: 6,
+	    rightTrigger: 7,
+	    back: 8,
+	    start: 9,
+	    leftStick: 10,
+	    rightStick: 11,
+	    up: 12,
+	    down: 13,
+	    left: 14,
+	    right: 15
 	};
 
 	return Gamepad;
