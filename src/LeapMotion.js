@@ -22,8 +22,8 @@ YAWVRB.LeapMotion = ( function () {
     const DEFAULT_OPTIONS = {
         rotation: [0, 0, 0],
         position: [0, -0.42, -0.42],
-        toolLength: 0.4,
-        toolRadius: 0.01,
+        toolLength: 0.15,
+        toolRadius: 0.0034,
         toolMass: 0.04,
         tipShape: 'Cylinder',
         tipRadius: 0.013,
@@ -32,6 +32,7 @@ YAWVRB.LeapMotion = ( function () {
         timeB: 0.25 + 1.5,
         minConfidence: 0.13,
         interactionBoxColor: 0x99eebb,
+        leapColor: 0x777777,
         toolColor: 0xeebb99,
         tipColor: 0x99bbee,
         handColor: 0x113399,
@@ -111,7 +112,7 @@ YAWVRB.LeapMotion = ( function () {
         var leapGeom = new THREE.BufferGeometry();
         leapGeom.fromGeometry(boxGeom);
         boxGeom.dispose();
-        var leapMaterial = new THREE.MeshLambertMaterial({color: 0x777777});
+        var leapMaterial = new THREE.MeshLambertMaterial({color: leapColor});
         var leapMesh = new THREE.Mesh(leapGeom, leapMaterial);
         leapMesh.position.y = METERS2LEAP*INCH2METERS*0.25;
         toolRoot.add(leapMesh);

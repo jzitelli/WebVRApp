@@ -27,6 +27,7 @@ function onLoad() {
     THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
     const INCH2METERS = 0.0254;
+    const UP = THREE.Object3D.DefaultUp;
     const RIGHT = new THREE.Vector3(1, 0, 0);
 
     var canvas = document.getElementById('webgl-canvas');
@@ -87,8 +88,7 @@ function onLoad() {
     var gfxTablet = new YAWVRB.GfxTablet(2560, 1600);
     avatar.add(gfxTablet.mesh);
     gfxTablet.mesh.position.set(-0.32, -0.3, -0.05);
-    gfxTablet.mesh.rotation.y = 0.5 * Math.PI;
-    gfxTablet.mesh.quaternion.multiply((new THREE.Quaternion()).setFromAxisAngle(RIGHT, -0.125 * Math.PI));
+    gfxTablet.mesh.quaternion.setFromAxisAngle(UP, 0.5 * Math.PI).multiply((new THREE.Quaternion()).setFromAxisAngle(RIGHT, -0.125 * Math.PI));
     gfxTablet.mesh.updateMatrix();
 
     objectSelector.addSelectable(avatar);
@@ -141,7 +141,10 @@ function onLoad() {
                 }
             }
 
-            app = new YAWVRB.App(scene, {}, {canvas: canvas});
+            app = new YAWVRB.App(scene, undefined, {canvas: canvas});
+
+            app.renderer.setPixelRatio(0.5);
+            app.renderer.setSize(window.innerWidth, window.innerHeight);
 
             scene.add(avatar);
 
@@ -159,16 +162,22 @@ function onLoad() {
             function animate(t) {
                 var dt = 0.001 * (t - lt);
                 frameCount++;
-                gamepad.update();
-                leapTool.updateTool(dt);
-                leapToolRemote.updateTool(dt);
-                app.render();
-                world.step(Math.min(dt, 1/60), dt, 10);
-                leapTool.updateToolPostStep();
-                leapToolRemote.updateToolPostStep();
+
                 moveByKeyboard(dt);
                 leapTool.updateToolMapping();
                 leapToolRemote.updateToolMapping();
+
+                gamepad.update();
+                leapTool.updateTool(dt);
+                leapToolRemote.updateTool(dt);
+
+                app.render();
+
+                world.step(Math.min(dt, 1/60), dt, 10);
+
+                leapTool.updateToolPostStep();
+                leapToolRemote.updateToolPostStep();
+
                 lt = t;
                 requestAnimationFrame(animate);
             }

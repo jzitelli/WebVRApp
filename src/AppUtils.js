@@ -9,8 +9,6 @@ YAWVRB.AppUtils = ( function () {
 	function ObjectSelector() {
 
 		var selectables = [];
-		var headings = [];
-		var pitches = [];
 
 		this.selection;
 		var heading = 0;
@@ -18,20 +16,18 @@ YAWVRB.AppUtils = ( function () {
 
 		this.addSelectable = function (obj) {
 			selectables.push(obj);
-			pitches.push(obj.rotation.x);
-			headings.push(obj.rotation.y);
 			if (!this.selection) this.selection = obj;
 		}.bind(this);
 
 		this.cycleSelection = ( function () {
 			var i = 0;
+			var euler = new THREE.Euler();
 			return function () {
-				headings[i] = heading;
-				pitches[i] = pitch;
 				i = (i + 1) % selectables.length;
 				this.selection = selectables[i];
-				heading = headings[i];
-				pitch = pitches[i];
+				euler.setFromQuaternion(this.selection.quaternion);
+				heading = euler.y;
+				pitch = euler.x;
 			};
 		} )().bind(this);
 
@@ -65,9 +61,8 @@ YAWVRB.AppUtils = ( function () {
 			selectables.forEach( function (object, i) {
 				if (object.name) {
 					transforms[object.name] = {
-						heading: headings[i],
-						pitch: pitches[i],
-						position: object.position.toArray()
+						position: object.position.toArray(),
+						quaternion: object.quaternion.toArray()
 					};
 				}
 			} );
@@ -84,15 +79,15 @@ YAWVRB.AppUtils = ( function () {
 			selectables.forEach( function (object, i) {
 				if (object.name && transforms[object.name]) {
 					var transform = transforms[object.name];
-					headings[i] = transform.heading;
-					pitches[i] = transform.pitch;
 					object.position.fromArray(transform.position);
-					object.quaternion.setFromAxisAngle(UP, transform.heading).multiply(pitchQuat.setFromAxisAngle(RIGHT, transform.pitch));
+					object.quaternion.fromArray(transform.quaternion);
 					object.updateMatrix();
 				}
 			} );
 		};
 	}
+
+	YAWVRB.DEADSCENE = YAWVRB.DEADSCENE || new THREE.Scene();
 
 	var displayText = ( function () {
 		const DEFAULT_OPTIONS = {

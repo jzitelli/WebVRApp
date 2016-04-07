@@ -16,8 +16,7 @@ YAWVRB.App = function (scene, config, rendererOptions) {
         domElement.id = 'webgl-canvas';
     }
 
-    var devicePixelRatio = config.devicePixelRatio || window.devicePixelRatio;
-    this.renderer.setPixelRatio(devicePixelRatio);
+    this.renderer.setPixelRatio(window.devicePixelRadio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
