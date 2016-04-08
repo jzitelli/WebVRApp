@@ -58,22 +58,16 @@ YAWVRB.Gamepad = ( function () {
             if (!gamepad) return;
             for (var i = 0; i < gamepad.buttons.length; i++) {
                 var button = gamepad.buttons[i];
-                var pressed;
-                if (button === 1) {
-                    pressed = true;
-                } else if (button === 0) {
-                    pressed = false;
-                } else if (button) {
-                    pressed = button.pressed; // || button.value;
-                } else {
-                    continue;
-                }
+                var pressed = (isNaN(button) ? (button.value === 1) : (button === 1));
                 if (pressed && !buttonPressed[i]) {
+                    buttonPressed[i] = true;
+                    console.log('pressed %d', i);
                     if (commandDowns[i]) commandDowns[i]();
                 } else if (!pressed && buttonPressed[i]) {
+                    buttonPressed[i] = false;
+                    console.log('depressed %d', i);
                     if (commandUps[i]) commandUps[i]();
                 }
-                buttonPressed[i] = pressed;
             }
         };
 
@@ -85,13 +79,13 @@ YAWVRB.Gamepad = ( function () {
         }
         if (initialGamepad && initialGamepad.buttons.length > 0) {
             gamepad = initialGamepad;
+            console.log("Using gamepad at index %d: %s. %d buttons, %d axes.", gamepad.index, gamepad.id, gamepad.buttons.length, gamepad.axes.length);
         }
 
         function onGamepadConnected(e) {
             if (e.gamepad.buttons.length > 0) {
                 gamepad = e.gamepad;
                 console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.", gamepad.index, gamepad.id, gamepad.buttons.length, gamepad.axes.length);
-                window.gamepad = gamepad;
             }
         }
         window.addEventListener("gamepadconnected", onGamepadConnected.bind(this));

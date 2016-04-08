@@ -24,7 +24,9 @@ function onLoad() {
     mouse.pointerMesh.updateMatrix();
 
     var gamepadCommands = {
-        resetVRSensor: {buttons: [YAWVRB.Gamepad.BUTTONS.back], commandDown: function () { app.resetVRSensor(); }}
+        resetVRSensor: {buttons: [7], commandDown: function () { app.resetVRSensor(); }},
+        moveFB: {axes: [1]},
+        moveRL: {axes: [0]}
     };
     var gamepad = new YAWVRB.Gamepad(gamepadCommands);
 
