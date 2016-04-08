@@ -96,23 +96,23 @@ YAWVRB.Keyboard = ( function () {
             mesh = new THREE.Mesh(controlGeom, keyMaterial);
             mesh.position.z = 4.5 * keyDelta;
             mesh.position.x = 0.5 * controlWidth;
-            keyMesh['lcontrol'] = mesh;
+            keyMesh.lcontrol = mesh;
             keyboardObject.add(mesh);
 
             mesh = mesh.clone();
             mesh.position.x += 0.5 * (controlWidth + windowsWidth);
-            keyMesh['lwindows'] = mesh;
+            keyMesh.lwindows = mesh;
             keyboardObject.add(mesh);
 
             mesh = mesh.clone();
             mesh.position.x += 0.5 * (windowsWidth + altWidth);
-            keyMesh['lalt'] = mesh;
+            keyMesh.lalt = mesh;
             keyboardObject.add(mesh);
 
             mesh = new THREE.Mesh(spacebarGeom, keyMaterial);
             mesh.position.z = 4.5 * keyDelta;
-            mesh.position.x = keyMesh['lalt'].position.x + 0.5 * (altWidth + spacebarWidth);
-            keyMesh['spacebar'] = mesh;
+            mesh.position.x = keyMesh.lalt.position.x + 0.5 * (altWidth + spacebarWidth);
+            keyMes.spacebar = mesh;
             keyboardObject.add(mesh);
 
             for (var k in keyMesh) {

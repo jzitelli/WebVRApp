@@ -115,7 +115,7 @@ YAWVRB.App = function (scene, config, rendererOptions) {
                 isPresenting = false;
                 if (!useDeprecatedWebVR && vrDisplay.capabilities.canPresent && vrDisplay.capabilities.hasExternalDisplay) {
                     presentingElement.style.display = "none";
-                    releasePointerLock()
+                    releasePointerLock();
                 }
             } );
         }
@@ -290,4 +290,4 @@ YAWVRB.App = function (scene, config, rendererOptions) {
         onFullscreenChange, false);
     window.addEventListener("beforeunload", beforeUnload, false);
 
-}
+};
