@@ -29,7 +29,7 @@ YAWVRB.Keyboard = ( function () {
     		return 0;
     	}
 
-    	for (name in commands) {
+    	for (var name in commands) {
     		var buttons = commands[name].buttons;
             Object.defineProperty(this, name, {
                 enumerable: true,

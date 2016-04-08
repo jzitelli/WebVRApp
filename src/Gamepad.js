@@ -13,7 +13,7 @@ YAWVRB.Gamepad = ( function () {
 		var commandUps = [];
     	var buttonPressed = [];
 
-    	for (name in commands) {
+    	for (var name in commands) {
     		var buttons = commands[name].buttons;
     		var axes = commands[name].axes;
             Object.defineProperty(this, name, {
@@ -41,7 +41,7 @@ YAWVRB.Gamepad = ( function () {
     		if (buttons) {
 	    		for (i = 0; i < buttons.length; i++) {
 	    			var button = gamepad.buttons[buttons[i]];
-	    			if (button && button.pressed) return button.value;
+	    			if (isNaN(button) && button.pressed) return button.value;
 	    		}
 	    		return 0;
 	    	} else if (axes) {
@@ -57,14 +57,14 @@ YAWVRB.Gamepad = ( function () {
 		this.update = function () {
 			if (!gamepad) return;
 			for (var i = 0; i < gamepad.buttons.length; i++) {
-				var gpButton = gamepad.buttons[i];
+				var button = gamepad.buttons[i];
 				var pressed;
-				if (gpButton === 1) {
+				if (button === 1) {
 					pressed = true;
-				} else if (gpButton === 0) {
+				} else if (button === 0) {
 					pressed = false;
-				} else if (gpButton) {
-					pressed = gpButton.pressed; // || gpButton.value;
+				} else if (button) {
+					pressed = button.pressed; // || button.value;
 				} else {
 					continue;
 				}
