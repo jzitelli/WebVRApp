@@ -1,4 +1,4 @@
-window.YAWVRB = window.YAWVRB || {};
+var YAWVRB = window.YAWVRB || {};
 
 YAWVRB.GfxTablet = ( function () {
 	"use strict";

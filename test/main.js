@@ -46,7 +46,6 @@ function onLoad() {
     keyboardObject.updateMatrix();
     avatar.add(keyboardObject);
 
-
     var world = new CANNON.World();
 
     // local leap motion controller:
@@ -80,18 +79,13 @@ function onLoad() {
     objectSelector.addSelectable(gfxTablet.mesh);
 
     function moveByKeyboard(dt) {
-        var km = readKeyboardMovement();
-        if (objectSelector.selection === avatar) km.turnUD = 0;
-        objectSelector.moveByKeyboard(dt, km.moveFB, km.moveRL, km.moveUD, km.turnLR, km.turnUD);
-        function readKeyboardMovement() {
-            return {
-                moveFB: keyboard.moveForward - keyboard.moveBackward,
-                moveRL: keyboard.moveRight - keyboard.moveLeft,
-                moveUD: keyboard.moveUp - keyboard.moveDown,
-                turnLR: keyboard.turnLeft - keyboard.turnRight,
-                turnUD: keyboard.turnUp - keyboard.turnDown
-            };
-        }
+        var moveFB = keyboard.moveForward - keyboard.moveBackward,
+            moveRL = keyboard.moveRight - keyboard.moveLeft,
+            moveUD = keyboard.moveUp - keyboard.moveDown,
+            turnRL = keyboard.turnRight - keyboard.turnLeft,
+            turnUD = keyboard.turnUp - keyboard.turnDown;
+        if (objectSelector.selection === avatar) turnUD = 0;
+        objectSelector.moveSelection(dt, moveFB, moveRL, moveUD, turnRL, turnUD);
     }
 
     ( function () {

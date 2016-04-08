@@ -1,4 +1,4 @@
-window.YAWVRB = window.YAWVRB || {};
+var YAWVRB = window.YAWVRB || {};
 
 YAWVRB.AppUtils = ( function () {
 	"use strict";
@@ -34,11 +34,11 @@ YAWVRB.AppUtils = ( function () {
 		const MOVESPEED = 0.3;
 		var pitchQuat = new THREE.Quaternion();
 
-		this.moveByKeyboard = function (dt, moveFB, moveRL, moveUD, turnLR, turnUD) {
+		this.moveSelection = function (dt, moveFB, moveRL, moveUD, turnRL, turnUD) {
 			var selection = this.selection;
 			if (!selection) return;
-			if (moveFB || moveRL || moveUD || turnLR || turnUD) {
-				heading += (turnLR) * dt;
+			if (moveFB || moveRL || moveUD || turnRL || turnUD) {
+				heading -= (turnRL) * dt;
 				pitch   -= (turnUD) * dt;
 				var cos = Math.cos(heading),
 					sin = Math.sin(heading);

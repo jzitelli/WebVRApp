@@ -7,7 +7,7 @@
 
 */
 
-window.YAWVRB = window.YAWVRB || {};
+var YAWVRB = window.YAWVRB || {};
 
 YAWVRB.LeapMotion = ( function () {
     "use strict";
@@ -407,6 +407,6 @@ YAWVRB.LeapMotion = ( function () {
 
     return {
         makeTool: makeTool
-    }
+    };
 
 } )();

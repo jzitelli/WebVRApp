@@ -1,4 +1,4 @@
-window.YAWVRB = window.YAWVRB || {};
+var YAWVRB = window.YAWVRB || {};
 
 YAWVRB.Keyboard = ( function () {
     "use strict";
@@ -7,41 +7,41 @@ YAWVRB.Keyboard = ( function () {
 
     function Keyboard(eventTarget, commands) {
 
-    	eventTarget.addEventListener("keydown", onKeyDown, false);
-    	eventTarget.addEventListener("keyup", onKeyUp, false);
+        eventTarget.addEventListener("keydown", onKeyDown, false);
+        eventTarget.addEventListener("keyup", onKeyUp, false);
 
-    	var keyDown = [];
-    	var commandDowns = [];
+        var keyDown = [];
+        var commandDowns = [];
 
-    	function onKeyDown(evt) {
-    		keyDown[evt.keyCode] = true;
-    		if (commandDowns[evt.keyCode]) commandDowns[evt.keyCode]();
-    	}
+        function onKeyDown(evt) {
+            keyDown[evt.keyCode] = true;
+            if (commandDowns[evt.keyCode]) commandDowns[evt.keyCode]();
+        }
 
-    	function onKeyUp(evt) {
-    		keyDown[evt.keyCode] = false;
-    	}
+        function onKeyUp(evt) {
+            keyDown[evt.keyCode] = false;
+        }
 
-    	function getState(buttons) {
-    		for (var i = 0; i < buttons.length; i++) {
-    			if (keyDown[buttons[i]]) return 1;
-    		}
-    		return 0;
-    	}
+        function getState(buttons) {
+            for (var i = 0; i < buttons.length; i++) {
+                if (keyDown[buttons[i]]) return 1;
+            }
+            return 0;
+        }
 
-    	for (var name in commands) {
-    		var buttons = commands[name].buttons;
+        for (var name in commands) {
+            var buttons = commands[name].buttons;
             Object.defineProperty(this, name, {
                 enumerable: true,
                 get: getState.bind(this, buttons)
             });
-    		var commandDown = commands[name].commandDown;
-    		if (commandDown) {
-    			for (var i = 0; i < buttons.length; i++) {
-	    			commandDowns[buttons[i]] = commandDown;
-	    		}
-    		}
-    	}
+            var commandDown = commands[name].commandDown;
+            if (commandDown) {
+                for (var i = 0; i < buttons.length; i++) {
+                    commandDowns[buttons[i]] = commandDown;
+                }
+            }
+        }
 
         this.object = ( function () {
 
@@ -112,7 +112,7 @@ YAWVRB.Keyboard = ( function () {
             mesh = new THREE.Mesh(spacebarGeom, keyMaterial);
             mesh.position.z = 4.5 * keyDelta;
             mesh.position.x = keyMesh.lalt.position.x + 0.5 * (altWidth + spacebarWidth);
-            keyMes.spacebar = mesh;
+            keyMesh.spacebar = mesh;
             keyboardObject.add(mesh);
 
             for (var k in keyMesh) {

@@ -13,9 +13,9 @@
     "spec/",
     "src/",
     "test/",
+    "favicon.ico",
     "LICENSE",
     "README.md",
-    "favicon.ico",
     "server.js"
   ],
   "keywords": [
