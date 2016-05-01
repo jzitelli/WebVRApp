@@ -10,25 +10,25 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-    <title>WebVRApp</title>
+    <title>YAWVRB</title>
 
     <link rel="stylesheet" href="/test/stylesheet.css">
 
     <script>
     var WebVRConfig = {
       //ENABLE_DEPRECATED_API: true, // Default: false.
-      FORCE_ENABLE_VR: true, // Default: false.
+      //FORCE_ENABLE_VR: true, // Default: false.
       //K_FILTER: 0.98, // Default: 0.98.
       PREDICTION_TIME_S: 0.01, // Default: 0.050s.
       //TOUCH_PANNER_DISABLED: true, // Default: false.
       //YAW_ONLY: true, // Default: false.
       //MOUSE_KEYBOARD_CONTROLS_DISABLED: true, // Default: false.
-      //KEYBOARD_CONTROLS_DISABLED: true,
+      KEYBOARD_CONTROLS_DISABLED: true,
       //DEFER_INITIALIZATION: true, // Default: false.
       //DIRTY_SUBMIT_FRAME_BINDINGS: true, // Default: false.
       BUFFER_SCALE: 0.5, // Default: 1.0.
       ENABLE_LEAP_MOTION: true,
-      LEAP_MOTION_HOST: '192.168.1.201'
+      LEAP_MOTION_HOST: '127.0.0.1'
     };
     </script>
 

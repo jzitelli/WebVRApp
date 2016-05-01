@@ -5,14 +5,54 @@ YAWVRB.Gamepad = ( function () {
 
     const DEADZONE = 0.12;
 
-    function Gamepad(commands) {
+    var gamepads;
+    var nextIndex = 0;
+    if (navigator.getGamepads) {
+        gamepads = navigator.getGamepads();
+    } else if (navigator.webkitGetGamepads) {
+        gamepads = navigator.webkitGetGamepads();
+    }
 
+    function Gamepad(commands) {
         var gamepad;
+        var index = nextIndex;
+        if (gamepads) {
+            for (var i = index; i < gamepads.length; i++) {
+                if (gamepads[i]) {
+                    gamepad = gamepads[i];
+                    index = i;
+                    nextIndex = i + 1;
+                    console.log("Using gamepad at index %d: %s. %d buttons, %d axes.", gamepad.index, gamepad.id, gamepad.buttons.length, gamepad.axes.length);
+                    break;
+                }
+            }
+        }
+        function onGamepadConnected(e) {
+            if (e.gamepad.index === index) {
+                gamepad = e.gamepad;
+                gamepads[index] = gamepad;
+                console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.", gamepad.index, gamepad.id, gamepad.buttons.length, gamepad.axes.length);
+            }
+        }
+        window.addEventListener("gamepadconnected", onGamepadConnected);
+        function onGamepadDisconnected(e) {
+            if (index === e.gamepad.index) {
+                console.log("Gamepad disconnected from index %d: %s", index, e.gamepad.id);
+                gamepad = null;
+                if (gamepads[index]) {
+                    gamepads[index] = null;
+                }
+            }
+        }
+        window.addEventListener("gamepaddisconnected", onGamepadDisconnected);
+
+        this.isConnected = function () {
+            return (gamepad && gamepad.connected);
+        };
 
         var commandDowns = [];
         var commandUps = [];
         var buttonPressed = [];
-
         for (var name in commands) {
             var buttons = commands[name].buttons;
             var axes = commands[name].axes;
@@ -20,7 +60,6 @@ YAWVRB.Gamepad = ( function () {
                 enumerable: true,
                 get: getState.bind(this, buttons, axes)
             });
-            var i;
             var commandDown = commands[name].commandDown;
             if (commandDown) {
                 for (i = 0; i < buttons.length; i++) {
@@ -61,43 +100,13 @@ YAWVRB.Gamepad = ( function () {
                 var pressed = (isNaN(button) ? (button.value === 1) : (button === 1));
                 if (pressed && !buttonPressed[i]) {
                     buttonPressed[i] = true;
-                    console.log('pressed %d', i);
                     if (commandDowns[i]) commandDowns[i]();
                 } else if (!pressed && buttonPressed[i]) {
                     buttonPressed[i] = false;
-                    console.log('depressed %d', i);
                     if (commandUps[i]) commandUps[i]();
                 }
             }
         };
-
-        var initialGamepad;
-        if (navigator.getGamepads) {
-            initialGamepad = navigator.getGamepads()[0];
-        } else if (navigator.webkitGetGamepads) {
-            initialGamepad = navigator.webkitGetGamepads()[0];
-        }
-        if (initialGamepad && initialGamepad.buttons.length > 0) {
-            gamepad = initialGamepad;
-            console.log("Using gamepad at index %d: %s. %d buttons, %d axes.", gamepad.index, gamepad.id, gamepad.buttons.length, gamepad.axes.length);
-        }
-
-        function onGamepadConnected(e) {
-            if (e.gamepad.buttons.length > 0) {
-                gamepad = e.gamepad;
-                console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.", gamepad.index, gamepad.id, gamepad.buttons.length, gamepad.axes.length);
-            }
-        }
-        window.addEventListener("gamepadconnected", onGamepadConnected.bind(this));
-
-        function onGamepadDisconnected(e) {
-            if (gamepad) {
-                gamepad = null;
-                console.log("Gamepad disconnected from index %d: %s", e.gamepad.index, e.gamepad.id);
-            }
-        }
-        window.addEventListener("gamepaddisconnected", onGamepadDisconnected);
-
     }
 
     Gamepad.AXES = {
@@ -125,21 +134,6 @@ YAWVRB.Gamepad = ( function () {
         left: 14,
         right: 15
     };
-
-    // for firefox on linux?
-    // Gamepad.BUTTONS = {
-    //     A: 0,
-    //     B: 1,
-    //     X: 2,
-    //     Y: 3,
-    //     leftBumper: 4,
-    //     rightBumper: 5,
-    //     back: 6,
-    //     start: 7,
-    //     power: 8,
-    //     leftStick: 9,
-    //     rightStick: 10
-    // };
 
     return Gamepad;
 } )();
