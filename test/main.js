@@ -24,9 +24,13 @@ function onLoad() {
     mouse.pointerMesh.updateMatrix();
 
     var gamepadCommands = {
-        resetVRSensor: {buttons: [7], commandDown: function () { app.resetVRSensor(); }},
-        moveFB: {axes: [1]},
-        moveRL: {axes: [0]}
+        resetVRSensor: {buttons: [YAWVRB.Gamepad.BUTTONS.back], commandDown: function () { app.resetVRSensor(); }},
+        cycleSelection: {buttons: [YAWVRB.Gamepad.BUTTONS.right], commandDown: objectSelector.cycleSelection},
+        moveFB: {axes: [YAWVRB.Gamepad.AXES.LSY]},
+        moveRL: {axes: [YAWVRB.Gamepad.AXES.LSX]},
+        turnRL: {axes: [YAWVRB.Gamepad.AXES.RSX]},
+        turnUD: {axes: [YAWVRB.Gamepad.AXES.RSY]},
+        toggleFloat: {buttons: [YAWVRB.Gamepad.BUTTONS.leftStick]}
     };
     var gamepad = new YAWVRB.Gamepad(gamepadCommands);
 
@@ -74,6 +78,8 @@ function onLoad() {
 
     YAWVRB.AppUtils.displayText('GfxTablet', {object: gfxTablet.mesh, position: [0, 0.25, -0.05]});
     YAWVRB.AppUtils.displayText('Keyboard', {object: keyboardObject});
+    if (leapTool) YAWVRB.AppUtils.displayText('Leap Motion (local)', {object: leapTool.toolRoot});
+    if (leapToolRemote) YAWVRB.AppUtils.displayText('Leap Motion (remote)', {object: leapToolRemote.toolRoot});
 
     objectSelector.addSelectable(avatar);
     objectSelector.addSelectable(keyboardObject);
@@ -87,6 +93,16 @@ function onLoad() {
             moveUD = keyboard.moveUp - keyboard.moveDown,
             turnRL = keyboard.turnRight - keyboard.turnLeft,
             turnUD = keyboard.turnUp - keyboard.turnDown;
+        if (gamepad.isConnected()) {
+            if (gamepad.toggleFloat) {
+                moveUD -= gamepad.moveFB;
+            } else {
+                moveFB -= gamepad.moveFB;
+                turnRL += gamepad.turnRL;
+                turnUD += gamepad.turnUD;
+            }
+            moveRL += gamepad.moveRL;
+        }
         if (objectSelector.selection === avatar) turnUD = 0;
         objectSelector.moveSelection(dt, moveFB, moveRL, moveUD, turnRL, turnUD);
     }
@@ -95,6 +111,7 @@ function onLoad() {
 
         // load the WebVRDesk scene and start
 
+        var objectLoader = new THREE.ObjectLoader();
         var textureLoader = new THREE.TextureLoader();
 
         var deskTexture = textureLoader.load('/test/models/textures/deskTexture.png');
@@ -105,8 +122,6 @@ function onLoad() {
 
         var chairTexture = textureLoader.load('/test/models/textures/chairTexture.png');
         var chairMaterial = new THREE.MeshBasicMaterial({map: chairTexture});
-
-        var objectLoader = new THREE.ObjectLoader();
 
         objectLoader.load("/test/models/WebVRDesk.json", function (scene) {
 
@@ -121,13 +136,9 @@ function onLoad() {
             }
 
             app = new YAWVRB.App(scene, undefined, {canvas: canvas, alpha: true});
-
             app.renderer.setSize(window.innerWidth, window.innerHeight);
-
             scene.add(avatar);
-
             avatar.add(app.camera);
-
             scene.updateMatrixWorld(true);
 
             if (leapTool) leapTool.updateToolMapping();
