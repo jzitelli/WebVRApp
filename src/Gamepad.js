@@ -126,20 +126,5 @@ YAWVRB.Gamepad = ( function () {
         right: 15
     };
 
-    // for firefox on linux?
-    // Gamepad.BUTTONS = {
-    //     A: 0,
-    //     B: 1,
-    //     X: 2,
-    //     Y: 3,
-    //     leftBumper: 4,
-    //     rightBumper: 5,
-    //     back: 6,
-    //     start: 7,
-    //     power: 8,
-    //     leftStick: 9,
-    //     rightStick: 10
-    // };
-
     return Gamepad;
 } )();

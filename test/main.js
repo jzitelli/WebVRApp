@@ -51,13 +51,15 @@ function onLoad() {
     var world = new CANNON.World();
 
     // local leap motion controller:
-    // var leapTool = YAWVRB.LeapMotion.makeTool({toolColor: 0xbb9999, handColor: 0x99bbbb});
-    // avatar.add(leapTool.toolRoot);
-    // world.add(leapTool.toolBody);
-    // leapTool.leapController.connect();
+    var leapTool;
+    leapTool = YAWVRB.LeapMotion.makeTool({toolColor: 0xbb9999, handColor: 0x99bbbb});
+    avatar.add(leapTool.toolRoot);
+    world.add(leapTool.toolBody);
+    leapTool.leapController.connect();
 
     // remote leap motion controller:
-    // var leapToolRemote = YAWVRB.LeapMotion.makeTool({toolColor: 0x99bb99, handColor: 0xbb99bb, host: URL_PARAMS.remoteLeapHost || '192.168.1.201'});
+    var leapToolRemote;
+    // leapToolRemote = YAWVRB.LeapMotion.makeTool({toolColor: 0x99bb99, handColor: 0xbb99bb, host: URL_PARAMS.remoteLeapHost || '192.168.1.201'});
     // leapToolRemote.toolRoot.position.x -= 32 * INCH2METERS;
     // leapToolRemote.toolRoot.updateMatrix();
     // avatar.add(leapToolRemote.toolRoot);
@@ -72,13 +74,11 @@ function onLoad() {
 
     YAWVRB.AppUtils.displayText('GfxTablet', {object: gfxTablet.mesh, position: [0, 0.25, -0.05]});
     YAWVRB.AppUtils.displayText('Keyboard', {object: keyboardObject});
-    //YAWVRB.AppUtils.displayText('Leap Motion #1', {object: leapTool.toolRoot});
-    //YAWVRB.AppUtils.displayText('Leap Motion #2', {object: leapToolRemote.toolRoot});
 
     objectSelector.addSelectable(avatar);
     objectSelector.addSelectable(keyboardObject);
-    // objectSelector.addSelectable(leapTool.toolRoot);
-    // objectSelector.addSelectable(leapToolRemote.toolRoot);
+    if (leapTool) objectSelector.addSelectable(leapTool.toolRoot);
+    if (leapToolRemote) objectSelector.addSelectable(leapToolRemote.toolRoot);
     objectSelector.addSelectable(gfxTablet.mesh);
 
     function moveByKeyboard(dt) {
@@ -130,8 +130,8 @@ function onLoad() {
 
             scene.updateMatrixWorld(true);
 
-            // leapTool.updateToolMapping();
-            // leapToolRemote.updateToolMapping();
+            if (leapTool) leapTool.updateToolMapping();
+            if (leapToolRemote) leapToolRemote.updateToolMapping();
 
             requestAnimationFrame(animate);
 
@@ -142,19 +142,19 @@ function onLoad() {
                 frameCount++;
 
                 moveByKeyboard(dt);
-                // leapTool.updateToolMapping();
-                // leapToolRemote.updateToolMapping();
+                if (leapTool) leapTool.updateToolMapping();
+                if (leapToolRemote) leapToolRemote.updateToolMapping();
 
                 gamepad.update();
-                // leapTool.updateTool(dt);
-                // leapToolRemote.updateTool(dt);
+                if (leapTool) leapTool.updateTool(dt);
+                if (leapToolRemote) leapToolRemote.updateTool(dt);
 
                 app.render();
 
                 world.step(Math.min(dt, 1/60), dt, 10);
 
-                // leapTool.updateToolPostStep();
-                // leapToolRemote.updateToolPostStep();
+                if (leapTool) leapTool.updateToolPostStep();
+                if (leapToolRemote) leapToolRemote.updateToolPostStep();
 
                 lt = t;
                 requestAnimationFrame(animate);
