@@ -121,7 +121,6 @@ function onLoad() {
 
             app = new YAWVRB.App(scene, undefined, {canvas: canvas, alpha: true});
 
-            app.renderer.setPixelRatio(0.5);
             app.renderer.setSize(window.innerWidth, window.innerHeight);
 
             scene.add(avatar);

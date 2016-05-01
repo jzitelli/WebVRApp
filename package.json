@@ -30,7 +30,7 @@
     "WebGL"
   ],
   "dependencies": {
-    "three": "git://github.com/jzitelli/three.js.git#dev",
+    "three.js": "git://github.com/jzitelli/three.js.git#dev",
     "webvr-polyfill": "git://github.com/jzitelli/webvr-polyfill.git#webvr-1.0"
   },
   "devDependencies": {
