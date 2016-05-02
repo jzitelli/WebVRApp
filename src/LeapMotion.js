@@ -188,6 +188,10 @@ YAWVRB.LeapMotion = ( function () {
 
         var lastFrameID;
 
+        function setDeadtime(t) {
+            deadtime = t;
+        }
+
         function updateTool(dt) {
 
             deadtime += dt;
@@ -401,7 +405,10 @@ YAWVRB.LeapMotion = ( function () {
             toolBody:           toolBody,
             updateTool:         updateTool,
             updateToolPostStep: updateToolPostStep,
-            updateToolMapping:  updateToolMapping
+            updateToolMapping:  updateToolMapping,
+            setDeadtime:        setDeadtime,
+            interactionBoxRoot: interactionBoxRoot,
+            interactionPlaneMaterial: interactionPlaneMaterial
         };
     }
 
