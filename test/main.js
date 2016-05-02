@@ -63,12 +63,14 @@ function onLoad() {
 
     // remote leap motion controller:
     var leapToolRemote;
-    // leapToolRemote = YAWVRB.LeapMotion.makeTool({toolColor: 0x99bb99, handColor: 0xbb99bb, host: URL_PARAMS.remoteLeapHost || '192.168.1.201'});
-    // leapToolRemote.toolRoot.position.x -= 32 * INCH2METERS;
-    // leapToolRemote.toolRoot.updateMatrix();
-    // avatar.add(leapToolRemote.toolRoot);
-    // world.add(leapToolRemote.toolBody);
-    // leapToolRemote.leapController.connect();
+    if (URL_PARAMS.remoteLeapHost) {
+        leapToolRemote = YAWVRB.LeapMotion.makeTool({toolColor: 0x99bb99, handColor: 0xbb99bb, host: URL_PARAMS.remoteLeapHost});
+        leapToolRemote.toolRoot.position.x -= 16 * INCH2METERS;
+        leapToolRemote.toolRoot.updateMatrix();
+        avatar.add(leapToolRemote.toolRoot);
+        world.add(leapToolRemote.toolBody);
+        leapToolRemote.leapController.connect();
+    }
 
     var gfxTablet = new YAWVRB.GfxTablet(2560, 1600);
     avatar.add(gfxTablet.mesh);
