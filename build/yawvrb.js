@@ -1330,7 +1330,9 @@ module.exports = ( function () {
             updateToolPostStep: updateToolPostStep,
             updateToolMapping:  updateToolMapping,
             setDeadtime:        setDeadtime,
-            toolShadowMesh: toolShadowMesh
+            toolShadowMesh: toolShadowMesh,
+            worldQuaternion: worldQuaternion,
+            worldPosition: worldPosition
         };
     }
 
