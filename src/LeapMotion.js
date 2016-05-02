@@ -401,7 +401,9 @@ YAWVRB.LeapMotion = ( function () {
             toolBody:           toolBody,
             updateTool:         updateTool,
             updateToolPostStep: updateToolPostStep,
-            updateToolMapping:  updateToolMapping
+            updateToolMapping:  updateToolMapping,
+            interactionBoxRoot: interactionBoxRoot,
+            interactionPlaneMaterial: interactionPlaneMaterial
         };
     }
 
