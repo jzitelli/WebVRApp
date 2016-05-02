@@ -942,7 +942,7 @@ module.exports = ( function () {
         toolRadius: 0.0034,
         toolMass: 0.04,
         tipShape: 'Cylinder',
-        tipRadius: 0.013,
+        tipRadius: 0.0034,
         interactionPlaneOpacity: 0.22,
         timeA: 0.25,
         timeB: 0.25 + 1.5,
@@ -952,6 +952,9 @@ module.exports = ( function () {
         toolColor: 0xeebb99,
         tipColor: 0x99bbee,
         handColor: 0x113399,
+        useShadowMesh: true,
+        shadowPlane: 0,
+        shadowMaterial: new THREE.MeshBasicMaterial({color: 0xffff00}),
         host: '127.0.0.1',
         port: 6437
     };
@@ -1047,9 +1050,9 @@ module.exports = ( function () {
 
         var toolShadowMesh;
         if (options.useShadowMesh) {
-            var shadowMaterial = options.shadowMaterial || new THREE.MeshBasicMaterial({color: 0xffff00});
+            var shadowMaterial = options.shadowMaterial;
             toolShadowMesh = new THREE.ShadowMesh(toolMesh, shadowMaterial);
-            var shadowPlane = new THREE.Plane(UP, 0.5);
+            var shadowPlane = new THREE.Plane(UP, options.shadowPlane);
             var shadowLightPosition = new THREE.Vector4(0.2, 5, 0, 0.01);
             toolShadowMesh.updateShadowMatrix(shadowPlane, shadowLightPosition);
         } else {
@@ -1106,6 +1109,10 @@ module.exports = ( function () {
 
         function setDeadtime(t) {
             deadtime = t;
+            if (deadtime === 0) {
+                interactionBoxRoot.visible = true;
+                interactionPlaneMaterial.opacity = options.interactionPlaneOpacity;
+            }
         }
 
         function updateTool(dt) {
@@ -1323,8 +1330,7 @@ module.exports = ( function () {
             updateToolPostStep: updateToolPostStep,
             updateToolMapping:  updateToolMapping,
             setDeadtime:        setDeadtime,
-            interactionBoxRoot: interactionBoxRoot,
-            interactionPlaneMaterial: interactionPlaneMaterial
+            toolShadowMesh: toolShadowMesh
         };
     }
 
