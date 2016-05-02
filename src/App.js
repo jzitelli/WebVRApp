@@ -1,3 +1,5 @@
+/* global THREE */
+
 function App(scene, config, rendererOptions) {
     "use strict";
     this.scene = scene;

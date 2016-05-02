@@ -1,9 +1,9 @@
 window.YAWVRB = {};
 
-YAWVRB.App        = require('./App.js');
-YAWVRB.AppUtils   = require('./AppUtils.js');
-YAWVRB.Gamepad    = require('./Gamepad.js');
-YAWVRB.GfxTablet  = require('./GfxTablet.js');
-YAWVRB.Keyboard   = require('./Keyboard.js');
-YAWVRB.LeapMotion = require('./LeapMotion.js');
-YAWVRB.Mouse      = require('./Mouse.js');
+window.YAWVRB.App        = require('./App.js');
+window.YAWVRB.AppUtils   = require('./AppUtils.js');
+window.YAWVRB.Gamepad    = require('./Gamepad.js');
+window.YAWVRB.GfxTablet  = require('./GfxTablet.js');
+window.YAWVRB.Keyboard   = require('./Keyboard.js');
+window.YAWVRB.LeapMotion = require('./LeapMotion.js');
+window.YAWVRB.Mouse      = require('./Mouse.js');

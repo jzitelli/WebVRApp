@@ -1,3 +1,5 @@
+/* global THREE, GFXTABLET */
+
 module.exports = ( function () {
 	"use strict";
 	const INCH2METERS = 0.0254;

@@ -1,8 +1,10 @@
+/* global THREE */
+
 module.exports = ( function () {
 	"use strict";
 
 	const DEFAULT_OPTIONS = {
-		eventTarget: document,
+		eventTarget: document
 	};
 
 	function Mouse(options) {

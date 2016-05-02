@@ -1,10 +1,11 @@
-/*
+/* *********************************************************************************************
 
    To connect to remote Leap Motion controllers, add this to the host's Leap Motion config.json:
-
      "websockets_allow_remote": true
 
-*/
+   ********************************************************************************************* */
+
+/* global Leap, THREE, CANNON */
 
 module.exports = ( function () {
     "use strict";

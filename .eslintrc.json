@@ -1,6 +1,7 @@
 {
     "env": {
-        "browser": true
+        "browser": true,
+        "node": true
     },
     "parserOptions": {
         "ecmaVersion": 6
@@ -10,6 +11,7 @@
         "semi": [
             "error",
             "always"
-        ]
+        ],
+        "no-console": "warn"
     }
 }

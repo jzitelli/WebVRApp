@@ -1,3 +1,5 @@
+/* global THREE */
+
 module.exports = ( function () {
     "use strict";
 
@@ -85,9 +87,7 @@ module.exports = ( function () {
             var controlWidth = INCH2METERS * 1.5,
                 windowsWidth = controlWidth,
                 altWidth     = controlWidth;
-            var controlGeom = new THREE.BoxBufferGeometry(0.95 * controlWidth, keyHeight, 0.95 * keyDelta),
-                windowsGeom = controlGeom,
-                altGeom     = controlGeom;
+            var controlGeom = new THREE.BoxBufferGeometry(0.95 * controlWidth, keyHeight, 0.95 * keyDelta);
             var spacebarWidth = 0.95 * INCH2METERS * 4.75;
             var spacebarGeom = new THREE.BoxBufferGeometry(0.95 * spacebarWidth, keyHeight, 0.95 * keyDelta);
 
@@ -121,7 +121,7 @@ module.exports = ( function () {
 
             window.addEventListener("keydown", function (evt) {
                 if (!keyDown[evt.keyCode]) {
-                    var keyName = YAWVRB.Keyboard.CODEKEYS[evt.keyCode];
+                    var keyName = Keyboard.CODEKEYS[evt.keyCode];
                     if (keyName) keyName = keyName.toLowerCase();
                     var mesh = keyMesh[keyName];
                     if (mesh) {
@@ -134,7 +134,7 @@ module.exports = ( function () {
 
             window.addEventListener("keyup", function (evt) {
                 if (keyDown[evt.keyCode]) {
-                    var keyName = YAWVRB.Keyboard.CODEKEYS[evt.keyCode];
+                    var keyName = Keyboard.CODEKEYS[evt.keyCode];
                     if (keyName) keyName = keyName.toLowerCase();
                     var mesh = keyMesh[keyName];
                     if (mesh) {
