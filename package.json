@@ -19,15 +19,18 @@
     "server.js"
   ],
   "keywords": [
-    "WebVR",
     "three.js",
     "cannon.js",
-    "Leap Motion",
     "GfxTablet",
+    "Google Cardboard",
+    "Leap Motion",
+    "Oculus Rift",
+    "HTC Vive",
+    "OSVR",
     "VR",
     "virtual reality",
-    "Google Cardboard",
-    "WebGL"
+    "WebGL",
+    "WebVR"
   ],
   "dependencies": {
     "three.js": "git://github.com/jzitelli/three.js.git#dev",
@@ -35,7 +38,8 @@
   },
   "devDependencies": {
     "jasmine": "latest",
-    "selenium-webdriver": "latest"
+    "selenium-webdriver": "latest",
+    "browserify": "latest"
   },
   "optionalDependencies": {
     "leapjs": "0.6.4",
@@ -44,6 +48,7 @@
   },
   "scripts": {
     "test": "jasmine",
-    "start": "cd ./test && python tornado_server.py"
+    "start": "cd ./test && python tornado_server.py",
+    "build": "browserify src/yawvrb.js -o build/yawvrb.js"
   }
 }
