@@ -10,6 +10,7 @@
   },
   "bugs": "https://github.com/jzitelli/yawvrb.js/issues",
   "files": [
+    "build/",
     "spec/",
     "src/",
     "test/",
@@ -33,10 +34,10 @@
     "WebVR"
   ],
   "dependencies": {
-    "three.js": "git://github.com/jzitelli/three.js.git#dev",
     "webvr-polyfill": "git://github.com/jzitelli/webvr-polyfill.git#webvr-1.0"
   },
   "devDependencies": {
+    "three.js": "git://github.com/jzitelli/three.js.git#dev",
     "jasmine": "latest",
     "selenium-webdriver": "latest",
     "browserify": "latest",
