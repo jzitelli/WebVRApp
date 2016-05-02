@@ -1,6 +1,4 @@
-var YAWVRB = window.YAWVRB || {};
-
-YAWVRB.App = function (scene, config, rendererOptions) {
+function App(scene, config, rendererOptions) {
     "use strict";
     this.scene = scene;
 
@@ -291,5 +289,6 @@ YAWVRB.App = function (scene, config, rendererOptions) {
     document.addEventListener(domElement.mozRequestFullScreen ? 'mozfullscreenchange' : 'webkitfullscreenchange',
         onFullscreenChange, false);
     window.addEventListener("beforeunload", beforeUnload, false);
+}
 
-};
+module.exports = App;

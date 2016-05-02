@@ -1,6 +1,4 @@
-var YAWVRB = window.YAWVRB || {};
-
-YAWVRB.AppUtils = ( function () {
+module.exports = ( function () {
 	"use strict";
 
 	const UP = THREE.Object3D.DefaultUp;
@@ -87,17 +85,20 @@ YAWVRB.AppUtils = ( function () {
 		};
 	}
 
+	YAWVRB = YAWVRB || {};
+	YAWVRB.DEADSCENE = YAWVRB.DEADSCENE || new THREE.Scene();
+	YAWVRB.DEADSCENE.name = 'DEADSCENE';
 	var displayText = ( function () {
-		YAWVRB.DEADSCENE = YAWVRB.DEADSCENE || new THREE.Scene();
-		YAWVRB.DEADSCENE.name = 'DEADSCENE';
+		var textMeshes = {};
+		var quadGeom = new THREE.PlaneBufferGeometry(1, 1);
+		quadGeom.translate(0.5, 0.5, 0);
 		const DEFAULT_OPTIONS = {
 			object: YAWVRB.DEADSCENE,
 			position: [0, 0.05, -0.05],
 			quaternion: [0, 0, 0, 1],
-			coordSystem: 'local'
+			coordSystem: 'local',
+			textSize: 21
 		};
-		var textMeshes = {};
-		var quadGeom = new THREE.PlaneBufferGeometry(1, 1);
 		function displayText(text, options) {
 			options = options || {};
 			for (var kwarg in DEFAULT_OPTIONS) {
@@ -108,25 +109,22 @@ YAWVRB.AppUtils = ( function () {
 			var mesh = textMeshes[key];
 			if (!mesh) {
                 var canvas = document.createElement('canvas');
-                canvas.width = 128;
-                canvas.height = 64;
+                canvas.height = 2 * options.textSize;
+                canvas.width = 128; //2*ctx.measureText(text).width;
                 var ctx = canvas.getContext('2d');
-				// ctx.strokeStyle = 'rgb(23, 23, 23)';
-    	        ctx.font = "28px serif";
-				// var textMetrics = ctx.measureText(text);
-                // canvas.width = textMetrics.width / 0.5;
+    	        ctx.font = String(options.textSize) + "px serif";
+	            // ctx.fillStyle   = 'rgba(23, 23, 23, 0.3)';
+	            // ctx.strokeStyle = 'rgba(23, 23, 23, 0.3)';
+    	        // ctx.fillRect(  0, 0, canvas.width, canvas.height);
+    	        // ctx.strokeRect(0, 0, canvas.width, canvas.height);
+	            ctx.fillStyle   = 'rgb(255, 72, 23)';
+				ctx.strokeStyle = 'rgb(250, 70, 20)';
+				ctx.fillText(  text, 0, options.textSize);
+				ctx.strokeText(text, 0, options.textSize);
                 var aspect = canvas.width / canvas.height;
 	            var texture = new THREE.Texture(canvas, THREE.UVMapping, THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
             	var material = new THREE.MeshBasicMaterial({color: 0xffffff, map: texture, transparent: true});
 				mesh = new THREE.Mesh(quadGeom, material);
-
-    	        // ctx.strokeRect(0, 0, canvas.width, canvas.height);
-	            // ctx.fillStyle = 'rgba(23, 23, 23, 0.3)';
-    	        // ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-	            ctx.fillStyle = 'rgb(255, 72, 23)';
-				ctx.fillText(text, 0, 48);
-
         	    material.map.needsUpdate = true;
 				if (options.coordSystem === 'local') {
 					options.object.add(mesh);

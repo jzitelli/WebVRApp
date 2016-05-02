@@ -1,6 +1,4 @@
-var YAWVRB = window.YAWVRB || {};
-
-YAWVRB.Mouse = ( function () {
+module.exports = ( function () {
 	"use strict";
 
 	const DEFAULT_OPTIONS = {

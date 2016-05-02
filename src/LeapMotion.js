@@ -1,4 +1,3 @@
-
 /*
 
    To connect to remote Leap Motion controllers, add this to the host's Leap Motion config.json:
@@ -7,9 +6,7 @@
 
 */
 
-var YAWVRB = window.YAWVRB || {};
-
-YAWVRB.LeapMotion = ( function () {
+module.exports = ( function () {
     "use strict";
 
     const INCH2METERS = 0.0254;

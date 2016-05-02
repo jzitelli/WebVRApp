@@ -1,6 +1,4 @@
-var YAWVRB = window.YAWVRB || {};
-
-YAWVRB.Gamepad = ( function () {
+module.exports = ( function () {
     "use strict";
 
     const DEADZONE = 0.12;

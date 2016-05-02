@@ -39,7 +39,8 @@
   "devDependencies": {
     "jasmine": "latest",
     "selenium-webdriver": "latest",
-    "browserify": "latest"
+    "browserify": "latest",
+    "watchify": "latest"
   },
   "optionalDependencies": {
     "leapjs": "0.6.4",
@@ -47,8 +48,9 @@
     "cannon": "git://github.com/jzitelli/cannon.js.git#dev"
   },
   "scripts": {
-    "test": "jasmine",
-    "start": "cd ./test && python tornado_server.py",
-    "build": "browserify src/yawvrb.js -o build/yawvrb.js"
+    "test": "npm run build && jasmine",
+    "start": "npm run build && cd ./test && python tornado_server.py",
+    "build": "browserify src/yawvrb.js -o build/yawvrb.js",
+    "watch": "watchify src/yawvrb.js -o build/yawvrb.js"
   }
 }

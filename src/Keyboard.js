@@ -1,6 +1,4 @@
-var YAWVRB = window.YAWVRB || {};
-
-YAWVRB.Keyboard = ( function () {
+module.exports = ( function () {
     "use strict";
 
     const INCH2METERS = 0.0254;

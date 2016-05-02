@@ -16,19 +16,20 @@
 
     <script>
     var WebVRConfig = {
+      BUFFER_SCALE: 0.5, // Default: 1.0.
+      PREDICTION_TIME_S: 0.02, // Default: 0.050s.
       //ENABLE_DEPRECATED_API: true, // Default: false.
       //FORCE_ENABLE_VR: true, // Default: false.
       //K_FILTER: 0.98, // Default: 0.98.
-      PREDICTION_TIME_S: 0.01, // Default: 0.050s.
       //TOUCH_PANNER_DISABLED: true, // Default: false.
       //YAW_ONLY: true, // Default: false.
       //MOUSE_KEYBOARD_CONTROLS_DISABLED: true, // Default: false.
       KEYBOARD_CONTROLS_DISABLED: true,
       //DEFER_INITIALIZATION: true, // Default: false.
       //DIRTY_SUBMIT_FRAME_BINDINGS: true, // Default: false.
-      BUFFER_SCALE: 0.5, // Default: 1.0.
       ENABLE_LEAP_MOTION: true,
-      LEAP_MOTION_HOST: '127.0.0.1'
+      LEAP_MOTION_HOST: '127.0.0.1',
+      LEAP_MOTION_PORT: 6437
     };
     </script>
 
@@ -52,13 +53,7 @@
 
     <script src="/node_modules/gfxtablet/src/GfxTablet.js"></script>
 
-    <script src="/src/App.js"></script>
-    <script src="/src/Keyboard.js"></script>
-    <script src="/src/AppUtils.js"></script>
-    <script src="/src/LeapMotion.js"></script>
-    <script src="/src/GfxTablet.js"></script>
-    <script src="/src/Mouse.js"></script>
-    <script src="/src/Gamepad.js"></script>
+    <script src="/build/yawvrb.js"></script>
 
     <script src="/test/utils.js"></script>
     <script src="/test/main.js"></script>
