@@ -101,21 +101,35 @@ function App(scene, config, rendererOptions) {
     var useDeprecatedWebVR = false;
     var vrDisplay;
 
+    this.sittingToStandingTransform = new THREE.Object3D();
+    this.sittingToStandingTransform.matrixAutoUpdate = false;
+
+    var updateSittingToStandingTransform = function () {
+        if (this.vrDisplay && this.vrDisplay.stageParameters && this.vrDisplay.stageParameters.sittingToStandingTransform) {
+            this.sittingToStandingTransform.matrix.fromArray(this.vrDisplay.stageParameters.sittingToStandingTransform);
+            this.sittingToStandingTransform.updateMatrixWorld();
+        }
+    }.bind(this);
+
     this.toggleVR = function () {
+        var vrDisplay = this.vrDisplay;
         if (!isPresenting) {
             this.vrEffect.requestPresent().then( function () {
+                updateSittingToStandingTransform();
                 isPresenting = true;
-                if (!useDeprecatedWebVR && vrDisplay.capabilities.canPresent && vrDisplay.capabilities.hasExternalDisplay) {
-                    var eyeParams = vrDisplay.getEyeParameters( 'left' );
-                    this.renderer.setSize(2*eyeParams.renderWidth, eyeParams.renderHeight);
+                if (!useDeprecatedWebVR && vrDisplay.capabilities.canPresent) {
+                    if (vrDisplay.capabilities.hasExternalDisplay) {
+                        var eyeParams = vrDisplay.getEyeParameters( 'left' );
+                        this.renderer.setSize(2*eyeParams.renderWidth, eyeParams.renderHeight);
+                    }
                     presentingElement.style.display = "block";
                     // requestPointerLock();
                 }
-            } );
+            }.bind(this) );
         } else {
             this.vrEffect.exitPresent().then( function () {
                 isPresenting = false;
-                if (!useDeprecatedWebVR && vrDisplay.capabilities.canPresent && vrDisplay.capabilities.hasExternalDisplay) {
+                if (!useDeprecatedWebVR && vrDisplay.capabilities.canPresent) {
                     presentingElement.style.display = "none";
                     // releasePointerLock();
                 }
