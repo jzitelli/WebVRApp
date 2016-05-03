@@ -48,15 +48,16 @@ def main():
     _logger.info("listening on port %d" % port)
     _logger.info("press CTRL-C to terminate the server")
     _logger.info("""
-           -----------
-        Y  A  W  V  R  B
-    *************************
-*********************************
-STARTING TORNADO APP!!!!!!!!!!!!!
-*********************************
-    *************************
-         Y  A  W  V  R  B
-           -----------
+
+             -----------
+          Y  A  W  V  R  B
+      *************************
+  *********************************
+  STARTING TORNADO APP!!!!!!!!!!!!!
+  *********************************
+      *************************
+           Y  A  W  V  R  B
+             -----------
 """)
     IOLoop.instance().start()
 

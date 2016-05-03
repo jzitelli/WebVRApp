@@ -133,7 +133,7 @@ function onLoad() {
     }
 
     var tGamepad = 0;
-    const GETGAMEPADS_POLLTIME = 0.021;
+    const GETGAMEPADS_POLLTIME = 0.03;
     var lastVibration = 0;
 
     function moveByKeyboard(dt, t) {
@@ -173,7 +173,17 @@ function onLoad() {
                 if (gamepad.buttons[j].pressed) {
                     if (!buttonsPressed[j]) {
                         buttonsPressed[j] = true;
-                        console.log('pressed %d', j);
+                        for (var name in gamepadCommands) {
+                            var command = gamepadCommands[name];
+                            if (command.buttons && command.commandDown) {
+                                for (var k = 0; k < command.buttons.length; k++) {
+                                    if (command.buttons[k] === j) {
+                                        command.commandDown();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
                 } else {
                     if (buttonsPressed[j]) {
@@ -181,18 +191,29 @@ function onLoad() {
                     }
                 }
             }
+            for (name in gamepadCommands) {
+                command = gamepadCommands[name];
+                for (j = 0; j < gamepad.axes.length; ++j) {
+                    var axis = gamepad.axes[j];
+                    if (Math.abs(axis) > 0.14) {
+                        if (command.axes && command.axes.indexOf(j) !== -1) {
+                            if (buttonsPressed[gamepadCommands['toggleFloat'].buttons[0]]) {
+                                if      (name === 'moveFB') moveUD -= gamepad.axes[j];
+                                else if (name === 'moveRL') moveRL += gamepad.axes[j];
+                                else if (name === 'turnRL') turnRL += gamepad.axes[j];
+                                else if (name === 'turnUD') turnUD += gamepad.axes[j];
+                            } else {
+                                if      (name === 'moveFB') moveFB -= gamepad.axes[j];
+                                else if (name === 'moveRL') moveRL += gamepad.axes[j];
+                                else if (name === 'turnRL') turnRL += gamepad.axes[j];
+                                else if (name === 'turnUD') turnUD += gamepad.axes[j];
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
         }
-
-        // if (gamepad.gamepad && gamepad.gamepad.connected) {
-        //     if (gamepad.toggleFloat) {
-        //         moveUD -= gamepad.moveFB;
-        //     } else {
-        //         moveFB -= gamepad.moveFB;
-        //         turnRL += gamepad.turnRL;
-        //         turnUD += gamepad.turnUD;
-        //     }
-        //     moveRL += gamepad.moveRL;
-        // }
         if (objectSelector.selection === avatar) turnUD = 0;
         objectSelector.moveSelection(dt, moveFB, moveRL, moveUD, turnRL, turnUD);
     }
