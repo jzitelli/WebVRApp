@@ -4,7 +4,6 @@ module.exports = ( function () {
     const DEADZONE = 0.12;
 
     var gamepads;
-    var nextIndex = 0;
     if (navigator.getGamepads) {
         gamepads = navigator.getGamepads();
     } else if (navigator.webkitGetGamepads) {
@@ -12,89 +11,101 @@ module.exports = ( function () {
     }
 
     function Gamepad(commands) {
-        var gamepad;
-        var index = nextIndex;
+        this.gamepad = null;
+
+        var index = 0;
         if (gamepads) {
             for (var i = index; i < gamepads.length; i++) {
                 if (gamepads[i]) {
-                    gamepad = gamepads[i];
-                    index = i;
-                    nextIndex = i + 1;
-                    console.log("Using gamepad at index %d: %s. %d buttons, %d axes.", gamepad.index, gamepad.id, gamepad.buttons.length, gamepad.axes.length);
-                    break;
+                    if (/STANDARD GAMEPAD/.test(gamepads[i].id)) {
+                        this.gamepad = gamepads[i];
+                        index = i;
+                        setupCommands();
+                        console.log("Using gamepad at index %d: %s. %d buttons, %d axes.", this.gamepad.index, this.gamepad.id, this.gamepad.buttons.length, this.gamepad.axes.length);
+                        break;
+                    }
                 }
             }
         }
+
+        this.logConnectedGamepads = logConnectedGamepads;
+        function logConnectedGamepads() {
+            for (var i = 0; i < gamepads.length; i++) {
+                var gamepad = gamepads[i];
+                if (gamepad && gamepad.connected) {
+                    console.log("gamepad %d: %d %s", i, gamepad.index, gamepad.id);
+                }
+            }
+        }
+
         function onGamepadConnected(e) {
             if (e.gamepad.index === index) {
-                gamepad = e.gamepad;
-                gamepads[index] = gamepad;
-                console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.", gamepad.index, gamepad.id, gamepad.buttons.length, gamepad.axes.length);
+                this.gamepad = e.gamepad;
+                gamepads[index] = this.gamepad;
+                setupCommands();
+                console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.", this.gamepad.index, this.gamepad.id, this.gamepad.buttons.length, this.gamepad.axes.length);
             }
         }
-        window.addEventListener("gamepadconnected", onGamepadConnected);
+        window.addEventListener("gamepadconnected", onGamepadConnected.bind(this));
+
         function onGamepadDisconnected(e) {
             if (index === e.gamepad.index) {
+                this.gamepad = null;
                 console.log("Gamepad disconnected from index %d: %s", index, e.gamepad.id);
-                gamepad = null;
-                if (gamepads[index]) {
-                    gamepads[index] = null;
-                }
             }
         }
         window.addEventListener("gamepaddisconnected", onGamepadDisconnected);
 
-        this.isConnected = function () {
-            return (gamepad && gamepad.connected);
-        };
-
         var commandDowns = [];
         var commandUps = [];
         var buttonPressed = [];
-        for (var name in commands) {
-            var buttons = commands[name].buttons;
-            var axes = commands[name].axes;
-            Object.defineProperty(this, name, {
-                enumerable: true,
-                get: getState.bind(this, buttons, axes)
-            });
-            var commandDown = commands[name].commandDown;
-            if (commandDown) {
-                for (i = 0; i < buttons.length; i++) {
-                    commandDowns[buttons[i]] = commandDown;
-                }
-            }
-            var commandUp = commands[name].commandUp;
-            if (commandUp) {
-                for (i = 0; i < buttons.length; i++) {
-                    commandUps[buttons[i]] = commandUp;
-                }
-            }
-        }
 
-        function getState(buttons, axes) {
-            if (!gamepad) return 0;
+        var setupCommands = function () {
+            for (var name in commands) {
+                var buttons = commands[name].buttons;
+                var axes = commands[name].axes;
+                Object.defineProperty(this, name, {
+                    enumerable: true,
+                    get: getState.bind(this, buttons, axes)
+                });
+                var commandDown = commands[name].commandDown;
+                if (commandDown) {
+                    for (i = 0; i < buttons.length; i++) {
+                        commandDowns[buttons[i]] = commandDown;
+                    }
+                }
+                var commandUp = commands[name].commandUp;
+                if (commandUp) {
+                    for (i = 0; i < buttons.length; i++) {
+                        commandUps[buttons[i]] = commandUp;
+                    }
+                }
+            }
+        }.bind(this);
+
+        var getState = function (buttons, axes) {
+            if (!this.gamepad) return 0;
             var i;
             if (buttons) {
                 for (i = 0; i < buttons.length; i++) {
-                    var button = gamepad.buttons[buttons[i]];
+                    var button = this.gamepad.buttons[buttons[i]];
                     if (isNaN(button) && button.pressed) return button.value;
                 }
                 return 0;
             } else if (axes) {
                 for (i = 0; i < axes.length; i++) {
-                    var value = gamepad.axes[axes[i]];
+                    var value = this.gamepad.axes[axes[i]];
                     if (value && Math.abs(value) > DEADZONE) return value;
                 }
                 return 0;
             }
             return 0;
-        }
+        }.bind(this);
 
         this.update = function () {
-            if (!gamepad) return;
-            for (var i = 0; i < gamepad.buttons.length; i++) {
-                var button = gamepad.buttons[i];
+            if (!this.gamepad) return;
+            for (var i = 0; i < this.gamepad.buttons.length; i++) {
+                var button = this.gamepad.buttons[i];
                 var pressed = (isNaN(button) ? (button.value === 1) : (button === 1));
                 if (pressed && !buttonPressed[i]) {
                     buttonPressed[i] = true;
@@ -104,7 +115,7 @@ module.exports = ( function () {
                     if (commandUps[i]) commandUps[i]();
                 }
             }
-        };
+        }.bind(this);
     }
 
     Gamepad.AXES = {

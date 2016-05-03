@@ -1,15 +1,16 @@
+/* global THREE */
 function onLoad() {
     "use strict";
-
-    THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
     const INCH2METERS = 0.0254;
     const UP = THREE.Object3D.DefaultUp;
     const RIGHT = new THREE.Vector3(1, 0, 0);
 
-    var canvas = document.getElementById('webgl-canvas');
+    THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
     var app;
+
+    var canvas = document.getElementById('webgl-canvas');
 
     var avatar = new THREE.Object3D();
     avatar.position.y = 1.2;
@@ -33,6 +34,7 @@ function onLoad() {
         toggleFloat: {buttons: [YAWVRB.Gamepad.BUTTONS.leftStick]}
     };
     var gamepad = new YAWVRB.Gamepad(gamepadCommands);
+    window.gamepad = gamepad;
 
     var keyboardCommands = {
         toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: function () { app.toggleVR(); }},
@@ -78,7 +80,7 @@ function onLoad() {
     gfxTablet.mesh.quaternion.setFromAxisAngle(UP, 0.5 * Math.PI).multiply((new THREE.Quaternion()).setFromAxisAngle(RIGHT, -0.125 * Math.PI));
     gfxTablet.mesh.updateMatrix();
 
-    YAWVRB.AppUtils.displayText('GfxTablet', {object: gfxTablet.mesh, position: [0, 0.25, -0.05]});
+    YAWVRB.AppUtils.displayText('GfxTablet', {object: gfxTablet.mesh, position: [0, 0.5, 0.05]});
     YAWVRB.AppUtils.displayText('Keyboard', {object: keyboardObject});
     if (leapTool) YAWVRB.AppUtils.displayText('Leap Motion (local)', {object: leapTool.toolRoot});
     if (leapToolRemote) YAWVRB.AppUtils.displayText('Leap Motion (remote)', {object: leapToolRemote.toolRoot});
@@ -95,7 +97,7 @@ function onLoad() {
             moveUD = keyboard.moveUp - keyboard.moveDown,
             turnRL = keyboard.turnRight - keyboard.turnLeft,
             turnUD = keyboard.turnUp - keyboard.turnDown;
-        if (gamepad.isConnected()) {
+        if (gamepad.gamepad && gamepad.gamepad.connected) {
             if (gamepad.toggleFloat) {
                 moveUD -= gamepad.moveFB;
             } else {
@@ -118,15 +120,12 @@ function onLoad() {
 
         var deskTexture = textureLoader.load('/test/models/textures/deskTexture.png');
         var deskMaterial = new THREE.MeshBasicMaterial({map: deskTexture});
-
         var roomTexture = textureLoader.load('/test/models/textures/roomTexture.png');
         var roomMaterial = new THREE.MeshBasicMaterial({map: roomTexture});
-
         var chairTexture = textureLoader.load('/test/models/textures/chairTexture.png');
         var chairMaterial = new THREE.MeshBasicMaterial({map: chairTexture});
 
         objectLoader.load("/test/models/WebVRDesk.json", function (scene) {
-
             for (var i = 0; i < scene.children.length; i++) {
                 var child = scene.children[i];
                 child.updateMatrix();
@@ -138,36 +137,36 @@ function onLoad() {
             }
 
             app = new YAWVRB.App(scene, undefined, {canvas: canvas, alpha: true});
+
             app.renderer.setSize(window.innerWidth, window.innerHeight);
             scene.add(avatar);
             avatar.add(app.camera);
-            scene.add(leapTool.toolShadowMesh);
+            if (leapTool && leapTool.toolShadowMesh)             scene.add(leapTool.toolShadowMesh);
+            if (leapToolRemote && leapToolRemote.toolShadowMesh) scene.add(leapToolRemote.toolShadowMesh);
             scene.updateMatrixWorld(true);
-
-            if (leapTool) leapTool.updateToolMapping();
+            if (leapTool)       leapTool.updateToolMapping();
             if (leapToolRemote) leapToolRemote.updateToolMapping();
 
             requestAnimationFrame(animate);
 
-            var frameCount = 0,
-                lt = 0;
+            var lt = 0;
             function animate(t) {
                 var dt = 0.001 * (t - lt);
-                frameCount++;
-
-                moveByKeyboard(dt);
-                if (leapTool) leapTool.updateToolMapping();
-                if (leapToolRemote) leapToolRemote.updateToolMapping();
 
                 gamepad.update();
-                if (leapTool) leapTool.updateTool(dt);
+                moveByKeyboard(dt);
+
+                if (leapTool)       leapTool.updateToolMapping();
+                if (leapToolRemote) leapToolRemote.updateToolMapping();
+
+                if (leapTool)       leapTool.updateTool(dt);
                 if (leapToolRemote) leapToolRemote.updateTool(dt);
 
                 app.render();
 
                 world.step(Math.min(dt, 1/60), dt, 10);
 
-                if (leapTool) leapTool.updateToolPostStep();
+                if (leapTool)       leapTool.updateToolPostStep();
                 if (leapToolRemote) leapToolRemote.updateToolPostStep();
 
                 lt = t;
