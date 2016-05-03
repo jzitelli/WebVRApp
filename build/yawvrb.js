@@ -54,7 +54,7 @@ function App(scene, config, rendererOptions) {
                 this.vrControls.update(true);
                 lastPosition.copy(this.camera.position);
                 var lastRotation = this.camera.rotation.y;
-                this.vrControls.resetSensor();
+                this.vrControls.resetPose();
                 this.vrControls.update(true);
                 if (onResetVRSensor) {
                     onResetVRSensor(lastRotation, lastPosition);
@@ -452,84 +452,81 @@ module.exports = ( function () {
 module.exports = ( function () {
     "use strict";
 
-    const DEADZONE = 0.12;
+    const DEADZONE = 0.145;
 
     var gamepads;
-    var nextIndex = 0;
-    if (navigator.getGamepads) {
-        gamepads = navigator.getGamepads();
-    } else if (navigator.webkitGetGamepads) {
-        gamepads = navigator.webkitGetGamepads();
+
+    function refreshGamepads() {
+        if (navigator.webkitGetGamepads) {
+            gamepads = navigator.webkitGetGamepads();
+        } else if (navigator.getGamepads) {
+            gamepads = navigator.getGamepads();
+        }
     }
+    refreshGamepads();
 
     function Gamepad(commands) {
-        var gamepad;
-        var index = nextIndex;
-        if (gamepads) {
-            for (var i = index; i < gamepads.length; i++) {
-                if (gamepads[i]) {
-                    gamepad = gamepads[i];
-                    index = i;
-                    nextIndex = i + 1;
-                    console.log("Using gamepad at index %d: %s. %d buttons, %d axes.", gamepad.index, gamepad.id, gamepad.buttons.length, gamepad.axes.length);
-                    break;
-                }
-            }
-        }
-        function onGamepadConnected(e) {
-            if (e.gamepad.index === index) {
-                gamepad = e.gamepad;
-                gamepads[index] = gamepad;
-                console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.", gamepad.index, gamepad.id, gamepad.buttons.length, gamepad.axes.length);
-            }
-        }
-        window.addEventListener("gamepadconnected", onGamepadConnected);
-        function onGamepadDisconnected(e) {
-            if (index === e.gamepad.index) {
-                console.log("Gamepad disconnected from index %d: %s", index, e.gamepad.id);
-                gamepad = null;
-                if (gamepads[index]) {
-                    gamepads[index] = null;
-                }
-            }
-        }
-        window.addEventListener("gamepaddisconnected", onGamepadDisconnected);
 
-        this.isConnected = function () {
-            return (gamepad && gamepad.connected);
-        };
-
+        this.gamepad = null;
         var commandDowns = [];
         var commandUps = [];
         var buttonPressed = [];
-        for (var name in commands) {
-            var buttons = commands[name].buttons;
-            var axes = commands[name].axes;
-            Object.defineProperty(this, name, {
-                enumerable: true,
-                get: getState.bind(this, buttons, axes)
-            });
-            var commandDown = commands[name].commandDown;
-            if (commandDown) {
-                for (i = 0; i < buttons.length; i++) {
-                    commandDowns[buttons[i]] = commandDown;
+
+        var i = 0;
+        if (gamepads) {
+            for (i = 0; i < gamepads.length; i++) {
+                if (gamepads[i]) {
+                    if (/STANDARD GAMEPAD/.test(gamepads[i].id) || /xinput/.test(gamepads[i].id)) {
+                        this.gamepad = gamepads[i];
+                        setupCommands.call(this);
+                        console.log("Using gamepad at index %d: %s. %d buttons, %d axes.", this.gamepad.index, this.gamepad.id, this.gamepad.buttons.length, this.gamepad.axes.length);
+                        break;
+                    }
                 }
             }
-            var commandUp = commands[name].commandUp;
-            if (commandUp) {
-                for (i = 0; i < buttons.length; i++) {
-                    commandUps[buttons[i]] = commandUp;
+        }
+
+        function setupCommands() {
+            for (var name in commands) {
+                var buttons = commands[name].buttons;
+                var axes = commands[name].axes;
+
+                if (buttons || axes) {
+
+                    Object.defineProperty(this, name, {
+                        enumerable: true,
+                        get: getState.bind(this, buttons, axes)
+                    });
+
+                    var commandDown = commands[name].commandDown;
+                    if (commandDown) {
+                        for (var i = 0; i < buttons.length; i++) {
+                            commandDowns[buttons[i]] = commandDown;
+                        }
+                    }
+
+                    var commandUp = commands[name].commandUp;
+                    if (commandUp) {
+                        for (i = 0; i < buttons.length; i++) {
+                            commandUps[buttons[i]] = commandUp;
+                        }
+                    }
+
                 }
+
             }
         }
 
         function getState(buttons, axes) {
-            if (!gamepad) return 0;
+            var gamepad = this.gamepad;
+            if (!gamepad || !gamepad.connected) return 0;
             var i;
             if (buttons) {
                 for (i = 0; i < buttons.length; i++) {
                     var button = gamepad.buttons[buttons[i]];
-                    if (isNaN(button) && button.pressed) return button.value;
+                    if (isNaN(button) && button.pressed) {
+                        return button.value;
+                    }
                 }
                 return 0;
             } else if (axes) {
@@ -538,12 +535,32 @@ module.exports = ( function () {
                     if (value && Math.abs(value) > DEADZONE) return value;
                 }
                 return 0;
+            } else {
+                return 0;
             }
-            return 0;
         }
 
+        function onGamepadConnected(e) {
+            console.log("Gamepad connected at index %d: %s", e.gamepad.index, e.gamepad.id);
+            refreshGamepads();
+            if (/STANDARD GAMEPAD/.test(e.gamepad.id) || /xinput/.test(e.gamepad.id)) {
+                this.gamepad = gamepads[e.gamepad.index];
+                setupCommands.call(this);
+                console.log("Using gamepad at index %d: %s. %d buttons, %d axes.", this.gamepad.index, this.gamepad.id, this.gamepad.buttons.length, this.gamepad.axes.length);
+            }
+        }
+        window.addEventListener("gamepadconnected", onGamepadConnected.bind(this));
+
+        function onGamepadDisconnected(e) {
+            console.log("Gamepad disconnected from index %d: %s", e.gamepad.index, e.gamepad.id);
+        }
+        window.addEventListener("gamepaddisconnected", onGamepadDisconnected.bind(this));
+
         this.update = function () {
-            if (!gamepad) return;
+            var gamepad = this.gamepad;
+            if (!gamepad || !gamepad.connected || !gamepad.buttons) {
+                return;
+            }
             for (var i = 0; i < gamepad.buttons.length; i++) {
                 var button = gamepad.buttons[i];
                 var pressed = (isNaN(button) ? (button.value === 1) : (button === 1));
@@ -555,7 +572,8 @@ module.exports = ( function () {
                     if (commandUps[i]) commandUps[i]();
                 }
             }
-        };
+        }.bind(this);
+
     }
 
     Gamepad.AXES = {
@@ -582,6 +600,15 @@ module.exports = ( function () {
         down: 13,
         left: 14,
         right: 15
+    };
+
+    Gamepad.logConnectedGamepads = function () {
+        for (var i = 0; i < gamepads.length; i++) {
+            var gamepad = gamepads[i];
+            if (gamepad && gamepad.connected) {
+                console.log("gamepad %d: %d %s", i, gamepad.index, gamepad.id);
+            }
+        }
     };
 
     return Gamepad;
