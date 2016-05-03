@@ -31,7 +31,8 @@ function onLoad() {
         moveRL: {axes: [YAWVRB.Gamepad.AXES.LSX]},
         turnRL: {axes: [YAWVRB.Gamepad.AXES.RSX]},
         turnUD: {axes: [YAWVRB.Gamepad.AXES.RSY]},
-        toggleFloat: {buttons: [YAWVRB.Gamepad.BUTTONS.leftStick]}
+        toggleFloat: {buttons: [YAWVRB.Gamepad.BUTTONS.leftStick]},
+        toggleVR: {buttons: [YAWVRB.Gamepad.BUTTONS.start], commandDown: function () { app.toggleVR(); }}
     };
 
     YAWVRB.Gamepad.logConnectedGamepads();
