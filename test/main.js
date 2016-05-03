@@ -109,13 +109,29 @@ function onLoad() {
         var gamepad = gamepads[i];
         if (gamepad && (/xbox/i.test(gamepad.id) || /xinput/i.test(gamepad.id))) {
             xboxGamepads.push(gamepad);
-        } else if (gamepad && gamepad.pose) {
+        }
+        if (gamepad && gamepad.pose) {
             vrGamepads.push(gamepad);
         }
     }
     for (i = 0; i < xboxGamepads.length; i++) {
         buttonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
     }
+    var vrButtonsPresseds = [];
+    vrButtonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
+    vrButtonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
+
+    var viveA = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.18, 0.06), new THREE.MeshLambertMaterial({color: 0xff2222}));
+    viveA.matrixAutoUpdate = false;
+    var viveB = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.18, 0.06), new THREE.MeshLambertMaterial({color: 0x22ff22}));
+    viveB.matrixAutoUpdate = false;
+
+    var sittingToStandingTransform = new THREE.Object3D();
+    sittingToStandingTransform.matrixAutoUpdate = false;
+    sittingToStandingTransform.add(viveA);
+    sittingToStandingTransform.add(viveB);
+    avatar.add(sittingToStandingTransform);
+    updateSittingToStandingTransform();
 
     function pollGamepads() {
         var newGamepads = navigator.getGamepads();
@@ -127,7 +143,8 @@ function onLoad() {
             var gamepad = gamepads[i];
             if (gamepad && (/xbox/i.test(gamepad.id) || /xinput/i.test(gamepad.id))) {
                 xboxGamepads.push(gamepad);
-            } else if (gamepad && gamepad.pose) {
+            }
+            if (gamepad && gamepad.pose) {
                 vrGamepads.push(gamepad);
             }
         }
@@ -136,19 +153,8 @@ function onLoad() {
         }
     }
 
-    var viveA = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.18, 0.06), new THREE.MeshLambertMaterial({color: 0xff2222}));
-    viveA.matrixAutoUpdate = false;
-    var viveB = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.18, 0.06), new THREE.MeshLambertMaterial({color: 0x22ff22}));
-    viveB.matrixAutoUpdate = false;
-
-    var sittingToStandingTransform = new THREE.Object3D();
-    sittingToStandingTransform.matrixAutoUpdate = false;
-    avatar.add(sittingToStandingTransform);
-    sittingToStandingTransform.add(viveA);
-    sittingToStandingTransform.add(viveB);
-
     function updateSittingToStandingTransform() {
-        if (app.vrDisplay && app.vrDisplay.stageParameters && app.vrDisplay.stageParameters.sittingToStandingTransform) {
+        if (app && app.vrDisplay && app.vrDisplay.stageParameters && app.vrDisplay.stageParameters.sittingToStandingTransform) {
             sittingToStandingTransform.matrix.fromArray(app.vrDisplay.stageParameters.sittingToStandingTransform);
             sittingToStandingTransform.updateMatrixWorld();
         }
@@ -165,29 +171,33 @@ function onLoad() {
             turnRL = keyboard.turnRight - keyboard.turnLeft,
             turnUD = keyboard.turnUp - keyboard.turnDown;
 
-        tGamepad += dt;
-        if (tGamepad > GETGAMEPADS_POLLTIME) {
-            tGamepad = 0;
-            pollGamepads();
-        }
+        pollGamepads();
+        updateSittingToStandingTransform();
 
         for (var i = 0; i < vrGamepads.length; ++i) {
             var gamepad = vrGamepads[i];
+
             var mesh = (i === 0 ? viveA : viveB);
             mesh.quaternion.fromArray(gamepad.pose.orientation);
             mesh.position.fromArray(gamepad.pose.position);
             mesh.updateMatrix();
             mesh.updateMatrixWorld();
+
+            var buttonsPressed = vrButtonsPresseds[i];
+
             if ("vibrate" in gamepad) {
                 for (var j = 0; j < gamepad.buttons.length; ++j) {
                     if (gamepad.buttons[j].pressed) {
-                        // var vibrationDelay = (10 * (1.0 - gamepad.buttons[j].value)) + 10;
-                        // if (t - lastVibration > vibrationDelay) {
-                        //     gamepad.vibrate(333);
-                        //     lastVibration = t;
-                        // }
+                        if (!buttonsPressed[j]) {
+                            console.log('pressed %d', j);
+                            buttonsPressed[j] = true;
+                        }
                         gamepad.vibrate(100);
-                        break;
+                    } else if (buttonsPressed[j]) {
+                        buttonsPressed[j] = false;
+                    }
+                    if (j === 3) {
+                        app.toggleVR();
                     }
                 }
             }
@@ -195,7 +205,7 @@ function onLoad() {
 
         for (i = 0; i < xboxGamepads.length; ++i) {
             gamepad = xboxGamepads[i];
-            var buttonsPressed = buttonsPresseds[i];
+            buttonsPressed = buttonsPresseds[i];
             for (j = 0; j < gamepad.buttons.length; ++j) {
                 if (gamepad.buttons[j].pressed) {
                     if (!buttonsPressed[j]) {
@@ -280,8 +290,6 @@ function onLoad() {
 
             if (leapTool && leapTool.toolShadowMesh)             app.scene.add(leapTool.toolShadowMesh);
             if (leapToolRemote && leapToolRemote.toolShadowMesh) app.scene.add(leapToolRemote.toolShadowMesh);
-
-            setTimeout(updateSittingToStandingTransform, 2000);
 
             app.scene.updateMatrixWorld(true);
 
