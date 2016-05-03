@@ -53,7 +53,7 @@ function App(scene, config, rendererOptions) {
                 this.vrControls.update(true);
                 lastPosition.copy(this.camera.position);
                 var lastRotation = this.camera.rotation.y;
-                this.vrControls.resetSensor();
+                this.vrControls.resetPose();
                 this.vrControls.update(true);
                 if (onResetVRSensor) {
                     onResetVRSensor(lastRotation, lastPosition);

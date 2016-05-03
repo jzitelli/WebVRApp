@@ -26,14 +26,18 @@ function onLoad() {
 
     var gamepadCommands = {
         resetVRSensor: {buttons: [YAWVRB.Gamepad.BUTTONS.back], commandDown: function () { app.resetVRSensor(); }},
-        cycleSelection: {buttons: [YAWVRB.Gamepad.BUTTONS.right], commandDown: objectSelector.cycleSelection},
+        cycleSelection: {buttons: [YAWVRB.Gamepad.BUTTONS.right], commandDown: function () {console.log('yay!');}}, //objectSelector.cycleSelection},
         moveFB: {axes: [YAWVRB.Gamepad.AXES.LSY]},
         moveRL: {axes: [YAWVRB.Gamepad.AXES.LSX]},
         turnRL: {axes: [YAWVRB.Gamepad.AXES.RSX]},
         turnUD: {axes: [YAWVRB.Gamepad.AXES.RSY]},
         toggleFloat: {buttons: [YAWVRB.Gamepad.BUTTONS.leftStick]}
     };
+
+    YAWVRB.Gamepad.logConnectedGamepads();
+
     var gamepad = new YAWVRB.Gamepad(gamepadCommands);
+
     window.gamepad = gamepad;
 
     var keyboardCommands = {
