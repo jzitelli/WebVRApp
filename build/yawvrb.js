@@ -418,7 +418,7 @@ module.exports = ( function () {
                 // ctx.fillRect(  0, 0, canvas.width, canvas.height);
                 // ctx.strokeRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle   = 'rgb(255, 72, 23)';
-                ctx.strokeStyle = 'rgb(250, 70, 20)';
+                ctx.strokeStyle = 'rgb(240, 70, 20)';
                 ctx.fillText(  text, 0, options.textSize);
                 ctx.strokeText(text, 0, options.textSize);
                 var aspect = canvas.width / canvas.height;
@@ -431,7 +431,7 @@ module.exports = ( function () {
                     mesh.position.fromArray(options.position);
                     mesh.quaternion.fromArray(options.quaternion);
                     var worldScale = options.object.getWorldScale();
-                    mesh.scale.set(aspect * 0.125 / worldScale.x, 0.125 / worldScale.y, 1 / worldScale.z);
+                    mesh.scale.set(aspect * 0.075 / worldScale.x, 0.075 / worldScale.y, 1 / worldScale.z);
                     mesh.updateMatrix();
                 }
                 textMeshes[key] = mesh;
@@ -954,7 +954,7 @@ module.exports = ( function () {
         handColor: 0x113399,
         useShadowMesh: true,
         shadowPlane: 0,
-        shadowMaterial: new THREE.MeshBasicMaterial({color: 0xffff00}),
+        shadowMaterial: new THREE.MeshBasicMaterial({color: 0x333333}),
         host: '127.0.0.1',
         port: 6437
     };
