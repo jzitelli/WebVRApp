@@ -119,7 +119,7 @@ module.exports = ( function () {
                 // ctx.fillRect(  0, 0, canvas.width, canvas.height);
                 // ctx.strokeRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle   = 'rgb(255, 72, 23)';
-                ctx.strokeStyle = 'rgb(250, 70, 20)';
+                ctx.strokeStyle = 'rgb(240, 70, 20)';
                 ctx.fillText(  text, 0, options.textSize);
                 ctx.strokeText(text, 0, options.textSize);
                 var aspect = canvas.width / canvas.height;
@@ -132,7 +132,7 @@ module.exports = ( function () {
                     mesh.position.fromArray(options.position);
                     mesh.quaternion.fromArray(options.quaternion);
                     var worldScale = options.object.getWorldScale();
-                    mesh.scale.set(aspect * 0.125 / worldScale.x, 0.125 / worldScale.y, 1 / worldScale.z);
+                    mesh.scale.set(aspect * 0.075 / worldScale.x, 0.075 / worldScale.y, 1 / worldScale.z);
                     mesh.updateMatrix();
                 }
                 textMeshes[key] = mesh;

@@ -141,6 +141,7 @@ function onLoad() {
             app.renderer.setSize(window.innerWidth, window.innerHeight);
             scene.add(avatar);
             avatar.add(app.camera);
+            scene.add(leapTool.toolShadowMesh);
             scene.updateMatrixWorld(true);
 
             if (leapTool) leapTool.updateToolMapping();

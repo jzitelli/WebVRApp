@@ -36,7 +36,7 @@ module.exports = ( function () {
         handColor: 0x113399,
         useShadowMesh: true,
         shadowPlane: 0,
-        shadowMaterial: new THREE.MeshBasicMaterial({color: 0xffff00}),
+        shadowMaterial: new THREE.MeshBasicMaterial({color: 0x333333}),
         host: '127.0.0.1',
         port: 6437
     };
