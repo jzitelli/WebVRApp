@@ -94,19 +94,47 @@ function onLoad() {
     if (leapToolRemote) objectSelector.addSelectable(leapToolRemote.toolRoot);
     objectSelector.addSelectable(gfxTablet.mesh);
 
-    // Loop over every gamepad and if we find any that have a pose use it.
-    var vrGamepads = [];
     var gamepads = navigator.getGamepads();
-    for (var i = 0; i < gamepads.length; ++i) {
+    for (var i = 0; i < gamepads.length; i++) {
+        if (gamepads[i]) console.log('gamepad %d: %s', i, gamepads[i].id);
+    }
+    var vrGamepads = [];
+    var xboxGamepads = [];
+    var buttonsPresseds = [];
+    for (i = 0; i < gamepads.length; ++i) {
         var gamepad = gamepads[i];
-        if (gamepad && gamepad.pose) {
+        if (gamepad && (/xbox/i.test(gamepad.id) || /xinput/i.test(gamepad.id))) {
+            xboxGamepads.push(gamepad);
+        } else if (gamepad && gamepad.pose) {
             vrGamepads.push(gamepad);
         }
     }
+    for (i = 0; i < xboxGamepads.length; i++) {
+        buttonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
+    }
+
+    function pollGamepads() {
+        var newGamepads = navigator.getGamepads();
+        if (newGamepads.length === gamepads.length) return;
+        gamepads = newGamepads;
+        vrGamepads = [];
+        xboxGamepads = [];
+        for (var i = 0; i < gamepads.length; ++i) {
+            var gamepad = gamepads[i];
+            if (gamepad && (/xbox/i.test(gamepad.id) || /xinput/i.test(gamepad.id))) {
+                xboxGamepads.push(gamepad);
+            } else if (gamepad && gamepad.pose) {
+                vrGamepads.push(gamepad);
+            }
+        }
+        for (i = 0; i < xboxGamepads.length; i++) {
+            if (!buttonsPresseds[i]) buttonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
+        }
+    }
+
     var tGamepad = 0;
-    const GETGAMEPADS_POLLTIME = 0.5;
+    const GETGAMEPADS_POLLTIME = 0.021;
     var lastVibration = 0;
-    var xboxGamepads = [];
 
     function moveByKeyboard(dt, t) {
         var moveFB = keyboard.moveForward - keyboard.moveBackward,
@@ -117,27 +145,17 @@ function onLoad() {
 
         tGamepad += dt;
         if (tGamepad > GETGAMEPADS_POLLTIME) {
-            vrGamepads = [];
             tGamepad = 0;
-            gamepads = navigator.getGamepads();
-            for (var i = 0; i < gamepads.length; ++i) {
-                var gamepad = gamepads[i];
-                if (gamepad && gamepad.pose) {
-                    vrGamepads.push(gamepad);
-                }
-                if (/XBOX/.test(gamepad.id) || /xinput/.test(gamepad.id)) {
-                    xboxGamepads.push(gamepad);
-                }
-            }
+            pollGamepads();
         }
-        for (i = 0; i < vrGamepads.length; ++i) {
-            gamepad = gamepads[i];
+
+        for (var i = 0; i < vrGamepads.length; ++i) {
+            var gamepad = vrGamepads[i];
             if ("vibrate" in gamepad) {
                 for (var j = 0; j < gamepad.buttons.length; ++j) {
                     if (gamepad.buttons[j].pressed) {
                         //gamepad.vibrate(1000);
-                        // Vibrate the gamepad relative to the amount the button is pressed.
-                        var vibrationDelay = (500 * (1.0 - gamepad.buttons[j].value)) + 100;
+                        var vibrationDelay = (10 * (1.0 - gamepad.buttons[j].value)) + 50;
                         if (t - lastVibration > vibrationDelay) {
                             gamepad.vibrate(333);
                             lastVibration = t;
@@ -147,6 +165,24 @@ function onLoad() {
                 }
             }
         }
+
+        for (i = 0; i < xboxGamepads.length; ++i) {
+            gamepad = xboxGamepads[i];
+            var buttonsPressed = buttonsPresseds[i];
+            for (j = 0; j < gamepad.buttons.length; ++j) {
+                if (gamepad.buttons[j].pressed) {
+                    if (!buttonsPressed[j]) {
+                        buttonsPressed[j] = true;
+                        console.log('pressed %d', j);
+                    }
+                } else {
+                    if (buttonsPressed[j]) {
+                        buttonsPressed[j] = false;
+                    }
+                }
+            }
+        }
+
         // if (gamepad.gamepad && gamepad.gamepad.connected) {
         //     if (gamepad.toggleFloat) {
         //         moveUD -= gamepad.moveFB;
