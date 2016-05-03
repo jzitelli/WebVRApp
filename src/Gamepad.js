@@ -12,6 +12,7 @@ module.exports = ( function () {
             gamepads = navigator.getGamepads();
         }
     }
+    refreshGamepads();
 
     function Gamepad(commands) {
 
@@ -20,7 +21,6 @@ module.exports = ( function () {
         var commandUps = [];
         var buttonPressed = [];
 
-        refreshGamepads();
         var i = 0;
         if (gamepads) {
             for (i = 0; i < gamepads.length; i++) {
@@ -81,9 +81,7 @@ module.exports = ( function () {
             } else if (axes) {
                 for (i = 0; i < axes.length; i++) {
                     var value = gamepad.axes[axes[i]];
-                    if (value !== undefined) {
-                        if (Math.abs(value) > DEADZONE) return value;
-                    }
+                    if (value && Math.abs(value) > DEADZONE) return value;
                 }
                 return 0;
             } else {
@@ -104,9 +102,6 @@ module.exports = ( function () {
 
         function onGamepadDisconnected(e) {
             console.log("Gamepad disconnected from index %d: %s", e.gamepad.index, e.gamepad.id);
-            if (this.gamepad && this.gamepad.index === e.gamepad.index) {
-                this.gamepad = null;
-            }
         }
         window.addEventListener("gamepaddisconnected", onGamepadDisconnected.bind(this));
 
