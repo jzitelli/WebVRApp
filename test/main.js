@@ -12,6 +12,14 @@ function onLoad() {
 
     var canvas = document.getElementById('webgl-canvas');
 
+    var glAttribs = {
+        alpha: false,
+        antialias: !VRSamplesUtil.isMobile()
+    };
+    var gl = canvas.getContext("webgl", glAttribs);
+    gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.CULL_FACE);
+
     var avatar = new THREE.Object3D();
     avatar.position.y = 1.2;
     avatar.position.z = -0.28
@@ -34,10 +42,6 @@ function onLoad() {
         toggleFloat: {buttons: [YAWVRB.Gamepad.BUTTONS.leftStick]},
         toggleVR: {buttons: [YAWVRB.Gamepad.BUTTONS.start], commandDown: function () { app.toggleVR(); }}
     };
-
-    // YAWVRB.Gamepad.logConnectedGamepads();
-    // var gamepad = new YAWVRB.Gamepad(gamepadCommands);
-    // window.gamepad = gamepad;
 
     var keyboardCommands = {
         toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: function () { app.toggleVR(); }},
@@ -132,8 +136,26 @@ function onLoad() {
         }
     }
 
+    var viveA = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.18, 0.06), new THREE.MeshLambertMaterial({color: 0xff2222}));
+    viveA.matrixAutoUpdate = false;
+    var viveB = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.18, 0.06), new THREE.MeshLambertMaterial({color: 0x22ff22}));
+    viveB.matrixAutoUpdate = false;
+
+    var sittingToStandingTransform = new THREE.Object3D();
+    sittingToStandingTransform.matrixAutoUpdate = false;
+    avatar.add(sittingToStandingTransform);
+    sittingToStandingTransform.add(viveA);
+    sittingToStandingTransform.add(viveB);
+
+    function updateSittingToStandingTransform() {
+        if (app.vrDisplay && app.vrDisplay.stageParameters && app.vrDisplay.stageParameters.sittingToStandingTransform) {
+            sittingToStandingTransform.matrix.fromArray(app.vrDisplay.stageParameters.sittingToStandingTransform);
+            sittingToStandingTransform.updateMatrixWorld();
+        }
+    }
+
     var tGamepad = 0;
-    const GETGAMEPADS_POLLTIME = 0.03;
+    const GETGAMEPADS_POLLTIME = 0.011;
     var lastVibration = 0;
 
     function moveByKeyboard(dt, t) {
@@ -151,15 +173,20 @@ function onLoad() {
 
         for (var i = 0; i < vrGamepads.length; ++i) {
             var gamepad = vrGamepads[i];
+            var mesh = (i === 0 ? viveA : viveB);
+            mesh.quaternion.fromArray(gamepad.pose.orientation);
+            mesh.position.fromArray(gamepad.pose.position);
+            mesh.updateMatrix();
+            mesh.updateMatrixWorld();
             if ("vibrate" in gamepad) {
                 for (var j = 0; j < gamepad.buttons.length; ++j) {
                     if (gamepad.buttons[j].pressed) {
-                        //gamepad.vibrate(1000);
-                        var vibrationDelay = (10 * (1.0 - gamepad.buttons[j].value)) + 50;
-                        if (t - lastVibration > vibrationDelay) {
-                            gamepad.vibrate(333);
-                            lastVibration = t;
-                        }
+                        // var vibrationDelay = (10 * (1.0 - gamepad.buttons[j].value)) + 10;
+                        // if (t - lastVibration > vibrationDelay) {
+                        //     gamepad.vibrate(333);
+                        //     lastVibration = t;
+                        // }
+                        gamepad.vibrate(100);
                         break;
                     }
                 }
@@ -244,13 +271,20 @@ function onLoad() {
             }
 
             app = new YAWVRB.App(scene, undefined, {canvas: canvas, alpha: true});
+            window.app = app;
 
             app.renderer.setSize(window.innerWidth, window.innerHeight);
-            scene.add(avatar);
+            app.scene.add(avatar);
+
             avatar.add(app.camera);
-            if (leapTool && leapTool.toolShadowMesh)             scene.add(leapTool.toolShadowMesh);
-            if (leapToolRemote && leapToolRemote.toolShadowMesh) scene.add(leapToolRemote.toolShadowMesh);
-            scene.updateMatrixWorld(true);
+
+            if (leapTool && leapTool.toolShadowMesh)             app.scene.add(leapTool.toolShadowMesh);
+            if (leapToolRemote && leapToolRemote.toolShadowMesh) app.scene.add(leapToolRemote.toolShadowMesh);
+
+            setTimeout(updateSittingToStandingTransform, 2000);
+
+            app.scene.updateMatrixWorld(true);
+
             if (leapTool)       leapTool.updateToolMapping();
             if (leapToolRemote) leapToolRemote.updateToolMapping();
 
@@ -282,70 +316,5 @@ function onLoad() {
         });
 
     } )();;
-
-      // function getPoseMatrix (out, pose) {
-      //   orientation = pose.orientation;
-      //   position = pose.position;
-      //   if (!orientation) { orientation = [0, 0, 0, 1]; }
-      //   if (!position) { position = [0, 0, 0]; }
-
-      //   if (vrDisplay.stageParameters) {
-      //     mat4.fromRotationTranslation(out, orientation, position);
-      //     mat4.multiply(out, vrDisplay.stageParameters.sittingToStandingTransform, out);
-      //   } else {
-      //     vec3.add(standingPosition, position, [0, PLAYER_HEIGHT, 0]);
-      //     mat4.fromRotationTranslation(out, orientation, standingPosition);
-      //   }
-      // }
-
-      // function renderSceneView (poseInMat, gamepads, eye) {
-      //   if (eye) {
-      //     mat4.translate(viewMat, poseInMat, eye.offset);
-      //     mat4.perspectiveFromFieldOfView(projectionMat, eye.fieldOfView, 0.1, 1024.0);
-      //     mat4.invert(viewMat, viewMat);
-      //   } else {
-      //     mat4.perspective(projectionMat, Math.PI*0.4, webglCanvas.width / webglCanvas.height, 0.1, 1024.0);
-      //     mat4.invert(viewMat, poseInMat);
-      //   }
-
-      //   debugGeom.bind(projectionMat, viewMat);
-
-      //   // Render every gamepad with a pose we found
-      //   for (var i = 0; i < gamepads.length; ++i) {
-      //     var gamepad = gamepads[i];
-      //     // Because this sample is done in standing space we need to apply
-      //     // the same transformation to the gamepad pose as we did the
-      //     // VRDisplay's pose.
-      //     getPoseMatrix(gamepadMat, gamepad.pose);
-      //     // Scaled down to from 1 meter to be something closer to the size of
-      //     // a hand.
-      //     mat4.scale(gamepadMat, gamepadMat, [0.1, 0.1, 0.1]);
-      //     // Loop through all the gamepad's axes and rotate the cube by their
-      //     // value.
-      //     for (var j = 0; j < gamepad.axes.length; ++j) {
-      //       switch (j%3) {
-      //         case 0:
-      //           mat4.rotateX(gamepadMat, gamepadMat, gamepad.axes[j] * Math.PI);
-      //           break;
-      //         case 1:
-      //           mat4.rotateY(gamepadMat, gamepadMat, gamepad.axes[j] * Math.PI);
-      //           break;
-      //         case 2:
-      //           mat4.rotateZ(gamepadMat, gamepadMat, gamepad.axes[j] * Math.PI);
-      //           break;
-      //       }
-      //     }
-      //     // Show the gamepad's cube as red if any buttons are pressed, blue
-      //     // otherwise.
-      //     vec4.set(gamepadColor, 0, 0, 1, 1);
-      //     for (var j = 0; j < gamepad.buttons.length; ++j) {
-      //       if (gamepad.buttons[j].pressed) {
-      //         vec4.set(gamepadColor, gamepad.buttons[j].value, 0, 0, 1);
-      //         break;
-      //       }
-      //     }
-      //     debugGeom.drawBoxWithMatrix(gamepadMat, gamepadColor);
-      //   }
-      // }
 
 }
