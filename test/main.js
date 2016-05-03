@@ -26,7 +26,7 @@ function onLoad() {
 
     var gamepadCommands = {
         resetVRSensor: {buttons: [YAWVRB.Gamepad.BUTTONS.back], commandDown: function () { app.resetVRSensor(); }},
-        cycleSelection: {buttons: [YAWVRB.Gamepad.BUTTONS.right], commandDown: function () {console.log('yay!');}}, //objectSelector.cycleSelection},
+        cycleSelection: {buttons: [YAWVRB.Gamepad.BUTTONS.right], commandDown: objectSelector.cycleSelection},
         moveFB: {axes: [YAWVRB.Gamepad.AXES.LSY]},
         moveRL: {axes: [YAWVRB.Gamepad.AXES.LSX]},
         turnRL: {axes: [YAWVRB.Gamepad.AXES.RSX]},

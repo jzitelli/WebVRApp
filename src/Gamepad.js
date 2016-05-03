@@ -17,6 +17,7 @@ module.exports = ( function () {
     function Gamepad(commands) {
 
         this.gamepad = null;
+
         var commandDowns = [];
         var commandUps = [];
         var buttonPressed = [];
@@ -47,17 +48,18 @@ module.exports = ( function () {
                         get: getState.bind(this, buttons, axes)
                     });
 
-                    var commandDown = commands[name].commandDown;
-                    if (commandDown) {
-                        for (var i = 0; i < buttons.length; i++) {
-                            commandDowns[buttons[i]] = commandDown;
+                    if (buttons) {
+                        var commandDown = commands[name].commandDown;
+                        if (commandDown) {
+                            for (var i = 0; i < buttons.length; i++) {
+                                commandDowns[buttons[i]] = commandDown;
+                            }
                         }
-                    }
-
-                    var commandUp = commands[name].commandUp;
-                    if (commandUp) {
-                        for (i = 0; i < buttons.length; i++) {
-                            commandUps[buttons[i]] = commandUp;
+                        var commandUp = commands[name].commandUp;
+                        if (commandUp) {
+                            for (i = 0; i < buttons.length; i++) {
+                                commandUps[buttons[i]] = commandUp;
+                            }
                         }
                     }
 
@@ -72,10 +74,7 @@ module.exports = ( function () {
             var i;
             if (buttons) {
                 for (i = 0; i < buttons.length; i++) {
-                    var button = gamepad.buttons[buttons[i]];
-                    if (isNaN(button) && button.pressed) {
-                        return button.value;
-                    }
+                    if (buttonPressed[buttons[i]]) return 1;
                 }
                 return 0;
             } else if (axes) {
