@@ -104,6 +104,7 @@ function App(scene, config, rendererOptions) {
     this.sittingToStandingTransform.updateMatrix();
 
     var updateSittingToStandingTransform = function () {
+        console.log('updating sitting to standing transform');
         if (this.vrDisplay && this.vrDisplay.stageParameters && this.vrDisplay.stageParameters.sittingToStandingTransform) {
             this.sittingToStandingTransform.matrix.fromArray(this.vrDisplay.stageParameters.sittingToStandingTransform);
             this.sittingToStandingTransform.updateMatrixWorld();
@@ -123,7 +124,7 @@ function App(scene, config, rendererOptions) {
 
     this.toggleVR = function () {
         var vrDisplay = this.vrDisplay;
-        if (vrDisplay && vrDisplay.isPresenting) {
+        if (vrDisplay && !vrDisplay.isPresenting) {
             this.vrEffect.requestPresent().then( function () {
                 updateSittingToStandingTransform();
                 if (vrDisplay.capabilities.canPresent) {
@@ -375,50 +376,25 @@ module.exports = ( function () {
 } )();
 
 },{}],3:[function(require,module,exports){
-/* global THREE */
-
 module.exports = ( function () {
     "use strict";
 
     const DEADZONE = 0.145;
 
-    var vrGamepads;
-    var xboxGamepads;
-    var buttonsPresseds;
-    var vrButtonsPresseds;
+    var gamepads;
+    var buttonsPresseds = [];
 
     pollGamepads();
 
     function pollGamepads() {
-        var gamepads = navigator.getGamepads();
-        vrGamepads = [];
-        xboxGamepads = [];
-        buttonsPresseds = [];
-        vrButtonsPresseds = [];
-        var gamepad,
-            i;
-        for (i = 0; i < gamepads.length; ++i) {
-            gamepad = gamepads[i];
-            if (gamepad && (/xbox/i.test(gamepad.id) || /xinput/i.test(gamepad.id))) {
-                xboxGamepads.push(gamepad);
-            }
-            if (gamepad && gamepad.pose) {
-                vrGamepads.push(gamepad);
+        gamepads = navigator.getGamepads();
+        for (var i = 0; i < gamepads.length; i++) {
+            var gamepad = gamepads[i];
+            if (!gamepad) continue;
+            if (buttonsPresseds[i] === undefined) {
+                buttonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
             }
         }
-        for (i = 0; i < xboxGamepads.length; i++) {
-            buttonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
-        }
-        for (i = 0; i < vrGamepads.length; i++) {
-            vrButtonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
-        }
-        return {
-            gamepads: gamepads,
-            vrGamepads: vrGamepads,
-            xboxGamepads: xboxGamepads,
-            buttonsPresseds: buttonsPresseds,
-            vrButtonsPresseds: vrButtonsPresseds
-        };
     }
 
     function onGamepadConnected(e) {
@@ -429,116 +405,58 @@ module.exports = ( function () {
 
     function onGamepadDisconnected(e) {
         console.log("Gamepad disconnected from index %d: %s", e.gamepad.index, e.gamepad.id);
-        pollGamepads();
+        var i = e.gamepad.index;
+        for (var j = 0; j < buttonsPresseds[i].length; j++) {
+            buttonsPresseds[i][j] = false;
+        }
     }
     window.addEventListener("gamepaddisconnected", onGamepadDisconnected);
 
-    var viveMeshA = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.18, 0.06), new THREE.MeshLambertMaterial({color: 0xff2222}));
-    viveMeshA.matrixAutoUpdate = false;
-    var viveMeshB = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.18, 0.06), new THREE.MeshLambertMaterial({color: 0x22ff22}));
-    viveMeshB.matrixAutoUpdate = false;
-
-    function update(gamepadCommands, vrGamepadCommands) {
-        var gamepad, mesh, buttonsPressed, command, name, axis;
-        var i, j, k;
-
+    function update(commands) {
         var values = [];
-
-        // vr Gamepads:
-
-        for (i = 0; i < vrGamepads.length; ++i) {
-            gamepad = vrGamepads[i];
-            mesh = (i === 0 ? viveMeshA : viveMeshB);
-            mesh.quaternion.fromArray(gamepad.pose.orientation);
-            mesh.position.fromArray(gamepad.pose.position);
-            mesh.updateMatrix();
-            mesh.updateMatrixWorld();
-
-            buttonsPressed = vrButtonsPresseds[i];
-
-            for (j = 0; j < gamepad.buttons.length; ++j) {
-                if (gamepad.buttons[j].pressed) {
-                    if (!buttonsPressed[j]) {
-                        buttonsPressed[j] = true;
-                        for (name in vrGamepadCommands) {
-                            command = vrGamepadCommands[name];
-                            if (command.buttons && command.commandDown) {
-                                for (k = 0; k < command.buttons.length; k++) {
-                                    if (command.buttons[k] === j) {
-                                        command.commandDown(j);
-                                        break;
-                                    }
-                                }
-                            }
+        pollGamepads();
+        for (var i = 0; i < gamepads.length; ++i) {
+            var gamepad = gamepads[i];
+            if (!gamepad) continue;
+            var buttonsPressed = buttonsPresseds[i];
+            for (var j = 0; j < gamepad.buttons.length; j++) {
+                if (gamepad.buttons[j].pressed && !buttonsPressed[j]) {
+                    buttonsPressed[j] = true;
+                    for (var name in commands) {
+                        var command = commands[name];
+                        if (command.commandDown && command.buttons && command.buttons.indexOf(j) !== -1) {
+                            command.commandDown(j);
                         }
                     }
-                } else {
-                    if (buttonsPressed[j]) {
-                        buttonsPressed[j] = false;
+                } else if (!gamepad.buttons[j].pressed && buttonsPressed[j]) {
+                    buttonsPressed[j] = false;
+                    for (name in commands) {
+                        command = commands[name];
+                        if (command.commandUp && command.buttons && command.buttons.indexOf(j) !== -1) {
+                            command.commandUp(j);
+                        }
                     }
                 }
             }
-
-            // get all axes values:
+            // get all button/axes values:
             var axesValues = {};
-            for (name in vrGamepadCommands) {
+            for (name in commands) {
                 axesValues[name] = 0;
-                command = vrGamepadCommands[name];
-                for (j = 0; j < gamepad.axes.length; ++j) {
-                    axis = gamepad.axes[j];
-                    if (Math.abs(axis) > DEADZONE) {
-                        if (command.axes && command.axes.indexOf(j) !== -1) {
-                            axesValues[name] = gamepad.axes[j];
-                            break;
-                        }
-                    }
-                }
-            }
-
-            values.push(axesValues);
-
-            // if ("vibrate" in gamepad) {
-            //     for (j = 0; j < gamepad.buttons.length; ++j) {
-            //         if (gamepad.buttons[j].pressed) {
-            //             gamepad.vibrate(100);
-            //         }
-            //     }
-            // }
-
-        }
-
-        // xbox Gamepads:
-
-        for (i = 0; i < xboxGamepads.length; ++i) {
-            gamepad = xboxGamepads[i];
-            buttonsPressed = buttonsPresseds[i];
-            for (j = 0; j < gamepad.buttons.length; ++j) {
-                if (gamepad.buttons[j].pressed) {
-                    if (!buttonsPressed[j]) {
-                        buttonsPressed[j] = true;
-                        for (name in gamepadCommands) {
-                            command = gamepadCommands[name];
-                            if (command.buttons && command.commandDown && command.buttons.indexOf(j) !== -1) {
-                                command.commandDown(j);
+                command = commands[name];
+                if (command.axes) {
+                    for (j = 0; j < gamepad.axes.length; j++) {
+                        var axis = gamepad.axes[j];
+                        if (Math.abs(axis) > DEADZONE) {
+                            if (command.axes.indexOf(j) !== -1) {
+                                axesValues[name] = gamepad.axes[j];
                                 break;
                             }
                         }
-                    } else {
-                        if (buttonsPressed[j]) {
-                            buttonsPressed[j] = false;
-                        }
                     }
-                }
-            }
-            axesValues = {};
-            for (name in gamepadCommands) {
-                axesValues[name] = 0;
-                command = gamepadCommands[name];
-                for (j = 0; j < gamepad.axes.length; ++j) {
-                    axis = gamepad.axes[j];
-                    if (Math.abs(axis) > DEADZONE) {
-                        if (command.axes && command.axes.indexOf(j) !== -1) {
-                            axesValues[name] = gamepad.axes[j];
+                } else if (command.buttons) {
+                    for (j = 0; j < command.buttons.length; j++) {
+                        if (gamepad.buttons[command.buttons[j]].pressed) {
+                            axesValues[name] = 1;
                             break;
                         }
                     }
@@ -551,9 +469,6 @@ module.exports = ( function () {
 
     return {
         update: update,
-        viveMeshA: viveMeshA,
-        viveMeshB: viveMeshB,
-        pollGamepads: pollGamepads,
         BUTTONS: {
             A: 0,
             B: 1,

@@ -123,7 +123,7 @@ function App(scene, config, rendererOptions) {
 
     this.toggleVR = function () {
         var vrDisplay = this.vrDisplay;
-        if (vrDisplay && vrDisplay.isPresenting) {
+        if (vrDisplay && !vrDisplay.isPresenting) {
             this.vrEffect.requestPresent().then( function () {
                 updateSittingToStandingTransform();
                 if (vrDisplay.capabilities.canPresent) {

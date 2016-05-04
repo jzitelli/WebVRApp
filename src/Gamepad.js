@@ -36,6 +36,7 @@ module.exports = ( function () {
 
     function update(commands) {
         var values = [];
+        pollGamepads();
         for (var i = 0; i < gamepads.length; ++i) {
             var gamepad = gamepads[i];
             if (!gamepad) continue;
