@@ -1,10 +1,19 @@
 /* global THREE */
 
+const DEFAULT_OPTIONS = {
+    useImmediatePose: false
+};
+
 function App(scene, config, rendererOptions) {
     "use strict";
-    this.scene = scene;
+    var _config = {};
+    config = config || _config;
+    for (var kwarg in DEFAULT_OPTIONS) {
+        if (config[kwarg] === undefined) _config[kwarg] = DEFAULT_OPTIONS[kwarg];
+    }
+    config = _config;
 
-    config = config || {};
+    this.scene = scene;
 
     rendererOptions = rendererOptions || {};
 
@@ -30,7 +39,7 @@ function App(scene, config, rendererOptions) {
     // public methods:
 
     this.render = function () {
-        if (this.vrControlsEnabled) this.vrControls.update();
+        if (this.vrControlsEnabled) this.vrControls.update(config.useImmediatePose);
         this.vrEffect.render(this.scene, this.camera);
     }.bind(this);
 

@@ -1,11 +1,20 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /* global THREE */
 
+const DEFAULT_OPTIONS = {
+    useImmediatePose: false
+};
+
 function App(scene, config, rendererOptions) {
     "use strict";
-    this.scene = scene;
+    var _config = {};
+    config = config || _config;
+    for (var kwarg in DEFAULT_OPTIONS) {
+        if (config[kwarg] === undefined) _config[kwarg] = DEFAULT_OPTIONS[kwarg];
+    }
+    config = _config;
 
-    config = config || {};
+    this.scene = scene;
 
     rendererOptions = rendererOptions || {};
 
@@ -31,7 +40,7 @@ function App(scene, config, rendererOptions) {
     // public methods:
 
     this.render = function () {
-        if (this.vrControlsEnabled) this.vrControls.update();
+        if (this.vrControlsEnabled) this.vrControls.update(config.useImmediatePose);
         this.vrEffect.render(this.scene, this.camera);
     }.bind(this);
 

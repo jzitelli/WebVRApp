@@ -14,3 +14,14 @@ body {
     margin: 0;
     padding: 0;
 }
+#overlay {
+    position: absolute;
+    left: 3vw;
+    top: 2vh;
+    width: 75%;
+    height: 75%;
+    z-index: 99;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(30, 30, 30, 0.5);
+}
