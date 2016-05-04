@@ -14,15 +14,6 @@ function onLoad() {
 
     var canvas = document.getElementById('webgl-canvas');
 
-    var glAttribs = {
-        alpha: false,
-        antialias: !VRSamplesUtil.isMobile()
-    };
-
-    var gl = canvas.getContext("webgl", glAttribs);
-    gl.enable(gl.DEPTH_TEST);
-    gl.enable(gl.CULL_FACE);
-
     var avatar = new THREE.Object3D();
     avatar.position.y = 1.2;
     avatar.position.z = -0.28
@@ -43,27 +34,15 @@ function onLoad() {
         turnRL: {axes: [YAWVRB.Gamepad.AXES.RSX]},
         turnUD: {axes: [YAWVRB.Gamepad.AXES.RSY]},
         toggleFloat: {buttons: [YAWVRB.Gamepad.BUTTONS.leftStick]},
-        toggleVR: {buttons: [YAWVRB.Gamepad.BUTTONS.start], commandDown: function () { app.toggleVR(); }}
+        toggleVR: {buttons: [YAWVRB.Gamepad.BUTTONS.start], commandDown: function () { console.log('entering VR'); app.toggleVR(); }}
     };
 
-    var vrGamepadCommands = {
-        moveFB: {axes: [YAWVRB.Gamepad.AXES.LSY], s: [-1]},
-        moveRL: {axes: [YAWVRB.Gamepad.AXES.LSX]},
-        toggleVR: {buttons: [YAWVRB.Gamepad.BUTTONS.start], commandDown: function () { app.toggleVR(); }},
-        logButtons: {buttons: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17], commandDown: function (button) { console.log('button %d down', button); }}
-    };
-
-    var allKeys = [];
-    for (var key in YAWVRB.Keyboard.KEYCODES) {
-        allKeys.push(YAWVRB.Keyboard.KEYCODES[key]);
-    }
     var keyboardCommands = {
         toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: function () { app.toggleVR(); }},
         resetVRSensor: {buttons: [YAWVRB.Keyboard.KEYCODES.Z], commandDown: function () { app.resetVRSensor(); }},
         cycleSelection: {buttons: [YAWVRB.Keyboard.KEYCODES.OPENBRACKET], commandDown: objectSelector.cycleSelection},
         toggleWireframe: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER1], commandDown: function () { app.toggleWireframe(); }},
-        toggleNormalMaterial: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER2], commandDown: function () { app.toggleNormalMaterial(); }},
-        logButtons: {buttons: allKeys, commandDown: function (keycode) { console.log('key %d down', keycode); }}
+        toggleNormalMaterial: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER2], commandDown: function () { app.toggleNormalMaterial(); }}
     };
     for (var k in YAWVRB.Keyboard.STANDARD_COMMANDS) {
         keyboardCommands[k] = YAWVRB.Keyboard.STANDARD_COMMANDS[k];
@@ -109,9 +88,9 @@ function onLoad() {
 
     objectSelector.addSelectable(avatar);
     objectSelector.addSelectable(keyboardObject);
+    objectSelector.addSelectable(gfxTablet.mesh);
     if (leapTool) objectSelector.addSelectable(leapTool.toolRoot);
     if (leapToolRemote) objectSelector.addSelectable(leapToolRemote.toolRoot);
-    objectSelector.addSelectable(gfxTablet.mesh);
 
     function moveByKeyboard(dt, t) {
         var moveFB = keyboard.moveForward - keyboard.moveBackward,
@@ -120,8 +99,21 @@ function onLoad() {
             turnRL = keyboard.turnRight - keyboard.turnLeft,
             turnUD = keyboard.turnUp - keyboard.turnDown;
 
-        var values = YAWVRB.Gamepad.update(gamepadCommands, vrGamepadCommands);
-        if (values.moveFB) moveFB += values.moveFB;
+        var values = YAWVRB.Gamepad.update(gamepadCommands);
+
+        for (var i = 0; i < values.length; i++) {
+            var vals = values[i];
+            if (vals.moveFB) {
+                if (vals.toggleFloat) {
+                    moveUD -= vals.moveFB;
+                } else {
+                    moveFB -= vals.moveFB;
+                }
+            }
+            if (vals.moveRL) moveRL += vals.moveRL;
+            if (vals.turnRL) turnRL += vals.turnRL;
+            if (vals.turnUD) turnUD += vals.turnUD;
+        }
 
         if (objectSelector.selection === avatar) turnUD = 0;
         objectSelector.moveSelection(dt, moveFB, moveRL, moveUD, turnRL, turnUD);
@@ -157,9 +149,6 @@ function onLoad() {
 
             app.renderer.setSize(window.innerWidth, window.innerHeight);
             app.scene.add(avatar);
-
-            app.sittingToStandingTransform.add(YAWVRB.Gamepad.viveMeshA);
-            app.sittingToStandingTransform.add(YAWVRB.Gamepad.viveMeshB);
 
             avatar.add(app.sittingToStandingTransform);
 

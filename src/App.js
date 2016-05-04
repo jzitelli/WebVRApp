@@ -103,6 +103,7 @@ function App(scene, config, rendererOptions) {
     this.sittingToStandingTransform.updateMatrix();
 
     var updateSittingToStandingTransform = function () {
+        console.log('updating sitting to standing transform');
         if (this.vrDisplay && this.vrDisplay.stageParameters && this.vrDisplay.stageParameters.sittingToStandingTransform) {
             this.sittingToStandingTransform.matrix.fromArray(this.vrDisplay.stageParameters.sittingToStandingTransform);
             this.sittingToStandingTransform.updateMatrixWorld();
