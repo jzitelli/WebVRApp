@@ -14,6 +14,8 @@ function App(scene, config, rendererOptions) {
     }
     config = _config;
 
+    scene = scene || new THREE.Scene();
+
     this.scene = scene;
 
     rendererOptions = rendererOptions || {};
