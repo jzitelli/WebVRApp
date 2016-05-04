@@ -10,9 +10,19 @@ function onLoad() {
 
     THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
-    var app;
-
     var canvas = document.getElementById('webgl-canvas');
+
+    var app = new YAWVRB.App(undefined, undefined, {canvas: canvas, alpha: true});
+    window.app = app;
+
+    var vrButton = document.getElementById('vrButton');
+    var fsButton = document.getElementById('fsButton');
+
+    vrButton.addEventListener('click', function () {
+        app.toggleVR();
+    });
+
+    app.renderer.setSize(window.innerWidth, window.innerHeight);
 
     var avatar = new THREE.Object3D();
     avatar.position.y = 1.2;
@@ -49,10 +59,12 @@ function onLoad() {
     }
 
     var keyboard = new YAWVRB.Keyboard(window, keyboardCommands);
+
     var keyboardObject = keyboard.object;
     keyboardObject.position.z = -12 * INCH2METERS;
     keyboardObject.position.y = -5 * INCH2METERS;
     keyboardObject.updateMatrix();
+
     avatar.add(keyboardObject);
 
     var world = new CANNON.World();
@@ -144,14 +156,9 @@ function onLoad() {
                 }
             }
 
-            app = new YAWVRB.App(scene, undefined, {canvas: canvas, alpha: true});
-            window.app = app;
-
-            app.renderer.setSize(window.innerWidth, window.innerHeight);
+            app.scene = scene;
             app.scene.add(avatar);
-
             avatar.add(app.sittingToStandingTransform);
-
             avatar.add(app.camera);
 
             if (leapTool && leapTool.toolShadowMesh)             app.scene.add(leapTool.toolShadowMesh);

@@ -3,6 +3,13 @@ body {
     background-color: #000;
     margin: 0;
     padding: 0;
+    font-family: monospace;
+}
+h1 {
+    font-size: 27pt;
+}
+a {
+    font-size: 20pt;
 }
 #webgl-canvas {
     box-sizing: border-box;
@@ -16,12 +23,12 @@ body {
 }
 #overlay {
     position: absolute;
-    left: 3vw;
+    left: 12.5%;
     top: 2vh;
     width: 75%;
     height: 75%;
-    z-index: 99;
-    margin: 0;
-    padding: 0;
+    z-index: 999;
+    padding: 6px;
+    margin: 8px;
     background-color: rgba(30, 30, 30, 0.5);
 }

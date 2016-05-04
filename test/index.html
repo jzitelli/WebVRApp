@@ -24,11 +24,14 @@
 
     <div id='overlay'>
 
-      <h1>YAWVRB</h1>
+      <h1 style='text-align: center; color: #feb'>YAWVRB</h1>
+
       <section>
-        <a id='vrButton'>toggle VR</a>
+        <a id='vrButton' style='color: #feb'>toggle VR</a>
         <br>
-        <a id='fsButton'>toggle fullscreen</a>
+        <a id='fsButton' style='color: #feb'>toggle fullscreen</a>
+        <br>
+        <a id='wireframeButton' style='color: #bfe'>toggle wireframe</a>
       </section>
 
     </div>
@@ -46,8 +49,8 @@
     var WebVRConfig = {
       BUFFER_SCALE: 0.5, // Default: 1.0.
       PREDICTION_TIME_S: 0.02, // Default: 0.050s.
-      KEYBOARD_CONTROLS_DISABLED: true
-      //FORCE_ENABLE_VR: true, // Default: false.
+      KEYBOARD_CONTROLS_DISABLED: true,
+      FORCE_ENABLE_VR: true, // Default: false.
       //ENABLE_LEAP_MOTION: true,
       //LEAP_MOTION_CONTROLLER: new Leap.Controller({background: true})
       //LEAP_MOTION_HOST: '127.0.0.1',
