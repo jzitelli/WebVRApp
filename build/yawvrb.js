@@ -66,10 +66,10 @@ function App(scene, config, rendererOptions) {
     this.toggleFullscreen = function (options) {
         if (!isFullscreen()) {
             requestFullscreen(options);
-            // if (!useDeprecatedWebVR) requestPointerLock();
+            // requestPointerLock();
         } else {
             exitFullscreen();
-            // if (!useDeprecatedWebVR) releasePointerLock();
+            // releasePointerLock();
         }
     };
 
@@ -98,12 +98,10 @@ function App(scene, config, rendererOptions) {
     // WebVR setup
 
     this.vrDisplay = null;
-    var isPresenting = false;
-    var useDeprecatedWebVR = false;
-    var vrDisplay;
 
     this.sittingToStandingTransform = new THREE.Object3D();
     this.sittingToStandingTransform.matrixAutoUpdate = false;
+    this.sittingToStandingTransform.updateMatrix();
 
     var updateSittingToStandingTransform = function () {
         if (this.vrDisplay && this.vrDisplay.stageParameters && this.vrDisplay.stageParameters.sittingToStandingTransform) {
@@ -112,117 +110,38 @@ function App(scene, config, rendererOptions) {
         }
     }.bind(this);
 
+    if (navigator.getVRDisplays) {
+        navigator.getVRDisplays().then( function (displays) {
+            if (displays.length > 0) {
+                this.vrDisplay = displays[0];
+                updateSittingToStandingTransform();
+            }
+        }.bind(this) );
+    } else {
+        console.error('WebVR API is not supported');
+    }
+
     this.toggleVR = function () {
         var vrDisplay = this.vrDisplay;
-        if (!isPresenting) {
+        if (vrDisplay && vrDisplay.isPresenting) {
             this.vrEffect.requestPresent().then( function () {
                 updateSittingToStandingTransform();
-                isPresenting = true;
-                if (!useDeprecatedWebVR && vrDisplay.capabilities.canPresent) {
+                if (vrDisplay.capabilities.canPresent) {
                     if (vrDisplay.capabilities.hasExternalDisplay) {
                         var eyeParams = vrDisplay.getEyeParameters( 'left' );
                         this.renderer.setSize(2*eyeParams.renderWidth, eyeParams.renderHeight);
                     }
-                    presentingElement.style.display = "block";
                     // requestPointerLock();
                 }
             }.bind(this) );
-        } else {
+        } else if (vrDisplay) {
             this.vrEffect.exitPresent().then( function () {
-                isPresenting = false;
-                if (!useDeprecatedWebVR && vrDisplay.capabilities.canPresent) {
-                    presentingElement.style.display = "none";
+                if (vrDisplay.capabilities.canPresent) {
                     // releasePointerLock();
                 }
             } );
         }
     }.bind(this);
-
-    // configure VR presenting element (for non-mirrored usage)
-
-    var presentingElement = document.createElement('div');
-    presentingElement.style.position = "absolute";
-    presentingElement.style.width = "100%";
-    presentingElement.style.height = "100%";
-    presentingElement.style.left = '0';
-    presentingElement.style.top = '0';
-    presentingElement.style.paddingTop = '24vh';
-    presentingElement.style.color = '#993';
-    presentingElement.style.backgroundColor = '#433';
-    presentingElement.style['z-index'] = 1;
-    presentingElement.style['text-align'] = 'center';
-    presentingElement.style.display = "none";
-    presentingElement.innerHTML = "<h2>VR CONTENT IS BEING PRESENTED ON THE VR DISPLAY</h2><h2>CLICK INSIDE THIS WINDOW TO RETURN TO NORMAL</h2>";
-    document.body.appendChild(presentingElement);
-    presentingElement.addEventListener('click', this.toggleVR, false);
-
-    // configure VR button
-
-    var vrButton = config.vrButton;
-    if (!vrButton) {
-        // no button was specified, so create one
-        vrButton = document.createElement('button');
-        vrButton.id = 'vrButton';
-        vrButton.innerHTML = 'TOGGLE VR';
-        vrButton.style.position = 'absolute';
-        vrButton.style.right = 0;
-        vrButton.style.bottom = '40px';
-        vrButton.style.margin = '0.75vh';
-        vrButton.style.padding = '0.75vh';
-    }
-    vrButton.addEventListener('click', this.toggleVR, false);
-
-    if (navigator.getVRDisplays) {
-
-        navigator.getVRDisplays().then( function (displays) {
-
-            if (displays.length > 0) {
-
-                vrDisplay = displays[0];
-                this.vrDisplay = vrDisplay;
-
-                if (!config.vrButton) document.body.appendChild(vrButton);
-
-            }
-
-        }.bind(this) );
-
-    } else if (navigator.getVRDevices) {
-
-        console.warn('using the deprecated WebVR API');
-        useDeprecatedWebVR = true;
-        navigator.getVRDevices().then( function (devices) {
-
-            if (devices.length > 0) {
-
-                if (!config.vrButton) document.body.appendChild(vrButton);
-
-            }
-
-        }.bind(this) );
-
-    } else {
-
-        console.error('WebVR API is not supported');
-
-    }
-
-    // configure fullscreen button:
-
-    var fsButton = config.fsButton;
-    if (!fsButton) {
-        // no button was specified, so create one
-        fsButton = document.createElement('button');
-        fsButton.id = 'fsButton';
-        fsButton.innerHTML = 'TOGGLE FULLSCREEN';
-        fsButton.style.position = 'absolute';
-        fsButton.style.right = 0;
-        fsButton.style.bottom = 0;
-        fsButton.style.margin = '0.75vh';
-        fsButton.style.padding = '0.75vh';
-        document.body.appendChild(fsButton);
-    }
-    fsButton.addEventListener('click', this.toggleFullscreen, false);
 
     // resize, fullscreen/VR listener functions and other useful functions:
 
@@ -234,13 +153,6 @@ function App(scene, config, rendererOptions) {
 
     var onFullscreenChange = function () {
         onResize();
-        if (useDeprecatedWebVR) {
-            if (isFullscreen()) {
-                requestPointerLock();
-            } else {
-                releasePointerLock();
-            }
-        }
     };
 
     function isFullscreen() {
@@ -273,29 +185,29 @@ function App(scene, config, rendererOptions) {
         }
     }
 
-    function requestPointerLock() {
-        if (domElement.requestPointerLock) {
-            domElement.requestPointerLock();
-        } else if (domElement.mozRequestPointerLock) {
-            domElement.mozRequestPointerLock();
-        } else if (domElement.webkitRequestPointerLock) {
-            domElement.webkitRequestPointerLock();
-        }
-    }
+    // function requestPointerLock() {
+    //     if (domElement.requestPointerLock) {
+    //         domElement.requestPointerLock();
+    //     } else if (domElement.mozRequestPointerLock) {
+    //         domElement.mozRequestPointerLock();
+    //     } else if (domElement.webkitRequestPointerLock) {
+    //         domElement.webkitRequestPointerLock();
+    //     }
+    // }
 
-    function releasePointerLock() {
-        if (document.exitPointerLock) {
-            document.exitPointerLock();
-        } else if (document.mozExitPointerLock) {
-            document.mozExitPointerLock();
-        } else if (document.webkitExitPointerLock) {
-            document.webkitExitPointerLock();
-        }
-    }
+    // function releasePointerLock() {
+    //     if (document.exitPointerLock) {
+    //         document.exitPointerLock();
+    //     } else if (document.mozExitPointerLock) {
+    //         document.mozExitPointerLock();
+    //     } else if (document.webkitExitPointerLock) {
+    //         document.webkitExitPointerLock();
+    //     }
+    // }
 
     var beforeUnload = function () {
         // stop VR presenting when exiting the app
-        if (isPresenting) {
+        if (this.vrDisplay && this.vrDisplay.isPresenting) {
             this.vrEffect.exitPresent();
         }
     }.bind(this);
@@ -470,24 +382,23 @@ module.exports = ( function () {
 
     const DEADZONE = 0.145;
 
-    var gamepads = navigator.getGamepads();
     var vrGamepads;
     var xboxGamepads;
     var buttonsPresseds;
-
-    var vrButtonsPresseds = [];
-    vrButtonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
-    vrButtonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
+    var vrButtonsPresseds;
 
     pollGamepads();
 
     function pollGamepads() {
-        gamepads = navigator.getGamepads();
+        var gamepads = navigator.getGamepads();
         vrGamepads = [];
         xboxGamepads = [];
         buttonsPresseds = [];
-        for (var i = 0; i < gamepads.length; ++i) {
-            var gamepad = gamepads[i];
+        vrButtonsPresseds = [];
+        var gamepad,
+            i;
+        for (i = 0; i < gamepads.length; ++i) {
+            gamepad = gamepads[i];
             if (gamepad && (/xbox/i.test(gamepad.id) || /xinput/i.test(gamepad.id))) {
                 xboxGamepads.push(gamepad);
             }
@@ -496,8 +407,18 @@ module.exports = ( function () {
             }
         }
         for (i = 0; i < xboxGamepads.length; i++) {
-            if (!buttonsPresseds[i]) buttonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
+            buttonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
         }
+        for (i = 0; i < vrGamepads.length; i++) {
+            vrButtonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
+        }
+        return {
+            gamepads: gamepads,
+            vrGamepads: vrGamepads,
+            xboxGamepads: xboxGamepads,
+            buttonsPresseds: buttonsPresseds,
+            vrButtonsPresseds: vrButtonsPresseds
+        };
     }
 
     function onGamepadConnected(e) {
@@ -521,7 +442,9 @@ module.exports = ( function () {
         var gamepad, mesh, buttonsPressed, command, name, axis;
         var i, j, k;
 
-        var values = {};
+        var values = [];
+
+        // vr Gamepads:
 
         for (i = 0; i < vrGamepads.length; ++i) {
             gamepad = vrGamepads[i];
@@ -530,6 +453,7 @@ module.exports = ( function () {
             mesh.position.fromArray(gamepad.pose.position);
             mesh.updateMatrix();
             mesh.updateMatrixWorld();
+
             buttonsPressed = vrButtonsPresseds[i];
 
             for (j = 0; j < gamepad.buttons.length; ++j) {
@@ -541,7 +465,7 @@ module.exports = ( function () {
                             if (command.buttons && command.commandDown) {
                                 for (k = 0; k < command.buttons.length; k++) {
                                     if (command.buttons[k] === j) {
-                                        command.commandDown();
+                                        command.commandDown(j);
                                         break;
                                     }
                                 }
@@ -555,27 +479,35 @@ module.exports = ( function () {
                 }
             }
 
+            // get all axes values:
+            var axesValues = {};
             for (name in vrGamepadCommands) {
-                values[name] = 0;
+                axesValues[name] = 0;
                 command = vrGamepadCommands[name];
                 for (j = 0; j < gamepad.axes.length; ++j) {
                     axis = gamepad.axes[j];
                     if (Math.abs(axis) > DEADZONE) {
                         if (command.axes && command.axes.indexOf(j) !== -1) {
-                            values[name] = gamepad.axes[j];
+                            axesValues[name] = gamepad.axes[j];
                             break;
                         }
                     }
                 }
             }
-            if ("vibrate" in gamepad) {
-                for (j = 0; j < gamepad.buttons.length; ++j) {
-                    if (gamepad.buttons[j].pressed) {
-                        gamepad.vibrate(100);
-                    }
-                }
-            }
+
+            values.push(axesValues);
+
+            // if ("vibrate" in gamepad) {
+            //     for (j = 0; j < gamepad.buttons.length; ++j) {
+            //         if (gamepad.buttons[j].pressed) {
+            //             gamepad.vibrate(100);
+            //         }
+            //     }
+            // }
+
         }
+
+        // xbox Gamepads:
 
         for (i = 0; i < xboxGamepads.length; ++i) {
             gamepad = xboxGamepads[i];
@@ -586,81 +518,66 @@ module.exports = ( function () {
                         buttonsPressed[j] = true;
                         for (name in gamepadCommands) {
                             command = gamepadCommands[name];
-                            if (command.buttons && command.commandDown) {
-                                for (k = 0; k < command.buttons.length; k++) {
-                                    if (command.buttons[k] === j) {
-                                        command.commandDown();
-                                        break;
-                                    }
-                                }
+                            if (command.buttons && command.commandDown && command.buttons.indexOf(j) !== -1) {
+                                command.commandDown(j);
+                                break;
                             }
                         }
-                    }
-                } else {
-                    if (buttonsPressed[j]) {
-                        buttonsPressed[j] = false;
+                    } else {
+                        if (buttonsPressed[j]) {
+                            buttonsPressed[j] = false;
+                        }
                     }
                 }
             }
+            axesValues = {};
             for (name in gamepadCommands) {
-                values[name] = 0;
+                axesValues[name] = 0;
                 command = gamepadCommands[name];
                 for (j = 0; j < gamepad.axes.length; ++j) {
                     axis = gamepad.axes[j];
                     if (Math.abs(axis) > DEADZONE) {
                         if (command.axes && command.axes.indexOf(j) !== -1) {
-                            values[name] = gamepad.axes[j];
+                            axesValues[name] = gamepad.axes[j];
                             break;
                         }
                     }
                 }
             }
+            values.push(axesValues);
         }
         return values;
     }
 
-    var AXES = {
-        LSX: 0,
-        LSY: 1,
-        RSX: 2,
-        RSY: 3
-    };
-
-    var BUTTONS = {
-        A: 0,
-        B: 1,
-        X: 2,
-        Y: 3,
-        leftBumper: 4,
-        rightBumper: 5,
-        leftTrigger: 6,
-        rightTrigger: 7,
-        back: 8,
-        start: 9,
-        leftStick: 10,
-        rightStick: 11,
-        up: 12,
-        down: 13,
-        left: 14,
-        right: 15
-    };
-
-    var logConnectedGamepads = function () {
-        for (var i = 0; i < gamepads.length; i++) {
-            var gamepad = gamepads[i];
-            if (gamepad && gamepad.connected) {
-                console.log("gamepad %d: %d %s", i, gamepad.index, gamepad.id);
-            }
-        }
-    };
-
     return {
-        logConnectedGamepads: logConnectedGamepads,
-        BUTTONS: BUTTONS,
-        AXES: AXES,
         update: update,
         viveMeshA: viveMeshA,
-        viveMeshB: viveMeshB
+        viveMeshB: viveMeshB,
+        pollGamepads: pollGamepads,
+        BUTTONS: {
+            A: 0,
+            B: 1,
+            X: 2,
+            Y: 3,
+            leftBumper: 4,
+            rightBumper: 5,
+            leftTrigger: 6,
+            rightTrigger: 7,
+            back: 8,
+            start: 9,
+            leftStick: 10,
+            rightStick: 11,
+            up: 12,
+            down: 13,
+            left: 14,
+            right: 15
+        },
+        AXES: {
+            LSX: 0,
+            LSY: 1,
+            RSX: 2,
+            RSY: 3
+        }
     };
 
 } )();
