@@ -2,6 +2,8 @@
 function onLoad() {
     "use strict";
 
+    console.log('navigator.userAgent: %s', navigator.userAgent);
+
     const INCH2METERS = 0.0254;
     const UP = THREE.Object3D.DefaultUp;
     const RIGHT = new THREE.Vector3(1, 0, 0);
@@ -16,6 +18,7 @@ function onLoad() {
         alpha: false,
         antialias: !VRSamplesUtil.isMobile()
     };
+
     var gl = canvas.getContext("webgl", glAttribs);
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
@@ -44,15 +47,23 @@ function onLoad() {
     };
 
     var vrGamepadCommands = {
-        toggleVR: {buttons: [3], commandDown: function () { app.toggleVR(); }}
+        moveFB: {axes: [YAWVRB.Gamepad.AXES.LSY], s: [-1]},
+        moveRL: {axes: [YAWVRB.Gamepad.AXES.LSX]},
+        toggleVR: {buttons: [YAWVRB.Gamepad.BUTTONS.start], commandDown: function () { app.toggleVR(); }},
+        logButtons: {buttons: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17], commandDown: function (button) { console.log('button %d down', button); }}
     };
 
+    var allKeys = [];
+    for (var key in YAWVRB.Keyboard.KEYCODES) {
+        allKeys.push(YAWVRB.Keyboard.KEYCODES[key]);
+    }
     var keyboardCommands = {
         toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: function () { app.toggleVR(); }},
         resetVRSensor: {buttons: [YAWVRB.Keyboard.KEYCODES.Z], commandDown: function () { app.resetVRSensor(); }},
         cycleSelection: {buttons: [YAWVRB.Keyboard.KEYCODES.OPENBRACKET], commandDown: objectSelector.cycleSelection},
         toggleWireframe: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER1], commandDown: function () { app.toggleWireframe(); }},
-        toggleNormalMaterial: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER2], commandDown: function () { app.toggleNormalMaterial(); }}
+        toggleNormalMaterial: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER2], commandDown: function () { app.toggleNormalMaterial(); }},
+        logButtons: {buttons: allKeys, commandDown: function (keycode) { console.log('key %d down', keycode); }}
     };
     for (var k in YAWVRB.Keyboard.STANDARD_COMMANDS) {
         keyboardCommands[k] = YAWVRB.Keyboard.STANDARD_COMMANDS[k];

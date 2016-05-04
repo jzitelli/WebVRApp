@@ -5,24 +5,23 @@ module.exports = ( function () {
 
     const DEADZONE = 0.145;
 
-    var gamepads = navigator.getGamepads();
     var vrGamepads;
     var xboxGamepads;
     var buttonsPresseds;
-
-    var vrButtonsPresseds = [];
-    vrButtonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
-    vrButtonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
+    var vrButtonsPresseds;
 
     pollGamepads();
 
     function pollGamepads() {
-        gamepads = navigator.getGamepads();
+        var gamepads = navigator.getGamepads();
         vrGamepads = [];
         xboxGamepads = [];
         buttonsPresseds = [];
-        for (var i = 0; i < gamepads.length; ++i) {
-            var gamepad = gamepads[i];
+        vrButtonsPresseds = [];
+        var gamepad,
+            i;
+        for (i = 0; i < gamepads.length; ++i) {
+            gamepad = gamepads[i];
             if (gamepad && (/xbox/i.test(gamepad.id) || /xinput/i.test(gamepad.id))) {
                 xboxGamepads.push(gamepad);
             }
@@ -31,8 +30,18 @@ module.exports = ( function () {
             }
         }
         for (i = 0; i < xboxGamepads.length; i++) {
-            if (!buttonsPresseds[i]) buttonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
+            buttonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
         }
+        for (i = 0; i < vrGamepads.length; i++) {
+            vrButtonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
+        }
+        return {
+            gamepads: gamepads,
+            vrGamepads: vrGamepads,
+            xboxGamepads: xboxGamepads,
+            buttonsPresseds: buttonsPresseds,
+            vrButtonsPresseds: vrButtonsPresseds
+        };
     }
 
     function onGamepadConnected(e) {
@@ -56,7 +65,9 @@ module.exports = ( function () {
         var gamepad, mesh, buttonsPressed, command, name, axis;
         var i, j, k;
 
-        var values = {};
+        var values = [];
+
+        // vr Gamepads:
 
         for (i = 0; i < vrGamepads.length; ++i) {
             gamepad = vrGamepads[i];
@@ -65,6 +76,7 @@ module.exports = ( function () {
             mesh.position.fromArray(gamepad.pose.position);
             mesh.updateMatrix();
             mesh.updateMatrixWorld();
+
             buttonsPressed = vrButtonsPresseds[i];
 
             for (j = 0; j < gamepad.buttons.length; ++j) {
@@ -76,7 +88,7 @@ module.exports = ( function () {
                             if (command.buttons && command.commandDown) {
                                 for (k = 0; k < command.buttons.length; k++) {
                                     if (command.buttons[k] === j) {
-                                        command.commandDown();
+                                        command.commandDown(j);
                                         break;
                                     }
                                 }
@@ -90,27 +102,35 @@ module.exports = ( function () {
                 }
             }
 
+            // get all axes values:
+            var axesValues = {};
             for (name in vrGamepadCommands) {
-                values[name] = 0;
+                axesValues[name] = 0;
                 command = vrGamepadCommands[name];
                 for (j = 0; j < gamepad.axes.length; ++j) {
                     axis = gamepad.axes[j];
                     if (Math.abs(axis) > DEADZONE) {
                         if (command.axes && command.axes.indexOf(j) !== -1) {
-                            values[name] = gamepad.axes[j];
+                            axesValues[name] = gamepad.axes[j];
                             break;
                         }
                     }
                 }
             }
-            if ("vibrate" in gamepad) {
-                for (j = 0; j < gamepad.buttons.length; ++j) {
-                    if (gamepad.buttons[j].pressed) {
-                        gamepad.vibrate(100);
-                    }
-                }
-            }
+
+            values.push(axesValues);
+
+            // if ("vibrate" in gamepad) {
+            //     for (j = 0; j < gamepad.buttons.length; ++j) {
+            //         if (gamepad.buttons[j].pressed) {
+            //             gamepad.vibrate(100);
+            //         }
+            //     }
+            // }
+
         }
+
+        // xbox Gamepads:
 
         for (i = 0; i < xboxGamepads.length; ++i) {
             gamepad = xboxGamepads[i];
@@ -121,81 +141,66 @@ module.exports = ( function () {
                         buttonsPressed[j] = true;
                         for (name in gamepadCommands) {
                             command = gamepadCommands[name];
-                            if (command.buttons && command.commandDown) {
-                                for (k = 0; k < command.buttons.length; k++) {
-                                    if (command.buttons[k] === j) {
-                                        command.commandDown();
-                                        break;
-                                    }
-                                }
+                            if (command.buttons && command.commandDown && command.buttons.indexOf(j) !== -1) {
+                                command.commandDown(j);
+                                break;
                             }
                         }
-                    }
-                } else {
-                    if (buttonsPressed[j]) {
-                        buttonsPressed[j] = false;
+                    } else {
+                        if (buttonsPressed[j]) {
+                            buttonsPressed[j] = false;
+                        }
                     }
                 }
             }
+            axesValues = {};
             for (name in gamepadCommands) {
-                values[name] = 0;
+                axesValues[name] = 0;
                 command = gamepadCommands[name];
                 for (j = 0; j < gamepad.axes.length; ++j) {
                     axis = gamepad.axes[j];
                     if (Math.abs(axis) > DEADZONE) {
                         if (command.axes && command.axes.indexOf(j) !== -1) {
-                            values[name] = gamepad.axes[j];
+                            axesValues[name] = gamepad.axes[j];
                             break;
                         }
                     }
                 }
             }
+            values.push(axesValues);
         }
         return values;
     }
 
-    var AXES = {
-        LSX: 0,
-        LSY: 1,
-        RSX: 2,
-        RSY: 3
-    };
-
-    var BUTTONS = {
-        A: 0,
-        B: 1,
-        X: 2,
-        Y: 3,
-        leftBumper: 4,
-        rightBumper: 5,
-        leftTrigger: 6,
-        rightTrigger: 7,
-        back: 8,
-        start: 9,
-        leftStick: 10,
-        rightStick: 11,
-        up: 12,
-        down: 13,
-        left: 14,
-        right: 15
-    };
-
-    var logConnectedGamepads = function () {
-        for (var i = 0; i < gamepads.length; i++) {
-            var gamepad = gamepads[i];
-            if (gamepad && gamepad.connected) {
-                console.log("gamepad %d: %d %s", i, gamepad.index, gamepad.id);
-            }
-        }
-    };
-
     return {
-        logConnectedGamepads: logConnectedGamepads,
-        BUTTONS: BUTTONS,
-        AXES: AXES,
         update: update,
         viveMeshA: viveMeshA,
-        viveMeshB: viveMeshB
+        viveMeshB: viveMeshB,
+        pollGamepads: pollGamepads,
+        BUTTONS: {
+            A: 0,
+            B: 1,
+            X: 2,
+            Y: 3,
+            leftBumper: 4,
+            rightBumper: 5,
+            leftTrigger: 6,
+            rightTrigger: 7,
+            back: 8,
+            start: 9,
+            leftStick: 10,
+            rightStick: 11,
+            up: 12,
+            down: 13,
+            left: 14,
+            right: 15
+        },
+        AXES: {
+            LSX: 0,
+            LSY: 1,
+            RSX: 2,
+            RSY: 3
+        }
     };
 
 } )();
