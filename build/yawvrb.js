@@ -547,15 +547,19 @@ module.exports = ( function () {
 
     function Keyboard(eventTarget, commands) {
 
-        eventTarget.addEventListener("keydown", onKeyDown, false);
+        this.enabled = true;
+
+        eventTarget.addEventListener("keydown", onKeyDown.bind(this), false);
         eventTarget.addEventListener("keyup", onKeyUp, false);
 
         var keyDown = [];
         var commandDowns = [];
 
         function onKeyDown(evt) {
-            keyDown[evt.keyCode] = true;
-            if (commandDowns[evt.keyCode]) commandDowns[evt.keyCode]();
+            if (this.enabled) {
+                keyDown[evt.keyCode] = true;
+                if (commandDowns[evt.keyCode]) commandDowns[evt.keyCode](evt.keyCode);
+            }
         }
 
         function onKeyUp(evt) {
@@ -563,6 +567,7 @@ module.exports = ( function () {
         }
 
         function getState(buttons) {
+            if (!this.enabled) return 0;
             for (var i = 0; i < buttons.length; i++) {
                 if (keyDown[buttons[i]]) return 1;
             }
@@ -830,7 +835,8 @@ module.exports = ( function () {
         turnLeft: {buttons: [Keyboard.KEYCODES.LEFTARROW]},
         turnRight: {buttons: [Keyboard.KEYCODES.RIGHTARROW]},
         turnUp: {buttons: [Keyboard.KEYCODES.UPARROW]},
-        turnDown: {buttons: [Keyboard.KEYCODES.DOWNARROW]}
+        turnDown: {buttons: [Keyboard.KEYCODES.DOWNARROW]},
+        toggleMenu: {buttons: [Keyboard.KEYCODES.ENTER]}
     };
 
     return Keyboard;
