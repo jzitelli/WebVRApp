@@ -110,23 +110,10 @@ function App(scene, config, rendererOptions) {
 
     this.vrDisplay = null;
 
-    this.sittingToStandingTransform = new THREE.Object3D();
-    this.sittingToStandingTransform.matrixAutoUpdate = false;
-    this.sittingToStandingTransform.updateMatrix();
-
-    var updateSittingToStandingTransform = function () {
-        console.log('updating sitting to standing transform');
-        if (this.vrDisplay && this.vrDisplay.stageParameters && this.vrDisplay.stageParameters.sittingToStandingTransform) {
-            this.sittingToStandingTransform.matrix.fromArray(this.vrDisplay.stageParameters.sittingToStandingTransform);
-            this.sittingToStandingTransform.updateMatrixWorld();
-        }
-    }.bind(this);
-
     if (navigator.getVRDisplays) {
         navigator.getVRDisplays().then( function (displays) {
             if (displays.length > 0) {
                 this.vrDisplay = displays[0];
-                updateSittingToStandingTransform();
             }
         }.bind(this) );
     } else {
@@ -137,7 +124,6 @@ function App(scene, config, rendererOptions) {
         var vrDisplay = this.vrDisplay;
         if (vrDisplay && !vrDisplay.isPresenting) {
             this.vrEffect.requestPresent().then( function () {
-                updateSittingToStandingTransform();
                 if (vrDisplay.capabilities.canPresent) {
                     if (vrDisplay.capabilities.hasExternalDisplay) {
                         var eyeParams = vrDisplay.getEyeParameters( 'left' );
