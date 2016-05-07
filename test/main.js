@@ -15,37 +15,35 @@ function onLoad() {
     var app = new YAWVRB.App(undefined, undefined, {canvas: canvas, alpha: true});
     window.app = app;
 
+    app.renderer.setSize(window.innerWidth, window.innerHeight);
+
     var vrButton = document.getElementById('vrButton');
     var fsButton = document.getElementById('fsButton');
 
     vrButton.addEventListener('click', function () {
         app.toggleVR();
+        vrButton.blur();
+    });
+    fsButton.addEventListener('click', function () {
+        app.toggleFullscreen();
+        fsButton.blur();
     });
 
-    app.renderer.setSize(window.innerWidth, window.innerHeight);
+    var world = new CANNON.World();
+
+    var objectSelector = new YAWVRB.Utils.ObjectSelector();
 
     var avatar = new THREE.Object3D();
     avatar.position.y = 1.2;
     avatar.position.z = -0.28
     avatar.updateMatrix();
-
-    var objectSelector = new YAWVRB.Utils.ObjectSelector();
+    objectSelector.addSelectable(avatar);
 
     var mouse = new YAWVRB.Mouse({eventTarget: window});
     avatar.add(mouse.pointerMesh);
     mouse.pointerMesh.position.z = -0.4;
     mouse.pointerMesh.updateMatrix();
-
-    var gamepadCommands = {
-        resetVRSensor: {buttons: [YAWVRB.Gamepad.BUTTONS.back], commandDown: function () { app.resetVRSensor(); }},
-        cycleSelection: {buttons: [YAWVRB.Gamepad.BUTTONS.right], commandDown: objectSelector.cycleSelection},
-        moveFB: {axes: [YAWVRB.Gamepad.AXES.LSY]},
-        moveRL: {axes: [YAWVRB.Gamepad.AXES.LSX]},
-        turnRL: {axes: [YAWVRB.Gamepad.AXES.RSX]},
-        turnUD: {axes: [YAWVRB.Gamepad.AXES.RSY]},
-        toggleFloat: {buttons: [YAWVRB.Gamepad.BUTTONS.leftStick]},
-        toggleVR: {buttons: [YAWVRB.Gamepad.BUTTONS.start], commandDown: function () { console.log('entering VR'); app.toggleVR(); }}
-    };
+    objectSelector.addSelectable(mouse.stageObject);
 
     var keyboardCommands = {
         toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: function () { app.toggleVR(); }},
@@ -64,45 +62,59 @@ function onLoad() {
     keyboardObject.position.z = -12 * INCH2METERS;
     keyboardObject.position.y = -5 * INCH2METERS;
     keyboardObject.updateMatrix();
-
+    YAWVRB.Utils.displayText('Keyboard', {object: keyboardObject});
+    objectSelector.addSelectable(keyboardObject);
     avatar.add(keyboardObject);
 
-    var world = new CANNON.World();
+    var gamepadCommands = {
+        resetVRSensor: {buttons: [YAWVRB.Gamepad.BUTTONS.back], commandDown: function () { app.resetVRSensor(); }},
+        cycleSelection: {buttons: [YAWVRB.Gamepad.BUTTONS.right], commandDown: objectSelector.cycleSelection},
+        moveFB: {axes: [YAWVRB.Gamepad.AXES.LSY]},
+        moveRL: {axes: [YAWVRB.Gamepad.AXES.LSX]},
+        turnRL: {axes: [YAWVRB.Gamepad.AXES.RSX]},
+        turnUD: {axes: [YAWVRB.Gamepad.AXES.RSY]},
+        toggleFloat: {buttons: [YAWVRB.Gamepad.BUTTONS.leftStick]},
+        toggleVR: {buttons: [YAWVRB.Gamepad.BUTTONS.start], commandDown: function () { console.log('entering VR'); app.toggleVR(); }}
+    };
 
     // local leap motion controller:
     var leapTool;
-    leapTool = YAWVRB.LeapMotion.makeTool({toolColor: 0xbb9999, handColor: 0x99bbbb, shadowPlane: avatar.position.y - 0.25});
+    leapTool = YAWVRB.LeapMotion.makeTool({
+        toolColor: 0xbb9999,
+        handColor: 0x99bbbb,
+        shadowPlane: avatar.position.y - 0.25
+    });
+    YAWVRB.Utils.displayText('Leap Motion (local)', {object: leapTool.toolRoot});
+    leapTool.leapController.connect();
+    objectSelector.addSelectable(leapTool.toolRoot);
     avatar.add(leapTool.toolRoot);
     world.add(leapTool.toolBody);
-    leapTool.leapController.connect();
 
     // remote leap motion controller:
     var leapToolRemote;
     if (URL_PARAMS.remoteLeapHost) {
-        leapToolRemote = YAWVRB.LeapMotion.makeTool({toolColor: 0x99bb99, handColor: 0xbb99bb, host: URL_PARAMS.remoteLeapHost});
+        leapToolRemote = YAWVRB.LeapMotion.makeTool({
+            toolColor: 0x99bb99,
+            handColor: 0xbb99bb,
+            host: URL_PARAMS.remoteLeapHost
+        });
         leapToolRemote.toolRoot.position.x -= 16 * INCH2METERS;
         leapToolRemote.toolRoot.updateMatrix();
+        YAWVRB.Utils.displayText('Leap Motion (remote)', {object: leapToolRemote.toolRoot});
+        leapToolRemote.leapController.connect();
+        objectSelector.addSelectable(leapToolRemote.toolRoot);
         avatar.add(leapToolRemote.toolRoot);
         world.add(leapToolRemote.toolBody);
-        leapToolRemote.leapController.connect();
     }
 
+    // GfxTablet:
     var gfxTablet = new YAWVRB.GfxTablet(2560, 1600);
     avatar.add(gfxTablet.mesh);
     gfxTablet.mesh.position.set(-0.32, -0.3, -0.05);
     gfxTablet.mesh.quaternion.setFromAxisAngle(UP, 0.5 * Math.PI).multiply((new THREE.Quaternion()).setFromAxisAngle(RIGHT, -0.125 * Math.PI));
     gfxTablet.mesh.updateMatrix();
-
     YAWVRB.Utils.displayText('GfxTablet', {object: gfxTablet.mesh, position: [0, 0.5, 0.05]});
-    YAWVRB.Utils.displayText('Keyboard', {object: keyboardObject});
-    if (leapTool) YAWVRB.Utils.displayText('Leap Motion (local)', {object: leapTool.toolRoot});
-    if (leapToolRemote) YAWVRB.Utils.displayText('Leap Motion (remote)', {object: leapToolRemote.toolRoot});
-
-    objectSelector.addSelectable(avatar);
-    objectSelector.addSelectable(keyboardObject);
     objectSelector.addSelectable(gfxTablet.mesh);
-    if (leapTool) objectSelector.addSelectable(leapTool.toolRoot);
-    if (leapToolRemote) objectSelector.addSelectable(leapToolRemote.toolRoot);
 
     function moveByKeyboard(dt, t) {
         var moveFB = keyboard.moveForward - keyboard.moveBackward,
