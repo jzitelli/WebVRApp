@@ -47,10 +47,11 @@ module.exports = ( function () {
         returns: stuff
 
         *************************************/
-        options = options || {};
         for (var option in DEFAULT_OPTIONS) {
             if (options[option] === undefined) options[option] = DEFAULT_OPTIONS[option];
         }
+        console.log('tool options:');
+        console.log(options);
 
         // coordinate transformations are performed via three.js scene graph
         var toolRoot = new THREE.Object3D();
