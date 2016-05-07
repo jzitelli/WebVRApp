@@ -37,6 +37,7 @@ module.exports = ( function () {
         useShadowMesh: true,
         shadowPlane: 0,
         shadowMaterial: new THREE.MeshBasicMaterial({color: 0x333333}),
+        shadowLightPosition: new THREE.Vector4(0, 7, 0, 0.1),
         host: '127.0.0.1',
         port: 6437
     };
@@ -136,8 +137,7 @@ module.exports = ( function () {
             var shadowMaterial = options.shadowMaterial;
             toolShadowMesh = new THREE.ShadowMesh(toolMesh, shadowMaterial);
             var shadowPlane = new THREE.Plane(UP, options.shadowPlane);
-            var shadowLightPosition = new THREE.Vector4(0.2, 5, 0, 0.01);
-            toolShadowMesh.updateShadowMatrix(shadowPlane, shadowLightPosition);
+            toolShadowMesh.updateShadowMatrix(shadowPlane, options.shadowLightPosition);
         } else {
             toolMesh.castShadow = true;
         }
