@@ -71,7 +71,7 @@ function onLoad() {
 
     // local leap motion controller:
     var leapTool;
-    leapTool = YAWVRB.LeapMotion.makeTool({toolColor: 0xbb9999, handColor: 0x99bbbb});
+    leapTool = YAWVRB.LeapMotion.makeTool({toolColor: 0xbb9999, handColor: 0x99bbbb, shadowPlane: avatar.position.y - 0.25});
     avatar.add(leapTool.toolRoot);
     world.add(leapTool.toolBody);
     leapTool.leapController.connect();

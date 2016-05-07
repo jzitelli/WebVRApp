@@ -813,8 +813,7 @@ module.exports = ( function () {
 
         var toolShadowMesh;
         if (options.useShadowMesh) {
-            var shadowMaterial = options.shadowMaterial;
-            toolShadowMesh = new THREE.ShadowMesh(toolMesh, shadowMaterial);
+            toolShadowMesh = new THREE.ShadowMesh(toolMesh, options.shadowMaterial);
             var shadowPlane = new THREE.Plane(UP, options.shadowPlane);
             toolShadowMesh.updateShadowMatrix(shadowPlane, options.shadowLightPosition);
         } else {
@@ -1125,6 +1124,11 @@ module.exports = ( function () {
 		this.pointerMesh = pointerMesh;
 
 		var eventTarget = options.eventTarget;
+
+		var material = new THREE.MeshBasicMaterial({color: 0xff00ff});
+		var stageGeom = new THREE.BoxBufferGeometry(2.5, 1.1, 3.5);
+		var stageObject = new THREE.Mesh(stageGeom, material);
+		this.stageObject = stageObject;
 
 		function onMouseMove(evt) {
 			var aspect = window.innerWidth / window.innerHeight;

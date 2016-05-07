@@ -134,8 +134,7 @@ module.exports = ( function () {
 
         var toolShadowMesh;
         if (options.useShadowMesh) {
-            var shadowMaterial = options.shadowMaterial;
-            toolShadowMesh = new THREE.ShadowMesh(toolMesh, shadowMaterial);
+            toolShadowMesh = new THREE.ShadowMesh(toolMesh, options.shadowMaterial);
             var shadowPlane = new THREE.Plane(UP, options.shadowPlane);
             toolShadowMesh.updateShadowMatrix(shadowPlane, options.shadowLightPosition);
         } else {
