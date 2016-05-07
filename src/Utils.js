@@ -41,8 +41,9 @@ module.exports = ( function () {
 
         this.cycleSelection = ( function () {
             var i = 0;
-            return function () {
-                i = (i + 1) % selectables.length;
+            return function (inc) {
+                i = (i + inc) % selectables.length;
+                if (i < 0) i += selectables.length;
                 this.selection = selectables[i];
             };
         } )().bind(this);

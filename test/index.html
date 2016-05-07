@@ -32,7 +32,9 @@
         <button id='fsButton' style='font-family: monospace; font-size: 16pt'>toggle fullscreen</button>
         <br>
         <label>wireframe<input id='wireframeInput' type='checkbox' /></label>
+<!--
         <label>shadow maps<input id='shadowMapsInput' type='checkbox' /></label>
+ -->
       </section>
 
     </div>
@@ -50,8 +52,8 @@
     var WebVRConfig = {
       BUFFER_SCALE: 0.5, // Default: 1.0.
       PREDICTION_TIME_S: 0.02, // Default: 0.050s.
-      KEYBOARD_CONTROLS_DISABLED: true
-      //FORCE_ENABLE_VR: true // Default: false.
+      KEYBOARD_CONTROLS_DISABLED: true,
+      FORCE_ENABLE_VR: true // Default: false.
       //ENABLE_LEAP_MOTION: true,
       //LEAP_MOTION_CONTROLLER: new Leap.Controller({background: true})
       //LEAP_MOTION_HOST: '127.0.0.1',

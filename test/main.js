@@ -17,26 +17,31 @@ function onLoad() {
 
     app.renderer.setSize(window.innerWidth, window.innerHeight);
 
-    var vrButton = document.getElementById('vrButton');
-    var fsButton = document.getElementById('fsButton');
-    var wireframeInput = document.getElementById('wireframeInput');
+    // menu setup:
 
+    var vrButton = document.getElementById('vrButton');
     vrButton.addEventListener('click', function () {
         app.toggleVR();
         vrButton.blur();
     });
+    var fsButton = document.getElementById('fsButton');
     fsButton.addEventListener('click', function () {
         app.toggleFullscreen();
         fsButton.blur();
     });
+    var wireframeInput = document.getElementById('wireframeInput');
     wireframeInput.addEventListener('click', function () {
         app.toggleWireframe();
-
     });
-
-    var world = new CANNON.World();
+    var shadowMapsInput = document.getElementById('shadowMapsInput');
+    // shadowMapsInput.addEventListener('click', function () {
+    // });
 
     var objectSelector = new YAWVRB.Utils.ObjectSelector();
+
+    var stage = new YAWVRB.Stage();
+
+    var world = new CANNON.World();
 
     var avatar = new THREE.Object3D();
     avatar.position.y = 1.2;
@@ -48,21 +53,23 @@ function onLoad() {
     avatar.add(mouse.pointerMesh);
     mouse.pointerMesh.position.z = -0.4;
     mouse.pointerMesh.updateMatrix();
-    objectSelector.addSelectable(mouse.stageObject);
+    // objectSelector.addSelectable(mouse.stageObject);
+    // stage.objects.push(mouse.stageObject);
 
     var keyboardCommands = {
         toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: function () { app.toggleVR(); }},
         resetVRSensor: {buttons: [YAWVRB.Keyboard.KEYCODES.Z], commandDown: function () { app.resetVRSensor(); }},
-        cycleSelection: {buttons: [YAWVRB.Keyboard.KEYCODES.OPENBRACKET], commandDown: objectSelector.cycleSelection},
+        cycleSelection: {buttons: [YAWVRB.Keyboard.KEYCODES.CLOSEDBRACKET], commandDown: objectSelector.cycleSelection},
+        cyclePrevSelection: {buttons: [YAWVRB.Keyboard.KEYCODES.OPENBRACKET], commandDown: objectSelector.cycleSelection.bind(objectSelector, -1)},
         toggleWireframe: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER1], commandDown: function () { app.toggleWireframe(); }},
-        toggleNormalMaterial: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER2], commandDown: function () { app.toggleNormalMaterial(); }}
+        toggleNormalMaterial: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER2], commandDown: function () { app.toggleNormalMaterial(); }},
+        saveStageConfiguration: {buttons: [YAWVRB.Keyboard.KEYCODES.X], commandDown: function () { stage.save(); }}
     };
     for (var k in YAWVRB.Keyboard.STANDARD_COMMANDS) {
         keyboardCommands[k] = YAWVRB.Keyboard.STANDARD_COMMANDS[k];
     }
 
     var keyboard = new YAWVRB.Keyboard(window, keyboardCommands);
-
     var keyboardObject = keyboard.stageObject;
     keyboardObject.position.z = -12 * INCH2METERS;
     keyboardObject.position.y = -5 * INCH2METERS;
@@ -70,6 +77,7 @@ function onLoad() {
     YAWVRB.Utils.displayText('Keyboard', {object: keyboardObject});
     objectSelector.addSelectable(keyboardObject);
     avatar.add(keyboardObject);
+    stage.objects.push(keyboardObject);
 
     var gamepadCommands = {
         resetVRSensor: {buttons: [YAWVRB.Gamepad.BUTTONS.back], commandDown: function () { app.resetVRSensor(); }},
@@ -89,11 +97,13 @@ function onLoad() {
         handColor: 0x99bbbb,
         shadowPlane: avatar.position.y - 0.25
     });
+    leapTool.toolRoot.name = 'toolRoot';
     YAWVRB.Utils.displayText('Leap Motion (local)', {object: leapTool.toolRoot});
     leapTool.leapController.connect();
     objectSelector.addSelectable(leapTool.toolRoot);
     avatar.add(leapTool.toolRoot);
     world.add(leapTool.toolBody);
+    stage.objects.push(leapTool.toolRoot);
 
     // remote leap motion controller:
     var leapToolRemote;
@@ -112,6 +122,8 @@ function onLoad() {
         objectSelector.addSelectable(leapToolRemote.toolRoot);
         avatar.add(leapToolRemote.toolRoot);
         world.add(leapToolRemote.toolBody);
+        leapToolRemote.toolRoot.name = 'remoteToolRoot';
+        stage.objects.push(leapToolRemote.toolRoot);
     }
 
     // GfxTablet:
@@ -120,8 +132,12 @@ function onLoad() {
     gfxTablet.mesh.position.set(-0.32, -0.3, -0.05);
     gfxTablet.mesh.quaternion.setFromAxisAngle(UP, 0.5 * Math.PI).multiply((new THREE.Quaternion()).setFromAxisAngle(RIGHT, -0.125 * Math.PI));
     gfxTablet.mesh.updateMatrix();
+    gfxTablet.mesh.name = 'GfxTablet';
     YAWVRB.Utils.displayText('GfxTablet', {object: gfxTablet.mesh, position: [0, 0.5, 0.05]});
     objectSelector.addSelectable(gfxTablet.mesh);
+    stage.objects.push(gfxTablet.mesh);
+
+    stage.load();
 
     function moveByKeyboard(dt, t) {
         var moveFB = keyboard.moveForward - keyboard.moveBackward,
