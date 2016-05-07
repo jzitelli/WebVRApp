@@ -29,7 +29,7 @@ function onLoad() {
     avatar.position.z = -0.28
     avatar.updateMatrix();
 
-    var objectSelector = new YAWVRB.AppUtils.ObjectSelector();
+    var objectSelector = new YAWVRB.Utils.ObjectSelector();
 
     var mouse = new YAWVRB.Mouse({eventTarget: window});
     avatar.add(mouse.pointerMesh);
@@ -93,10 +93,10 @@ function onLoad() {
     gfxTablet.mesh.quaternion.setFromAxisAngle(UP, 0.5 * Math.PI).multiply((new THREE.Quaternion()).setFromAxisAngle(RIGHT, -0.125 * Math.PI));
     gfxTablet.mesh.updateMatrix();
 
-    YAWVRB.AppUtils.displayText('GfxTablet', {object: gfxTablet.mesh, position: [0, 0.5, 0.05]});
-    YAWVRB.AppUtils.displayText('Keyboard', {object: keyboardObject});
-    if (leapTool) YAWVRB.AppUtils.displayText('Leap Motion (local)', {object: leapTool.toolRoot});
-    if (leapToolRemote) YAWVRB.AppUtils.displayText('Leap Motion (remote)', {object: leapToolRemote.toolRoot});
+    YAWVRB.Utils.displayText('GfxTablet', {object: gfxTablet.mesh, position: [0, 0.5, 0.05]});
+    YAWVRB.Utils.displayText('Keyboard', {object: keyboardObject});
+    if (leapTool) YAWVRB.Utils.displayText('Leap Motion (local)', {object: leapTool.toolRoot});
+    if (leapToolRemote) YAWVRB.Utils.displayText('Leap Motion (remote)', {object: leapToolRemote.toolRoot});
 
     objectSelector.addSelectable(avatar);
     objectSelector.addSelectable(keyboardObject);
@@ -128,7 +128,7 @@ function onLoad() {
         }
 
         if (objectSelector.selection === avatar) turnUD = 0;
-        objectSelector.moveSelection(dt, moveFB, moveRL, moveUD, turnRL, turnUD);
+        YAWVRB.Utils.moveObject(objectSelector.selection, dt, moveFB, moveRL, moveUD, turnRL, turnUD);
     }
 
     ( function () {
@@ -158,7 +158,6 @@ function onLoad() {
 
             app.scene = scene;
             app.scene.add(avatar);
-            avatar.add(app.sittingToStandingTransform);
             avatar.add(app.camera);
 
             if (leapTool && leapTool.toolShadowMesh)             app.scene.add(leapTool.toolShadowMesh);

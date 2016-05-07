@@ -6,13 +6,33 @@ module.exports = ( function () {
     const UP = THREE.Object3D.DefaultUp;
     const RIGHT = new THREE.Vector3(1, 0, 0);
 
+    var moveObject = ( function () {
+        const MOVESPEED = 0.3;
+        var euler = new THREE.Euler();
+        var pitchQuat = new THREE.Quaternion();
+        return function (object, dt, moveFB, moveRL, moveUD, turnRL, turnUD) {
+            if (moveFB || moveRL || moveUD || turnRL || turnUD) {
+                euler.setFromQuaternion(object.quaternion);
+                var heading = euler.y;
+                var pitch = euler.x;
+                heading -= (turnRL) * dt;
+                pitch   -= (turnUD) * dt;
+                var cos = Math.cos(heading),
+                    sin = Math.sin(heading);
+                object.position.z -= dt * MOVESPEED * ((moveFB) * cos + (moveRL) * sin);
+                object.position.x += dt * MOVESPEED * ((moveRL) * cos - (moveFB) * sin);
+                object.position.y += dt * MOVESPEED * moveUD;
+                if (pitch) pitchQuat.setFromAxisAngle(RIGHT, pitch);
+                object.quaternion.multiplyQuaternions(object.quaternion.setFromAxisAngle(UP, heading), pitchQuat);
+                object.updateMatrix();
+                object.updateMatrixWorld();
+            }
+        };
+    } )();
+
     function ObjectSelector() {
-
-        var selectables = [];
-
         this.selection;
-        var heading = 0;
-        var pitch = 0;
+        var selectables = [];
 
         this.addSelectable = function (obj) {
             selectables.push(obj);
@@ -21,70 +41,11 @@ module.exports = ( function () {
 
         this.cycleSelection = ( function () {
             var i = 0;
-            var euler = new THREE.Euler();
             return function () {
                 i = (i + 1) % selectables.length;
                 this.selection = selectables[i];
-                euler.setFromQuaternion(this.selection.quaternion);
-                heading = euler.y;
-                pitch = euler.x;
             };
         } )().bind(this);
-
-        const MOVESPEED = 0.3;
-        var pitchQuat = new THREE.Quaternion();
-
-        this.moveSelection = function (dt, moveFB, moveRL, moveUD, turnRL, turnUD) {
-            var selection = this.selection;
-            if (!selection) return;
-            if (moveFB || moveRL || moveUD || turnRL || turnUD) {
-                heading -= (turnRL) * dt;
-                pitch   -= (turnUD) * dt;
-                var cos = Math.cos(heading),
-                    sin = Math.sin(heading);
-                selection.position.z -= dt * MOVESPEED * ((moveFB) * cos + (moveRL) * sin);
-                selection.position.x += dt * MOVESPEED * ((moveRL) * cos - (moveFB) * sin);
-                selection.position.y += dt * MOVESPEED * moveUD;
-                selection.quaternion.multiplyQuaternions(selection.quaternion.setFromAxisAngle(UP, heading), pitchQuat.setFromAxisAngle(RIGHT, pitch));
-                selection.updateMatrix();
-                selection.updateMatrixWorld();
-            }
-        }.bind(this);
-
-        this.saveAllTransforms = function (key) {
-            if (!window.localStorage) {
-                console.error('platform does not support localStorage');
-                return;
-            }
-            key = key || 'YAWVRB_TRANSFORMS';
-            var transforms = {};
-            selectables.forEach( function (object) {
-                if (object.name) {
-                    transforms[object.name] = {
-                        position: object.position.toArray(),
-                        quaternion: object.quaternion.toArray()
-                    };
-                }
-            } );
-            window.localStorage[key] = transforms;
-        };
-
-        this.loadTransforms = function (key) {
-            if (!window.localStorage) {
-                console.error('platform does not support localStorage');
-                return;
-            }
-            key = key || 'YAWVRB_TRANSFORMS';
-            var transforms = window.localStorage[key];
-            selectables.forEach( function (object) {
-                if (object.name && transforms[object.name]) {
-                    var transform = transforms[object.name];
-                    object.position.fromArray(transform.position);
-                    object.quaternion.fromArray(transform.quaternion);
-                    object.updateMatrix();
-                }
-            } );
-        };
     }
 
     var DEADSCENE = new THREE.Scene();
@@ -144,6 +105,7 @@ module.exports = ( function () {
     return {
         ObjectSelector: ObjectSelector,
         displayText: displayText,
+        moveObject: moveObject,
         DEADSCENE: DEADSCENE
     };
 
