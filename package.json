@@ -15,9 +15,9 @@
     "src/",
     "test/",
     "favicon.ico",
+    "server.js",
     "LICENSE",
-    "README.md",
-    "server.js"
+    "README.md"
   ],
   "keywords": [
     "three.js",
@@ -27,7 +27,6 @@
     "Leap Motion",
     "Oculus Rift",
     "HTC Vive",
-    "OSVR",
     "VR",
     "virtual reality",
     "WebGL",
@@ -45,7 +44,7 @@
     "eslint": "latest"
   },
   "optionalDependencies": {
-    "leapjs": "0.6.4",
+    "leapjs": "latest",
     "gfxtablet": "git://github.com/jzitelli/GfxTablet.js.git",
     "cannon": "git://github.com/jzitelli/cannon.js.git#dev"
   },
@@ -53,7 +52,7 @@
     "lint": "eslint src/*.js",
     "build": "npm run lint && browserify src/yawvrb.js -o build/yawvrb.js",
     "test": "npm run build && jasmine",
-    "start": "cd ./test && python tornado_server.py",
+    "start": "npm run build && cd ./test && python tornado_server.py",
     "watch": "watchify src/yawvrb.js -o build/yawvrb.js"
   }
 }

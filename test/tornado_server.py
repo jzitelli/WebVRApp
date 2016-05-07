@@ -45,9 +45,12 @@ def main():
     port = config.get('PORT', 5000)
 
     app.listen(port)
-    _logger.info("listening on port %d" % port)
-    _logger.info("press CTRL-C to terminate the server")
+
     _logger.info("""
+
+listening on port %d
+press CTRL-c to terminate the server
+
 
              -----------
           Y  A  W  V  R  B
@@ -58,7 +61,7 @@ def main():
       *************************
            Y  A  W  V  R  B
              -----------
-""")
+""" % port)
     IOLoop.instance().start()
 
 
