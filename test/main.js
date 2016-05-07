@@ -19,6 +19,7 @@ function onLoad() {
 
     var vrButton = document.getElementById('vrButton');
     var fsButton = document.getElementById('fsButton');
+    var wireframeInput = document.getElementById('wireframeInput');
 
     vrButton.addEventListener('click', function () {
         app.toggleVR();
@@ -27,6 +28,10 @@ function onLoad() {
     fsButton.addEventListener('click', function () {
         app.toggleFullscreen();
         fsButton.blur();
+    });
+    wireframeInput.addEventListener('click', function () {
+        app.toggleWireframe();
+
     });
 
     var world = new CANNON.World();
@@ -58,7 +63,7 @@ function onLoad() {
 
     var keyboard = new YAWVRB.Keyboard(window, keyboardCommands);
 
-    var keyboardObject = keyboard.object;
+    var keyboardObject = keyboard.stageObject;
     keyboardObject.position.z = -12 * INCH2METERS;
     keyboardObject.position.y = -5 * INCH2METERS;
     keyboardObject.updateMatrix();
@@ -96,7 +101,9 @@ function onLoad() {
         leapToolRemote = YAWVRB.LeapMotion.makeTool({
             toolColor: 0x99bb99,
             handColor: 0xbb99bb,
-            host: URL_PARAMS.remoteLeapHost
+            host: URL_PARAMS.remoteLeapHost,
+            shadowPlane: avatar.position.y - 0.25,
+            shadowMaterial: new THREE.MeshBasicMaterial({color: 0xffff99})
         });
         leapToolRemote.toolRoot.position.x -= 16 * INCH2METERS;
         leapToolRemote.toolRoot.updateMatrix();

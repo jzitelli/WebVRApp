@@ -48,7 +48,7 @@ module.exports = ( function () {
             }
         }
 
-        this.object = ( function () {
+        this.stageObject = ( function () {
 
             // create keyboard visuals:
 
