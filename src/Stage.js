@@ -25,9 +25,8 @@ module.exports = ( function () {
             if (t) console.log(t);
         }.bind(this);
 
-        this.save = function (key) {
+        this.save = function () {
             // console.log('saving poses of stage objects');
-            key = key || 'StagePoses';
             var transforms = {};
             this.objects.forEach( function (object) {
                 if (object.name) {
@@ -38,21 +37,15 @@ module.exports = ( function () {
                     console.log(transforms);
                 }
             } );
-            window.localStorage[key] = JSON.stringify(transforms);
+            return transforms;
         }.bind(this);
 
-        this.load = function (key) {
+        this.load = function (transforms) {
             console.log('loading poses of stage objects...');
-            key = key || 'StagePoses';
-            if (!window.localStorage[key]) return;
-            var transforms = JSON.parse(window.localStorage[key]);
             if (!transforms) return;
             this.objects.forEach( function (object) {
                 if (object.name && transforms[object.name]) {
-                    console.log(object.name);
                     var transform = transforms[object.name];
-                    console.log(transform.position);
-                    console.log(transform.quaternion);
                     object.position.fromArray(transform.position);
                     object.quaternion.fromArray(transform.quaternion);
                     object.updateMatrix();
