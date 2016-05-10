@@ -41,8 +41,8 @@ module.exports = ( function () {
         }.bind(this);
 
         this.load = function (transforms) {
-            console.log('loading poses of stage objects...');
             if (!transforms) return;
+            console.log('loading poses of stage objects...');
             this.objects.forEach( function (object) {
                 if (object.name && transforms[object.name]) {
                     var transform = transforms[object.name];
