@@ -10,6 +10,7 @@ function App(scene, config, rendererOptions) {
     config = config || _config;
     for (var kwarg in DEFAULT_OPTIONS) {
         if (config[kwarg] === undefined) _config[kwarg] = DEFAULT_OPTIONS[kwarg];
+        else _config[kwarg] = config[kwarg];
     }
     config = _config;
 
