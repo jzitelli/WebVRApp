@@ -50,9 +50,11 @@ module.exports = ( function () {
         *************************************/
         var _options = {};
         options = options || _options;
-        for (var option in DEFAULT_OPTIONS) {
+        for (var option in options) {
+            _options[option] = options[option];
+        }
+        for (option in DEFAULT_OPTIONS) {
             if (options[option] === undefined) _options[option] = DEFAULT_OPTIONS[option];
-            else _options[option] = options[option];
         }
         options = _options;
         console.log('tool options:');

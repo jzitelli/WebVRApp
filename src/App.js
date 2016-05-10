@@ -1,16 +1,22 @@
 /* global THREE */
 
 const DEFAULT_OPTIONS = {
-    useImmediatePose: true
+    useImmediatePose: true,
+    onResetVRSensor: function (lastRotation, lastPosition) {
+        console.log('lastRotation: ' + lastRotation);
+        console.log('lastPosition: ' + lastPosition);
+    }
 };
 
 function App(scene, config, rendererOptions) {
     "use strict";
     var _config = {};
     config = config || _config;
-    for (var kwarg in DEFAULT_OPTIONS) {
+    for (var kwarg in config) {
+        _config[kwarg] = config[kwarg];
+    }
+    for (kwarg in DEFAULT_OPTIONS) {
         if (config[kwarg] === undefined) _config[kwarg] = DEFAULT_OPTIONS[kwarg];
-        else _config[kwarg] = config[kwarg];
     }
     config = _config;
     console.log('YAWVRB.App config:');
