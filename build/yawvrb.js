@@ -1196,8 +1196,8 @@ module.exports = ( function () {
         }.bind(this);
 
         this.load = function (transforms) {
-            console.log('loading poses of stage objects...');
             if (!transforms) return;
+            console.log('loading poses of stage objects...');
             this.objects.forEach( function (object) {
                 if (object.name && transforms[object.name]) {
                     var transform = transforms[object.name];
@@ -1225,15 +1225,15 @@ module.exports = ( function () {
 
     var moveObject = ( function () {
         const MOVESPEED = 0.3;
-        var euler = new THREE.Euler();
+        var euler = new THREE.Euler(0, 0, 0, 'YXZ');
         var pitchQuat = new THREE.Quaternion();
         return function (object, dt, moveFB, moveRL, moveUD, turnRL, turnUD) {
             if (moveFB || moveRL || moveUD || turnRL || turnUD) {
                 euler.setFromQuaternion(object.quaternion);
+                euler.y -= (turnRL) * dt;
+                euler.x -= (turnUD) * dt;
                 var heading = euler.y;
                 var pitch = euler.x;
-                heading -= (turnRL) * dt;
-                pitch   -= (turnUD) * dt;
                 var cos = Math.cos(heading),
                     sin = Math.sin(heading);
                 object.position.z -= dt * MOVESPEED * ((moveFB) * cos + (moveRL) * sin);
