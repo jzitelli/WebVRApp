@@ -1,7 +1,7 @@
 /* global THREE */
 
 const DEFAULT_OPTIONS = {
-    useImmediatePose: false
+    useImmediatePose: true
 };
 
 function App(scene, config, rendererOptions) {
@@ -13,6 +13,8 @@ function App(scene, config, rendererOptions) {
         else _config[kwarg] = config[kwarg];
     }
     config = _config;
+    console.log('YAWVRB.App config:');
+    console.log(config);
 
     scene = scene || new THREE.Scene();
 
