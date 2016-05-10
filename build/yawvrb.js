@@ -723,9 +723,13 @@ module.exports = ( function () {
         returns: stuff
 
         *************************************/
+        var _options = {};
+        options = options || _options;
         for (var option in DEFAULT_OPTIONS) {
-            if (options[option] === undefined) options[option] = DEFAULT_OPTIONS[option];
+            if (options[option] === undefined) _options[option] = DEFAULT_OPTIONS[option];
+            else _options[option] = options[option];
         }
+        options = _options;
         console.log('tool options:');
         console.log(options);
 
@@ -740,7 +744,8 @@ module.exports = ( function () {
         // set up / connect to leap controller:
 
         var leapController = new Leap.Controller({background: true,
-                                                  host: options.host, port: options.port});
+                                                  host: options.host,
+                                                  port: options.port});
 
         // leap motion event callbacks:
         var onConnect = options.onConnect || function () {
@@ -1110,10 +1115,13 @@ module.exports = ( function () {
 	};
 
 	function Mouse(options) {
-		options = options || {};
+		var _options = {};
+		options = options || _options;
 		for (var option in DEFAULT_OPTIONS) {
-			if (options[option] === undefined) options[option] = DEFAULT_OPTIONS[option];
+			if (options[option] === undefined) _options[option] = DEFAULT_OPTIONS[option];
+			else _options[option] = options[option];
 		}
+		options = _options;
 
 		var pointerMesh = options.pointerMesh || new THREE.Mesh(new THREE.CircleBufferGeometry(0.014, 8), new THREE.MeshBasicMaterial({color: 0xffee22}));
 		pointerMesh.matrixAutoUpdate = false;

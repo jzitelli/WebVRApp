@@ -8,10 +8,13 @@ module.exports = ( function () {
 	};
 
 	function Mouse(options) {
-		options = options || {};
+		var _options = {};
+		options = options || _options;
 		for (var option in DEFAULT_OPTIONS) {
-			if (options[option] === undefined) options[option] = DEFAULT_OPTIONS[option];
+			if (options[option] === undefined) _options[option] = DEFAULT_OPTIONS[option];
+			else _options[option] = options[option];
 		}
+		options = _options;
 
 		var pointerMesh = options.pointerMesh || new THREE.Mesh(new THREE.CircleBufferGeometry(0.014, 8), new THREE.MeshBasicMaterial({color: 0xffee22}));
 		pointerMesh.matrixAutoUpdate = false;
