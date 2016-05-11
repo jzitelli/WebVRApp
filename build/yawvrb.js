@@ -133,10 +133,10 @@ function App(scene, config, rendererOptions) {
         var vrDisplay = this.vrDisplay;
         if (vrDisplay && !vrDisplay.isPresenting && vrDisplay.capabilities.canPresent) {
             this.vrEffect.requestPresent().then( function () {
-                if (vrDisplay.capabilities.hasExternalDisplay) {
-                    var eyeParams = vrDisplay.getEyeParameters( 'left' );
-                    this.renderer.setSize(2*eyeParams.renderWidth, eyeParams.renderHeight);
-                }
+                // if (vrDisplay.capabilities.hasExternalDisplay) {
+                //     var eyeParams = vrDisplay.getEyeParameters( 'left' );
+                //     this.renderer.setSize(2*eyeParams.renderWidth, eyeParams.renderHeight);
+                // }
                 // requestPointerLock();
             }.bind(this) );
         } else if (vrDisplay && vrDisplay.isPresenting) {
@@ -1225,8 +1225,8 @@ module.exports = ( function () {
                 if (object.name && transforms[object.name]) {
                     var transform = transforms[object.name];
                     object.position.fromArray(transform.position);
-                    //object.quaternion.fromArray(transform.quaternion);
-                    object.quaternion.setFromEuler(object.rotation.fromArray(transform.rotation));
+                    object.quaternion.fromArray(transform.quaternion);
+                    object.rotation.setFromEuler(object.rotation.fromArray(transform.rotation));
                     object.updateMatrix();
                     object.updateMatrixWorld();
                 }

@@ -53,8 +53,8 @@ module.exports = ( function () {
                 if (object.name && transforms[object.name]) {
                     var transform = transforms[object.name];
                     object.position.fromArray(transform.position);
-                    //object.quaternion.fromArray(transform.quaternion);
-                    object.quaternion.setFromEuler(object.rotation.fromArray(transform.rotation));
+                    object.quaternion.fromArray(transform.quaternion);
+                    object.rotation.setFromEuler(object.rotation.fromArray(transform.rotation));
                     object.updateMatrix();
                     object.updateMatrixWorld();
                 }
