@@ -1204,6 +1204,9 @@ module.exports = ( function () {
             var transforms = {};
             this.objects.forEach( function (object) {
                 if (object.name) {
+                    object.updateMatrix();
+                    object.updateMatrixWorld();
+                    object.matrix.decompose(object.position, object.quaternion, object.scale);
                     transforms[object.name] = {
                         position: object.position.toArray(),
                         quaternion: object.quaternion.toArray(),
@@ -1211,19 +1214,28 @@ module.exports = ( function () {
                     };
                 }
             } );
-            console.log(transforms);
+            console.log(JSON.stringify(transforms, undefined, 2));
+            localStorage.setItem('stagePoses', JSON.stringify(transforms, undefined, 2));
             return transforms;
         }.bind(this);
 
         this.load = function (transforms) {
-            if (!transforms) return;
+            if (!transforms) {
+                transforms = localStorage.getItem('stagePoses');
+                if (!transforms) {
+                    console.warn('no stage poses found in localStorage');
+                    return;
+                } else {
+                    transforms = JSON.parse(transforms);
+                }
+            }
             console.log('loading poses of stage objects...');
             this.objects.forEach( function (object) {
                 if (object.name && transforms[object.name]) {
                     var transform = transforms[object.name];
                     object.position.fromArray(transform.position);
                     object.quaternion.fromArray(transform.quaternion);
-                    object.rotation.setFromEuler(object.rotation.fromArray(transform.rotation));
+                    object.rotation.fromArray(transform.rotation);
                     object.updateMatrix();
                     object.updateMatrixWorld();
                 }
