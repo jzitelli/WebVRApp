@@ -1,7 +1,7 @@
 /* global THREE */
 
 const DEFAULT_OPTIONS = {
-    useImmediatePose: true,
+    useImmediatePose: false,
     onResetVRSensor: function (lastRotation, lastPosition) {
         console.log('lastRotation: ' + lastRotation);
         console.log('lastPosition: ' + lastPosition);
