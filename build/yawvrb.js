@@ -742,7 +742,7 @@ module.exports = ( function () {
             if (options[option] === undefined) _options[option] = DEFAULT_OPTIONS[option];
         }
         options = _options;
-        console.log('tool options:');
+        console.log('Leap Motion tool options:');
         console.log(options);
 
         // coordinate transformations are performed via three.js scene graph
@@ -1341,11 +1341,34 @@ module.exports = ( function () {
         return displayText;
     } )();
 
+    var URL_PARAMS = ( function () {
+        var params = {};
+        location.search.substr(1).split("&").forEach( function(item) {
+            var k = item.split("=")[0],
+                v = decodeURIComponent(item.split("=")[1]);
+            if (k in params) {
+                params[k].push(v);
+            } else {
+                params[k] = [v];
+            }
+        } );
+        for (var k in params) {
+            if (params[k].length === 1)
+                params[k] = params[k][0];
+            if (params[k] === 'true')
+                params[k] = true;
+            else if (params[k] === 'false')
+                params[k] = false;
+        }
+        return params;
+    } )();
+
     return {
         ObjectSelector: ObjectSelector,
         displayText: displayText,
         moveObject: moveObject,
-        DEADSCENE: DEADSCENE
+        DEADSCENE: DEADSCENE,
+        URL_PARAMS: URL_PARAMS
     };
 
 } )();
