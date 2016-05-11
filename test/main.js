@@ -112,7 +112,7 @@ window.onLoad = function () {
     // remote leap motion controller:
     var remoteLeapStatusIndicator = document.getElementById('remoteLeapStatus');
     var remoteLeapToolOptions = {
-        host: YAWVRB.Utils.URL_PARAMS.remoteLeapHost || '192.168.1.200',
+        host: YAWVRB.Utils.URL_PARAMS.remoteLeapHost || '192.168.1.201',
         onConnect: function () {
             remoteLeapStatusIndicator.textContent = 'remote websocket connected';
             remoteLeapStatusIndicator.style['background-color'] = 'rgba(60, 60, 20, 0.7)';
@@ -127,7 +127,7 @@ window.onLoad = function () {
         },
         onDisconnect: function () {
             remoteLeapStatusIndicator.textContent = 'remote websocket disconnected';
-            remoteLeapStatusIndicator.style['background-color'] = 'rgba(60, 20, 20, 0.7)';            
+            remoteLeapStatusIndicator.style['background-color'] = 'rgba(60, 20, 20, 0.7)';
         },
         toolColor: 0x99bb99,
         handColor: 0xbb99bb,
