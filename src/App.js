@@ -142,6 +142,8 @@ function App(scene, config, rendererOptions) {
             this.vrEffect.exitPresent().then( function () {
                 console.log('exited VR presentation');
             } );
+        } else {
+            console.error('there is no capable VRDisplay available');
         }
     }.bind(this);
 
