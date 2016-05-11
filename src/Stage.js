@@ -8,17 +8,22 @@ module.exports = ( function () {
 
         var vrDisplay;
 
-        navigator.getVRDisplays().then( function (displays) {
-            for (var i = 0; i < displays.length; i++) {
-                vrDisplay = displays[i];
-                console.log('vrDisplay:\n' + vrDisplay);
-                if (vrDisplay.stageParameters && vrDisplay.stageParameters.sittingToStandingTransform) {
-                    console.log('sittingToStandingTransform:\n' + vrDisplay.stageParameters.sittingToStandingTransform);
-                } else {
-                    console.warn('no sittingToStandingTransform provided by the VRDisplay');
+        if (navigator.getVRDisplays) {
+            console.log('checking VRDisplays for stage parameters...');
+            navigator.getVRDisplays().then( function (displays) {
+                for (var i = 0; i < displays.length; i++) {
+                    vrDisplay = displays[i];
+                    console.log('%s:\n%s', vrDisplay.deviceName, JSON.stringify(vrDisplay, undefined, 2));
+                    if (vrDisplay.stageParameters && vrDisplay.stageParameters.sittingToStandingTransform) {
+                        console.log('sittingToStandingTransform:\n' + vrDisplay.stageParameters.sittingToStandingTransform);
+                    } else {
+                        console.warn('no sittingToStandingTransform provided by the VRDisplay');
+                    }
                 }
-            }
-        } );
+            } );
+        } else {
+            console.warn('your browser does not support the latest WebVR API');
+        }
 
         this.updateCalibrationPose = function ( pose, t ) {
             if (pose) console.log(pose);
@@ -26,17 +31,18 @@ module.exports = ( function () {
         }.bind(this);
 
         this.save = function () {
-            // console.log('saving poses of stage objects');
+            console.log('saving poses of stage objects...');
             var transforms = {};
             this.objects.forEach( function (object) {
                 if (object.name) {
                     transforms[object.name] = {
                         position: object.position.toArray(),
-                        quaternion: object.quaternion.toArray()
+                        quaternion: object.quaternion.toArray(),
+                        rotation: object.rotation.toArray()
                     };
-                    console.log(transforms);
                 }
             } );
+            console.log(transforms);
             return transforms;
         }.bind(this);
 
@@ -47,7 +53,8 @@ module.exports = ( function () {
                 if (object.name && transforms[object.name]) {
                     var transform = transforms[object.name];
                     object.position.fromArray(transform.position);
-                    object.quaternion.fromArray(transform.quaternion);
+                    //object.quaternion.fromArray(transform.quaternion);
+                    object.quaternion.setFromEuler(object.rotation.fromArray(transform.rotation));
                     object.updateMatrix();
                     object.updateMatrixWorld();
                 }
