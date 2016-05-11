@@ -307,7 +307,7 @@ module.exports = ( function () {
                     }
                 } else if (command.buttons) {
                     for (j = 0; j < command.buttons.length; j++) {
-                        if (gamepad.buttons[command.buttons[j]].pressed) {
+                        if (gamepad.buttons[command.buttons[j]] && gamepad.buttons[command.buttons[j]].pressed) {
                             axesValues[name] = 1;
                             break;
                         }
