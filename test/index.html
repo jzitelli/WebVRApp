@@ -18,24 +18,21 @@
     <canvas id='webgl-canvas'></canvas>
 
     <div id='overlay'>
-
       <h1>YAWVRB</h1>
-
-      <label>profile name:<input id='profileName' type='textbox' /></label>
-
-      <h2>display options</h2>
+      <label>Profile name:<input id='profileName' type='textbox' /></label>
+      <h2>Display options:</h2>
       <section>
         <button id='vrButton'>toggle VR</button>
         <button id='fsButton'>toggle fullscreen</button>
         <br>
-        <label style='font-family: monospace; font-size: 14pt'>wireframe<input id='wireframeInput' type='checkbox' /></label>
+        <label style='font-family: monospace; font-size: 14pt'><input id='wireframeInput' type='checkbox' />wireframe</label>
         <!-- <label style='font-family: monospace; font-size: 14pt'>shadow maps<input id='shadowMapsInput' type='checkbox' /></label> -->
       </section>
-
-      <h2>leap motion options</h2>
-      <section>
-        <label>Leap Motion websocket address:<input id='remoteLeapAddress' type='textbox' /></label>
+      <h2>Leap Motion options:</h2>
+      <section id='leapMotionOptions'>
+        <div id="localLeapStatus"  class="statusIndicator">not connected</div>
         <div id="remoteLeapStatus" class='statusIndicator'>not connected</div>
+        <label>remote websocket address:<input id='remoteLeapAddress' type='textbox' /></label>
       </section>
     </div>
 
@@ -43,19 +40,19 @@
     var WebVRConfig = {
       BUFFER_SCALE: 0.5, // Default: 1.0.
       PREDICTION_TIME_S: 0.02, // Default: 0.050s.
-      KEYBOARD_CONTROLS_DISABLED: true
-      //FORCE_ENABLE_VR: true // Default: false.
-      //ENABLE_LEAP_MOTION: true,
+      FORCE_ENABLE_VR: false, // Default: false.
+      ENABLE_LEAP_MOTION: false,
       //LEAP_MOTION_CONTROLLER: new Leap.Controller({background: true})
-      //LEAP_MOTION_HOST: '127.0.0.1',
-      //LEAP_MOTION_PORT: 6437,
-      //K_FILTER: 0.98, // Default: 0.98.
-      //TOUCH_PANNER_DISABLED: true, // Default: false.
+      LEAP_MOTION_HOST: '127.0.0.1',
+      LEAP_MOTION_PORT: 6437,
+      K_FILTER: 0.98, // Default: 0.98.
+      TOUCH_PANNER_DISABLED: false, // Default: false.
+      KEYBOARD_CONTROLS_DISABLED: true,
       //MOUSE_KEYBOARD_CONTROLS_DISABLED: true, // Default: false.
-      //YAW_ONLY: true, // Default: false.
-      //DEFER_INITIALIZATION: true, // Default: false.
-      //DIRTY_SUBMIT_FRAME_BINDINGS: true, // Default: false.
-      //ENABLE_DEPRECATED_API: true, // Default: false.
+      YAW_ONLY: false, // Default: false.
+      DEFER_INITIALIZATION: false, // Default: false.
+      DIRTY_SUBMIT_FRAME_BINDINGS: false, // Default: false.
+      ENABLE_DEPRECATED_API: false // Default: false.
     };
     </script>
 
@@ -74,7 +71,6 @@
 
     <script src="/build/yawvrb.js"></script>
 
-    <script src="/test/utils.js"></script>
     <script src="/test/main.js"></script>
 
   </body>

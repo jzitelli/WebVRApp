@@ -54,7 +54,7 @@ module.exports = ( function () {
             if (options[option] === undefined) _options[option] = DEFAULT_OPTIONS[option];
         }
         options = _options;
-        console.log('tool options:');
+        console.log('Leap Motion tool options:');
         console.log(options);
 
         // coordinate transformations are performed via three.js scene graph

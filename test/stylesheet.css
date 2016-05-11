@@ -11,27 +11,32 @@ h1 {
     font-size: 27pt;
 }
 h2 {
-    font-size: 22pt;
+    font-size: 20pt;
 }
 a {
-    font-size: 19pt;
+    font-size: 15pt;
 }
 button {
-    font-size: 16pt;
+    font-size: 14pt;
     font-family: monospace;
 }
 label {
-    font-size: 16pt;
+    font-size: 14pt;
     font-family: monospace;
     color: #ea9;
 }
 input {
-    font-size: 16pt;
+    font-size: 14pt;
     font-family: monospace;
 }
 .statusIndicator {
     background-color: rgba(60, 20, 20, 0.8);
-    width: 33%;
+    font-size: 14pt;
+    margin: 8px;
+    box-sizing: border-box;
+    text-align: center;
+    position: relative;
+    width: 60%;
 }
 #webgl-canvas {
     box-sizing: border-box;
@@ -45,12 +50,12 @@ input {
 }
 #overlay {
     position: absolute;
-    left: 12.5vw;
+    left: 30vw;
     top: 2vh;
-    width: 75%;
-    height: 75%;
+    width: 40%;
+    /*height: 75%;*/
     z-index: 999;
-    padding: 6px;
-    margin: 8px;
+    padding: 12px;
+    margin: 12px;
     background-color: rgba(55, 50, 25, 0.5);
 }
