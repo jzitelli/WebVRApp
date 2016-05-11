@@ -14,12 +14,9 @@ module.exports = ( function () {
     const LEAP2METERS = 0.001;
     const METERS2LEAP = 1000;
     const UP = THREE.Object3D.DefaultUp;
-    const RIGHT = new THREE.Vector3(1, 0, 0);
     const FORWARD = new THREE.Vector3(0, 0, -1);
 
     const DEFAULT_OPTIONS = {
-        rotation: [0, 0, 0],
-        position: [0, -0.42, -0.42],
         toolLength: 0.15,
         toolRadius: 0.0034,
         toolMass: 0.04,
@@ -63,10 +60,6 @@ module.exports = ( function () {
         // coordinate transformations are performed via three.js scene graph
         var toolRoot = new THREE.Object3D();
         toolRoot.scale.set(LEAP2METERS, LEAP2METERS, LEAP2METERS);
-
-        toolRoot.quaternion.multiplyQuaternions(toolRoot.quaternion.setFromAxisAngle(UP, options.rotation[1]), (new THREE.Quaternion()).setFromAxisAngle(RIGHT, options.rotation[0]));
-
-        toolRoot.position.fromArray(options.position);
 
         // set up / connect to leap controller:
 
