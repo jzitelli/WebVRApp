@@ -42,20 +42,22 @@ module.exports = ( function () {
             if (!gamepad) continue;
             var buttonsPressed = buttonsPresseds[i];
             for (var j = 0; j < gamepad.buttons.length; j++) {
-                if (gamepad.buttons[j].pressed && !buttonsPressed[j]) {
-                    buttonsPressed[j] = true;
-                    for (var name in commands) {
-                        var command = commands[name];
-                        if (command.commandDown && command.buttons && command.buttons.indexOf(j) !== -1) {
-                            command.commandDown(j);
+                if (gamepad.buttons[j]) {
+                    if (gamepad.buttons[j].pressed && !buttonsPressed[j]) {
+                        buttonsPressed[j] = true;
+                        for (var name in commands) {
+                            var command = commands[name];
+                            if (command.commandDown && command.buttons && command.buttons.indexOf(j) !== -1) {
+                                command.commandDown(j);
+                            }
                         }
-                    }
-                } else if (!gamepad.buttons[j].pressed && buttonsPressed[j]) {
-                    buttonsPressed[j] = false;
-                    for (name in commands) {
-                        command = commands[name];
-                        if (command.commandUp && command.buttons && command.buttons.indexOf(j) !== -1) {
-                            command.commandUp(j);
+                    } else if (!gamepad.buttons[j].pressed && buttonsPressed[j]) {
+                        buttonsPressed[j] = false;
+                        for (name in commands) {
+                            command = commands[name];
+                            if (command.commandUp && command.buttons && command.buttons.indexOf(j) !== -1) {
+                                command.commandUp(j);
+                            }
                         }
                     }
                 }
