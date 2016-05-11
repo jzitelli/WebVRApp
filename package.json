@@ -33,7 +33,7 @@
     "WebVR"
   ],
   "dependencies": {
-      "webvr-polyfill": "git://github.com/jzitelli/webvr-polyfill.git#webvr-1.0"
+    "webvr-polyfill": "git://github.com/jzitelli/webvr-polyfill.git"
   },
   "devDependencies": {
     "three.js": "git://github.com/jzitelli/three.js.git#dev",
