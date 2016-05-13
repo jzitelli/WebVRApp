@@ -314,7 +314,7 @@ window.onLoad = function () {
 
             app.scene.updateMatrixWorld(true);
 
-            if (leapTool)       leapTool.updateToolMapping();
+            leapTool.updateToolMapping();
             if (leapToolRemote) leapToolRemote.updateToolMapping();
 
             function startAnimateLoop() {
