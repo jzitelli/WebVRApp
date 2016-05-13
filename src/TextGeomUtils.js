@@ -79,6 +79,7 @@ module.exports = ( function () {
             var dt = 0.001 * (t - lt);
             lt = t;
             var numChildren = this.root.children.length;
+            if (numChildren === 0) return;
             var lastLineObject = this.root.children[numChildren-1];
             if (lastLineObject.position.y < 0) {
                 for (var i = 0; i < numChildren; i++) {
