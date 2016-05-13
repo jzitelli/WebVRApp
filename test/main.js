@@ -50,7 +50,6 @@ window.onLoad = function () {
     app.renderer.setSize(window.innerWidth, window.innerHeight);
 
     // menu setup:
-
     var overlay = document.getElementById('overlay');
 
     var infoElement = document.createElement('div');
@@ -60,8 +59,12 @@ window.onLoad = function () {
     overlay.appendChild(infoElement);
 
     var plaintext = document.createElement('plaintext');
+    plaintext.style['font-size'] = '7pt';
     plaintext.innerHTML = 'WebVRConfig = ' + JSON.stringify(window.WebVRConfig, undefined, 2);
     infoElement.appendChild(plaintext);
+
+    var profileNameInput = document.getElementById('profileName');
+    profileNameInput.value = 'dev';
 
     var vrButton = document.getElementById('vrButton');
     vrButton.addEventListener('click', function () {
@@ -75,15 +78,15 @@ window.onLoad = function () {
         fsButton.blur();
     });
 
-    var profileNameInput = document.getElementById('profileName');
-    profileNameInput.value = 'dev';
-
     var wireframeInput = document.getElementById('wireframeInput');
     wireframeInput.addEventListener('click', function () {
         app.toggleWireframe();
     });
 
-    var shadowMaterial = new THREE.MeshBasicMaterial({color: 0x555544});
+    var saveStageButton = document.getElementById('saveStageButton');
+    saveStageButton.addEventListener('click', function () {
+        stage.save();
+    });
 
     // local leap motion controller:
     var localLeapStatusIndicator = document.getElementById('localLeapStatus');
@@ -107,7 +110,7 @@ window.onLoad = function () {
         toolColor: 0xbb9999,
         handColor: 0x99bbbb,
         shadowPlane: avatar.position.y - 0.25,
-        shadowMaterial: shadowMaterial
+        shadowMaterial: new THREE.MeshBasicMaterial({color: 0x222233})
     };
     var leapTool = YAWVRB.LeapMotion.makeTool(leapToolOptions);
     leapTool.toolRoot.name = 'toolRoot';
@@ -140,8 +143,8 @@ window.onLoad = function () {
         },
         toolColor: 0x99bb99,
         handColor: 0xbb99bb,
-        shadowPlane: avatar.position.y - 0.25,
-        shadowMaterial: shadowMaterial
+        shadowPlane: leapToolOptions.shadowPlane,
+        shadowMaterial: leapToolOptions.shadowMaterial
     };
     var leapToolRemote = YAWVRB.LeapMotion.makeTool(remoteLeapToolOptions);
     var remoteLeapAddressInput = document.getElementById('remoteLeapAddress');
