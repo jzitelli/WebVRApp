@@ -1440,26 +1440,20 @@ module.exports = ( function () {
 module.exports = ( function () {
     "use strict";
 
-    const UP = THREE.Object3D.DefaultUp;
-    const RIGHT = new THREE.Vector3(1, 0, 0);
-
     var moveObject = ( function () {
         const MOVESPEED = 0.3;
         var euler = new THREE.Euler(0, 0, 0, 'YXZ');
-        var pitchQuat = new THREE.Quaternion();
         return function (object, dt, moveFB, moveRL, moveUD, turnRL, turnUD) {
             if (moveFB || moveRL || moveUD || turnRL || turnUD) {
                 euler.setFromQuaternion(object.quaternion);
                 euler.y -= (turnRL) * dt;
                 euler.x -= (turnUD) * dt;
+                object.quaternion.setFromEuler(euler);
                 var cos = Math.cos(euler.y),
                     sin = Math.sin(euler.y);
                 object.position.z -= dt * MOVESPEED * ((moveFB) * cos + (moveRL) * sin);
                 object.position.x += dt * MOVESPEED * ((moveRL) * cos - (moveFB) * sin);
                 object.position.y += dt * MOVESPEED * moveUD;
-                // pitchQuat.setFromAxisAngle(RIGHT, euler.x);
-                // object.quaternion.multiplyQuaternions(object.quaternion.setFromAxisAngle(UP, heading), pitchQuat);
-                object.quaternion.setFromEuler(euler);
                 object.updateMatrix();
                 object.updateMatrixWorld();
             }

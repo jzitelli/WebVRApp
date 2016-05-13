@@ -65,8 +65,6 @@ window.onLoad = function () {
                     euler.setFromQuaternion(object.quaternion);
                     euler.y -= lastRotation;
                     object.quaternion.setFromEuler(euler);
-                    //object.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, euler.y);
-                    //object.rotation.y -= lastRotation;
                     // maintain position of object w.r.t. HMD:
                     object.position.sub(lastPosition);
                     object.position.applyAxisAngle(THREE.Object3D.DefaultUp, -lastRotation);
@@ -302,14 +300,15 @@ window.onLoad = function () {
         var chairMaterial = new THREE.MeshBasicMaterial({map: chairTexture});
 
         objectLoader.load("/test/models/WebVRDesk.json", function (scene) {
-            for (var i = 0; i < scene.children.length; i++) {
-                var child = scene.children[i];
-                child.updateMatrix();
+            while (scene.children.length > 0) {
+                var child = scene.children[0];
+                scene.remove(child);
                 if (child instanceof THREE.Mesh) {
                     if (child.name === 'desk') child.material = deskMaterial;
                     else if (child.name === 'chair') child.material = chairMaterial;
                     else child.material = roomMaterial;
                 }
+                child.updateMatrix();
                 app.scene.add(child);
             }
 
