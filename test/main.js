@@ -50,6 +50,11 @@ window.onLoad = function () {
 
     objectSelector.addSelectable(avatar);
 
+    avatar.add(stage.stageRoot);
+
+    stage.stageRoot.add(YAWVRB.Gamepad.viveA);
+    stage.stageRoot.add(YAWVRB.Gamepad.viveB);
+
     var world = new CANNON.World();
 
     var app = ( function () {

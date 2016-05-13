@@ -1,3 +1,4 @@
+/* global THREE */
 module.exports = ( function () {
     "use strict";
 
@@ -7,6 +8,10 @@ module.exports = ( function () {
         this.objects = [];
 
         var vrDisplay;
+
+        var stageRoot = new THREE.Object3D();
+        stageRoot.matrixAutoUpdate = false;
+        this.stageRoot = stageRoot;
 
         if (navigator.getVRDisplays) {
             console.log('checking VRDisplays for stage parameters...');

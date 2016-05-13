@@ -228,6 +228,7 @@ function App(scene, config, rendererOptions) {
 module.exports = App;
 
 },{}],2:[function(require,module,exports){
+/* global THREE */
 module.exports = ( function () {
     "use strict";
 
@@ -236,15 +237,26 @@ module.exports = ( function () {
     var gamepads;
     var buttonsPresseds = [];
 
+    var vrGamepads;
+    var viveA = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.18, 0.06), new THREE.MeshLambertMaterial({color: 0xff2222}));
+    viveA.matrixAutoUpdate = false;
+    var viveB = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.18, 0.06), new THREE.MeshLambertMaterial({color: 0x22ff22}));
+    viveB.matrixAutoUpdate = false;
+    var vrGamepadMeshes = [viveA, viveB];
+
     pollGamepads();
 
     function pollGamepads() {
         gamepads = navigator.getGamepads();
+        vrGamepads = [];
         for (var i = 0; i < gamepads.length; i++) {
             var gamepad = gamepads[i];
             if (!gamepad) continue;
             if (buttonsPresseds[i] === undefined) {
                 buttonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
+            }
+            if (/openvr/i.test(gamepad.id)) {
+                vrGamepads.push(gamepad);
             }
         }
     }
@@ -318,6 +330,14 @@ module.exports = ( function () {
             }
             values.push(axesValues);
         }
+        // update openvr controller poses:
+        for (i = 0; i < vrGamepads.length; i++) {
+            gamepad = vrGamepads[i];
+            var mesh = vrGamepadMeshes[i];
+            mesh.position.fromArray(gamepad.pose.position);
+            mesh.quaternion.fromArray(gamepad.pose.orientation);
+            mesh.updateMatrix();
+        }
         return values;
     }
 
@@ -346,7 +366,9 @@ module.exports = ( function () {
             LSY: 1,
             RSX: 2,
             RSY: 3
-        }
+        },
+        viveA: viveA,
+        viveB: viveB
     };
 
 } )();
@@ -1169,6 +1191,7 @@ module.exports = ( function () {
 } )();
 
 },{}],7:[function(require,module,exports){
+/* global THREE */
 module.exports = ( function () {
     "use strict";
 
@@ -1178,6 +1201,10 @@ module.exports = ( function () {
         this.objects = [];
 
         var vrDisplay;
+
+        var stageRoot = new THREE.Object3D();
+        stageRoot.matrixAutoUpdate = false;
+        this.stageRoot = stageRoot;
 
         if (navigator.getVRDisplays) {
             console.log('checking VRDisplays for stage parameters...');
