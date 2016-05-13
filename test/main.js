@@ -28,10 +28,24 @@ window.onLoad = function () {
     var app = new YAWVRB.App(undefined, {
         onResetVRSensor: function (lastRotation, lastPosition) {
             console.log('lastRotation: %f, lastPosition: (%f, %f, %f)', lastRotation, lastPosition.x, lastPosition.y, lastPosition.z);
+            // maintain poses of stage objects:
+            stage.objects.forEach( function (object) {
+                // maintain rotation of object (relative heading of object w.r.t. HMD):
+                object.rotation.y -= lastRotation;
+                // maintain position of object w.r.t. HMD:
+                object.position.sub(lastPosition);
+                object.updateMatrix();
+            } );
         }
-    }, {canvas: canvas, alpha: true});
+    }, {
+        canvas: canvas,
+        alpha: true
+    });
 
     window.app = app;
+
+    app.scene.add(avatar);
+    avatar.add(app.camera);
 
     app.renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -71,10 +85,6 @@ window.onLoad = function () {
 
     var shadowMaterial = new THREE.MeshBasicMaterial({color: 0x555544});
 
-    // var shadowMapsInput = document.getElementById('shadowMapsInput');
-    // shadowMapsInput.addEventListener('click', function () {
-    // });
-
     // local leap motion controller:
     var localLeapStatusIndicator = document.getElementById('localLeapStatus');
     var leapToolOptions = {
@@ -99,8 +109,7 @@ window.onLoad = function () {
         shadowPlane: avatar.position.y - 0.25,
         shadowMaterial: shadowMaterial
     };
-    var leapTool;
-    leapTool = YAWVRB.LeapMotion.makeTool(leapToolOptions);
+    var leapTool = YAWVRB.LeapMotion.makeTool(leapToolOptions);
     leapTool.toolRoot.name = 'toolRoot';
     YAWVRB.Utils.displayText('Leap Motion (local)', {object: leapTool.toolRoot});
     leapTool.leapController.connect();
@@ -258,44 +267,41 @@ window.onLoad = function () {
                     else if (child.name === 'chair') child.material = chairMaterial;
                     else child.material = roomMaterial;
                 }
+                app.scene.add(child);
             }
-
-            app.scene = scene;
-            app.scene.add(avatar);
-            avatar.add(app.camera);
-
-            if (leapTool && leapTool.toolShadowMesh)             app.scene.add(leapTool.toolShadowMesh);
-            if (leapToolRemote && leapToolRemote.toolShadowMesh) app.scene.add(leapToolRemote.toolShadowMesh);
 
             app.scene.updateMatrixWorld(true);
 
             if (leapTool)       leapTool.updateToolMapping();
             if (leapToolRemote) leapToolRemote.updateToolMapping();
 
-            requestAnimationFrame(animate);
+            function startAnimateLoop() {
+                var lt = 0;
+                function animate(t) {
+                    var dt = 0.001 * (t - lt);
 
-            var lt = 0;
-            function animate(t) {
-                var dt = 0.001 * (t - lt);
+                    moveByKeyboard(dt, t);
 
-                moveByKeyboard(dt, t);
+                    if (leapTool)       leapTool.updateToolMapping();
+                    if (leapToolRemote) leapToolRemote.updateToolMapping();
 
-                if (leapTool)       leapTool.updateToolMapping();
-                if (leapToolRemote) leapToolRemote.updateToolMapping();
+                    if (leapTool)       leapTool.updateTool(dt);
+                    if (leapToolRemote) leapToolRemote.updateTool(dt);
 
-                if (leapTool)       leapTool.updateTool(dt);
-                if (leapToolRemote) leapToolRemote.updateTool(dt);
+                    app.render();
 
-                app.render();
+                    world.step(Math.min(dt, 1/60), dt, 10);
 
-                world.step(Math.min(dt, 1/60), dt, 10);
+                    if (leapTool)       leapTool.updateToolPostStep();
+                    if (leapToolRemote) leapToolRemote.updateToolPostStep();
 
-                if (leapTool)       leapTool.updateToolPostStep();
-                if (leapToolRemote) leapToolRemote.updateToolPostStep();
-
-                lt = t;
+                    lt = t;
+                    requestAnimationFrame(animate);
+                }
                 requestAnimationFrame(animate);
             }
+
+            startAnimateLoop();
 
         });
 
