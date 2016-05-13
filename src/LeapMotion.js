@@ -61,6 +61,8 @@ module.exports = ( function () {
         var toolRoot = new THREE.Object3D();
         toolRoot.scale.set(LEAP2METERS, LEAP2METERS, LEAP2METERS);
 
+        toolRoot.position.set(0, -18 * 0.0254, -0.49);
+
         // set up / connect to leap controller:
 
         var leapController = new Leap.Controller({background: true,

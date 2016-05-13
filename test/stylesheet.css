@@ -50,9 +50,9 @@ input {
 }
 #overlay {
     position: absolute;
-    left: 30vw;
+    left: 34vw;
     top: 2vh;
-    width: 40%;
+    width: 32%;
     /*height: 75%;*/
     z-index: 999;
     padding: 12px;
