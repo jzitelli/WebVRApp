@@ -52,22 +52,34 @@ window.onLoad = function () {
 
     var world = new CANNON.World();
 
-    var app = new YAWVRB.App(undefined, {
-        onResetVRSensor: function (lastRotation, lastPosition) {
-            console.log('lastRotation: %f, lastPosition: (%f, %f, %f)', lastRotation, lastPosition.x, lastPosition.y, lastPosition.z);
-            // maintain poses of stage objects:
-            stage.objects.forEach( function (object) {
-                // maintain rotation of object (relative heading of object w.r.t. HMD):
-                object.rotation.y -= lastRotation;
-                // maintain position of object w.r.t. HMD:
-                object.position.sub(lastPosition);
-                object.updateMatrix();
-            } );
-        }
-    }, {
-        canvas: document.getElementById('webgl-canvas'),
-        alpha: true
-    });
+    var app = ( function () {
+        var euler = new THREE.Euler(0, 0, 0, 'YXZ');
+        var app;
+        app = new YAWVRB.App(undefined, {
+            onResetVRSensor: function (lastRotation, lastPosition) {
+                console.log('lastRotation: %f, lastPosition: (%f, %f, %f)', lastRotation, lastPosition.x, lastPosition.y, lastPosition.z);
+                // maintain poses of stage objects:
+                stage.objects.forEach( function (object) {
+                    // maintain rotation of object (relative heading of object w.r.t. HMD):
+                    var camera = app.camera;
+                    euler.setFromQuaternion(object.quaternion);
+                    euler.y -= lastRotation;
+                    object.quaternion.setFromEuler(euler);
+                    //object.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, euler.y);
+                    //object.rotation.y -= lastRotation;
+                    // maintain position of object w.r.t. HMD:
+                    object.position.sub(lastPosition);
+                    object.position.applyAxisAngle(THREE.Object3D.DefaultUp, -lastRotation);
+                    object.position.add(camera.position);
+                    object.updateMatrix();
+                } );
+            }
+        }, {
+            canvas: document.getElementById('webgl-canvas'),
+            alpha: true
+        });
+        return app;
+    } )();
 
     window.app = app;
 

@@ -1452,15 +1452,14 @@ module.exports = ( function () {
                 euler.setFromQuaternion(object.quaternion);
                 euler.y -= (turnRL) * dt;
                 euler.x -= (turnUD) * dt;
-                var heading = euler.y;
-                var pitch = euler.x;
-                var cos = Math.cos(heading),
-                    sin = Math.sin(heading);
+                var cos = Math.cos(euler.y),
+                    sin = Math.sin(euler.y);
                 object.position.z -= dt * MOVESPEED * ((moveFB) * cos + (moveRL) * sin);
                 object.position.x += dt * MOVESPEED * ((moveRL) * cos - (moveFB) * sin);
                 object.position.y += dt * MOVESPEED * moveUD;
-                if (pitch) pitchQuat.setFromAxisAngle(RIGHT, pitch);
-                object.quaternion.multiplyQuaternions(object.quaternion.setFromAxisAngle(UP, heading), pitchQuat);
+                // pitchQuat.setFromAxisAngle(RIGHT, euler.x);
+                // object.quaternion.multiplyQuaternions(object.quaternion.setFromAxisAngle(UP, heading), pitchQuat);
+                object.quaternion.setFromEuler(euler);
                 object.updateMatrix();
                 object.updateMatrixWorld();
             }
