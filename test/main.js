@@ -10,8 +10,6 @@ window.onLoad = function () {
 
     THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
-    var canvas = document.getElementById('webgl-canvas');
-
     var objectSelector = new YAWVRB.Utils.ObjectSelector();
 
     var stage = new YAWVRB.Stage();
@@ -24,6 +22,28 @@ window.onLoad = function () {
     avatar.updateMatrix();
 
     objectSelector.addSelectable(avatar);
+
+    var textGeomLogger;
+    ( function () {
+        var fontLoader = new THREE.FontLoader();
+        fontLoader.load('/node_modules/three.js/examples/fonts/droid/droid_sans_mono_regular.typeface.js', function (font) {
+            textGeomLogger = new YAWVRB.TextGeomUtils.TextGeomLogger(new YAWVRB.TextGeomUtils.TextGeomCacher(font, {size: 0.015, height: 0, curveSegments: 4}));
+            textGeomLogger.root.position.set(-1.25/2, 0, -0.5);
+            textGeomLogger.root.updateMatrix();
+            avatar.add(textGeomLogger.root);
+            textGeomLogger.log('textGeomLogger: hello world');
+            avatar.updateMatrixWorld(true);
+
+            setTimeout( function () {
+                textGeomLogger.log('another line');
+            }, 4000);
+
+            setTimeout( function () {
+                textGeomLogger.log('and another line');
+            }, 8000);
+
+        });
+    } )();
 
     var app = new YAWVRB.App(undefined, {
         onResetVRSensor: function (lastRotation, lastPosition) {
@@ -38,7 +58,7 @@ window.onLoad = function () {
             } );
         }
     }, {
-        canvas: canvas,
+        canvas: document.getElementById('webgl-canvas'),
         alpha: true
     });
 
@@ -283,19 +303,20 @@ window.onLoad = function () {
                 function animate(t) {
                     var dt = 0.001 * (t - lt);
 
+                    if (textGeomLogger) textGeomLogger.update(t);
+
                     moveByKeyboard(dt, t);
 
-                    if (leapTool)       leapTool.updateToolMapping();
+                    leapTool.updateToolMapping();
                     if (leapToolRemote) leapToolRemote.updateToolMapping();
-
-                    if (leapTool)       leapTool.updateTool(dt);
+                    leapTool.updateTool(dt);
                     if (leapToolRemote) leapToolRemote.updateTool(dt);
 
                     app.render();
 
                     world.step(Math.min(dt, 1/60), dt, 10);
 
-                    if (leapTool)       leapTool.updateToolPostStep();
+                    leapTool.updateToolPostStep();
                     if (leapToolRemote) leapToolRemote.updateToolPostStep();
 
                     lt = t;
