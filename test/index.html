@@ -20,19 +20,28 @@
     <div id='overlay'>
       <h1>YAWVRB</h1>
       <label>Profile name:<input id='profileName' type='textbox' /></label>
-      <h2>Display options:</h2>
       <section>
+        <h2>Display options:</h2>
         <button id='vrButton'>toggle VR</button>
         <button id='fsButton'>toggle fullscreen</button>
         <br>
-        <label style='font-family: monospace; font-size: 14pt'><input id='wireframeInput' type='checkbox' />wireframe</label>
+        <label><input id='wireframeInput' type='checkbox' />wireframe</label>
         <!-- <label style='font-family: monospace; font-size: 14pt'>shadow maps<input id='shadowMapsInput' type='checkbox' /></label> -->
       </section>
-      <h2>Leap Motion options:</h2>
       <section id='leapMotionOptions'>
-        <div id="localLeapStatus"  class="statusIndicator">not connected</div>
-        <div id="remoteLeapStatus" class='statusIndicator'>not connected</div>
-        <label>remote websocket address:<input id='remoteLeapAddress' type='textbox' /></label>
+        <h2>Leap Motion options:</h2>
+        <label>local websocket:
+          <div id="localLeapStatus"  class="statusIndicator">not connected</div>
+        </label>
+        <br>
+        <label>remote websocket: <input id='remoteLeapAddress' type='textbox' />
+          <div id="remoteLeapStatus" class='statusIndicator'>not connected</div>
+        </label>
+      </section>
+
+      <h2>Stage options:</h2>
+      <section>
+        <button id='saveStageButton'>Save stage poses</button>
       </section>
     </div>
 

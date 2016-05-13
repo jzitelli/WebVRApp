@@ -36,7 +36,6 @@ window.onLoad = function () {
     app.renderer.setSize(window.innerWidth, window.innerHeight);
 
     // menu setup:
-
     var overlay = document.getElementById('overlay');
 
     var infoElement = document.createElement('div');
@@ -48,6 +47,9 @@ window.onLoad = function () {
     var plaintext = document.createElement('plaintext');
     plaintext.innerHTML = 'WebVRConfig = ' + JSON.stringify(window.WebVRConfig, undefined, 2);
     infoElement.appendChild(plaintext);
+
+    var profileNameInput = document.getElementById('profileName');
+    profileNameInput.value = 'dev';
 
     var vrButton = document.getElementById('vrButton');
     vrButton.addEventListener('click', function () {
@@ -61,19 +63,17 @@ window.onLoad = function () {
         fsButton.blur();
     });
 
-    var profileNameInput = document.getElementById('profileName');
-    profileNameInput.value = 'dev';
-
     var wireframeInput = document.getElementById('wireframeInput');
     wireframeInput.addEventListener('click', function () {
         app.toggleWireframe();
     });
 
-    var shadowMaterial = new THREE.MeshBasicMaterial({color: 0x555544});
+    var saveStageButton = document.getElementById('saveStageButton');
+    saveStageButton.addEventListener('click', function () {
+        stage.save();
+    });
 
-    // var shadowMapsInput = document.getElementById('shadowMapsInput');
-    // shadowMapsInput.addEventListener('click', function () {
-    // });
+    var shadowMaterial = new THREE.MeshBasicMaterial({color: 0x555544});
 
     // local leap motion controller:
     var localLeapStatusIndicator = document.getElementById('localLeapStatus');

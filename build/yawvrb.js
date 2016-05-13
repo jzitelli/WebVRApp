@@ -1248,6 +1248,180 @@ module.exports = ( function () {
 } )();
 
 },{}],8:[function(require,module,exports){
+module.exports = ( function() {
+    "use strict";
+    function SynthSpeaker(options) {
+        options = options || {};
+        this.volume = options.volume || 1;
+        this.rate   = options.rate || 1;
+        this.pitch  = options.pitch || 1;
+
+        this.queue = [];
+        this.onBegins = [];
+        this.onEnds = [];
+        this.speaking = false;
+
+        var onend = function () {
+            var onEnd = this.onEnds.shift();
+            if (onEnd) {
+                onEnd();
+            }
+            this.utterance = new SpeechSynthesisUtterance();
+            this.utterance.volume = this.volume;
+            this.utterance.rate = this.rate;
+            this.utterance.pitch = this.pitch;
+            this.utterance.onend = onend;
+            if (this.queue.length > 0) {
+                this.utterance.text = this.queue.shift();
+                var onBegin = this.onBegins.shift();
+                if (onBegin) {
+                    onBegin();
+                }
+                speechSynthesis.speak(this.utterance);
+            } else {
+                this.speaking = false;
+            }
+        }.bind(this);
+
+        this.utterance = new SpeechSynthesisUtterance();
+        this.utterance.onend = onend;
+        this.utterance.volume = this.volume;
+        this.utterance.rate = this.rate;
+        this.utterance.pitch = this.pitch;
+
+    }
+
+    SynthSpeaker.prototype.speak = function(text, onBegin, onEnd) {
+        this.onEnds.push(onEnd);
+        if (this.speaking) {
+            this.queue.push(text);
+            this.onBegins.push(onBegin);
+        } else {
+            if (onBegin) {
+                onBegin();
+            }
+            this.utterance.text = text;
+            this.speaking = true;
+            speechSynthesis.speak(this.utterance);
+        }
+    };
+
+    if (window.speechSynthesis) {
+        return SynthSpeaker;
+    } else {
+        console.warn("speechSynthesis not supported");
+        return function () {
+            this.volume = 0;
+            this.rate = 1;
+            this.pitch = 1;
+            this.speak = function (text, onBegin, onEnd) {
+                if (onBegin) onBegin();
+                if (onEnd) onEnd();
+            };
+        };
+    }
+} )();
+
+},{}],9:[function(require,module,exports){
+/* global THREE */
+module.exports = ( function () {
+    "use strict";
+    var alphas  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    var digits  = "0123456789";
+    var symbols = ",./;'[]\\-=<>?:\"{}|_+~!@#$%^&*()";
+    var chars   = alphas + digits + symbols;
+
+    function TextGeomCacher(font, options) {
+        options = options || {};
+        var textGeomParams = {
+            font:          font,
+            size:          options.size || 0.12,
+            height:        options.height || 0,
+            curveSegments: options.curveSegments || 2
+        };
+
+        this.geometries = {};
+        for (var i = 0; i < chars.length; i++) {
+            var c = chars[i];
+            var geom = new THREE.TextGeometry(c, textGeomParams);
+            var bufferGeom = new THREE.BufferGeometry();
+            bufferGeom.fromGeometry(geom);
+            geom.dispose();
+            this.geometries[c] = bufferGeom;
+        }
+
+        this.makeObject = function (text, material) {
+            var object = new THREE.Object3D();
+            object.matrixAutoUpdate = false;
+            for (var j = 0; j < text.length; j++) {
+                var c = text[j];
+                if (c !== ' ') {
+                    var mesh = new THREE.Mesh(this.geometries[c], material);
+                    mesh.matrixAutoUpdate = false;
+                    mesh.position.x = 0.8*textGeomParams.size * j;
+                    mesh.updateMatrix();
+                    object.add(mesh);
+                }
+            }
+            return object;
+        }.bind(this);
+    }
+
+    function TextGeomLogger(textGeomCacher, options) {
+        options = options || {};
+        var material   = options.material || new THREE.MeshBasicMaterial({color: 0xff2201});
+        var nrows      = options.nrows || 20;
+        //var ncols      = options.ncols || 30;
+        var lineHeight = options.lineHeight || 1.8 * 0.12;
+
+        var lineObjects = {};
+
+        this.root = new THREE.Object3D();
+        this.root.matrixAutoUpdate = false;
+
+        this.log = function (msg) {
+            var lines = msg.split(/\n/);
+            // create / clone lines:
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                var lineObject = lineObjects[line];
+                if (lineObject) {
+                    var clone = lineObject.clone();
+                    this.root.add(clone);
+                } else {
+                    lineObject = textGeomCacher.makeObject(line, material);
+                    this.root.add(lineObject);
+                    lineObjects[line] = lineObject;
+                }
+            }
+            // remove rows exceeding max display
+            for (i = this.root.children.length - 1; i >= nrows; i--) {
+                this.root.remove(this.root.children[0]);
+            }
+            // scroll lines:
+            for (i = 0; i < this.root.children.length; i++) {
+                var child = this.root.children[i];
+                child.position.y = (this.root.children.length - i) * lineHeight;
+                child.updateMatrix();
+            }
+            this.root.updateMatrixWorld(true);
+        }.bind(this);
+
+        this.clear = function () {
+            for (var i = this.root.children.length - 1; i >= 0; i--) {
+                this.root.remove(this.root.children[this.root.children.length - 1]);
+            }
+        }.bind(this);
+    }
+
+    return {
+        TextGeomCacher: TextGeomCacher,
+        TextGeomLogger: TextGeomLogger
+    };
+
+} )();
+
+},{}],10:[function(require,module,exports){
 /* global THREE */
 
 module.exports = ( function () {
@@ -1385,7 +1559,7 @@ module.exports = ( function () {
 
 } )();
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 window.YAWVRB = {};
 
 window.YAWVRB.App        = require('./App.js');
@@ -1396,5 +1570,7 @@ window.YAWVRB.Keyboard   = require('./Keyboard.js');
 window.YAWVRB.LeapMotion = require('./LeapMotion.js');
 window.YAWVRB.Mouse      = require('./Mouse.js');
 window.YAWVRB.Stage      = require('./Stage.js');
+window.YAWVRB.TextGeomUtils = require('./TextGeomUtils.js');
+window.YAWVRB.SynthSpeaker  = require('./SynthSpeaker.js');
 
-},{"./App.js":1,"./Gamepad.js":2,"./GfxTablet.js":3,"./Keyboard.js":4,"./LeapMotion.js":5,"./Mouse.js":6,"./Stage.js":7,"./Utils.js":8}]},{},[9]);
+},{"./App.js":1,"./Gamepad.js":2,"./GfxTablet.js":3,"./Keyboard.js":4,"./LeapMotion.js":5,"./Mouse.js":6,"./Stage.js":7,"./SynthSpeaker.js":8,"./TextGeomUtils.js":9,"./Utils.js":10}]},{},[11]);
