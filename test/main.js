@@ -10,24 +10,13 @@ window.onLoad = function () {
 
     THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
-    var objectSelector = new YAWVRB.Utils.ObjectSelector();
-
-    var stage = new YAWVRB.Stage();
-
-    var world = new CANNON.World();
-
-    var avatar = new THREE.Object3D();
-    avatar.position.y = 1.2;
-    avatar.position.z = -0.28;
-    avatar.updateMatrix();
-
-    objectSelector.addSelectable(avatar);
-
     var textGeomLogger;
     ( function () {
         var fontLoader = new THREE.FontLoader();
         fontLoader.load('/node_modules/three.js/examples/fonts/droid/droid_sans_mono_regular.typeface.js', function (font) {
-            textGeomLogger = new YAWVRB.TextGeomUtils.TextGeomLogger(new YAWVRB.TextGeomUtils.TextGeomCacher(font, {size: 0.015, height: 0, curveSegments: 4}));
+            textGeomLogger = new YAWVRB.TextGeomUtils.TextGeomLogger(new YAWVRB.TextGeomUtils.TextGeomCacher(font, {size: 0.015, height: 0, curveSegments: 4}), {
+                lineHeight: 0.03
+            });
             textGeomLogger.root.position.set(-1.25/2, 0, -0.5);
             textGeomLogger.root.updateMatrix();
             avatar.add(textGeomLogger.root);
@@ -44,6 +33,24 @@ window.onLoad = function () {
 
         });
     } )();
+
+    var objectSelector = new YAWVRB.Utils.ObjectSelector();
+
+    var stage = new YAWVRB.Stage();
+
+    function saveStage() {
+        var transforms = stage.save();
+        textGeomLogger.log(JSON.stringify(transforms, undefined, 2));
+    }
+
+    var avatar = new THREE.Object3D();
+    avatar.position.y = 1.2;
+    avatar.position.z = -0.28;
+    avatar.updateMatrix();
+
+    objectSelector.addSelectable(avatar);
+
+    var world = new CANNON.World();
 
     var app = new YAWVRB.App(undefined, {
         onResetVRSensor: function (lastRotation, lastPosition) {
@@ -105,7 +112,7 @@ window.onLoad = function () {
 
     var saveStageButton = document.getElementById('saveStageButton');
     saveStageButton.addEventListener('click', function () {
-        stage.save();
+        saveStage();
     });
 
     // local leap motion controller:
@@ -200,7 +207,7 @@ window.onLoad = function () {
         cyclePrevSelection: {buttons: [YAWVRB.Keyboard.KEYCODES.OPENBRACKET], commandDown: objectSelector.cycleSelection.bind(objectSelector, -1)},
         toggleWireframe: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER1], commandDown: function () { app.toggleWireframe(); }},
         toggleNormalMaterial: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER2], commandDown: function () { app.toggleNormalMaterial(); }},
-        saveStageConfiguration: {buttons: [YAWVRB.Keyboard.KEYCODES.X], commandDown: function () { stage.save(); }}
+        saveStageConfiguration: {buttons: [YAWVRB.Keyboard.KEYCODES.X], commandDown: saveStage}
     };
     for (var k in YAWVRB.Keyboard.STANDARD_COMMANDS) {
         keyboardCommands[k] = YAWVRB.Keyboard.STANDARD_COMMANDS[k];
@@ -219,6 +226,7 @@ window.onLoad = function () {
     var gamepadCommands = {
         resetVRSensor: {buttons: [YAWVRB.Gamepad.BUTTONS.back], commandDown: function () { app.resetVRSensor(); }},
         cycleSelection: {buttons: [YAWVRB.Gamepad.BUTTONS.right], commandDown: objectSelector.cycleSelection},
+        cyclePrevSelection: {buttons: [YAWVRB.Gamepad.BUTTONS.left], commandDown: objectSelector.cycleSelection.bind(objectSelector, -1)},
         moveFB: {axes: [YAWVRB.Gamepad.AXES.LSY]},
         moveRL: {axes: [YAWVRB.Gamepad.AXES.LSX]},
         turnRL: {axes: [YAWVRB.Gamepad.AXES.RSX]},

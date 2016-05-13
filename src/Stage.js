@@ -40,8 +40,7 @@ module.exports = ( function () {
                     object.matrix.decompose(object.position, object.quaternion, object.scale);
                     transforms[object.name] = {
                         position: object.position.toArray(),
-                        quaternion: object.quaternion.toArray(),
-                        rotation: object.rotation.toArray()
+                        quaternion: object.quaternion.toArray()
                     };
                 }
             } );
@@ -66,7 +65,6 @@ module.exports = ( function () {
                     var transform = transforms[object.name];
                     object.position.fromArray(transform.position);
                     object.quaternion.fromArray(transform.quaternion);
-                    object.rotation.fromArray(transform.rotation);
                     object.updateMatrix();
                     object.updateMatrixWorld();
                 }
