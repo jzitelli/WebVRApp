@@ -32,7 +32,7 @@ module.exports = ( function () {
     }
 
     function onGamepadConnected(e) {
-        console.log("Gamepad connected at index %d: %s", e.gamepad.index, e.gamepad.id);
+        console.log("Gamepad connected at index %d: %s - %d buttons, %d axes", e.gamepad.index, e.gamepad.id, e.gamepad.buttons.length, e.gamepad.axes.length);
         pollGamepads();
     }
     window.addEventListener("gamepadconnected", onGamepadConnected);
