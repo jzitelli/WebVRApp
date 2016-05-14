@@ -6,20 +6,17 @@ module.exports = ( function () {
 
     var gamepads;
     var buttonsPresseds = [];
-
+    var gamepadCommands = [];
     var xboxGamepads = [];
-
     var vrGamepads = [];
 
-    var viveA = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.18, 0.06), new THREE.MeshLambertMaterial({color: 0xff2222}));
-    viveA.matrixAutoUpdate = false;
-    var viveB = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.18, 0.06), new THREE.MeshLambertMaterial({color: 0x22ff22}));
-    viveB.matrixAutoUpdate = false;
-
+    var viveA = new THREE.Mesh(new THREE.BoxBufferGeometry(0.13, 0.06, 0.06), new THREE.MeshLambertMaterial({color: 0xff2222}));
+    var viveB = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.06, 0.13), new THREE.MeshLambertMaterial({color: 0x22ff22}));
     var vrGamepadMeshes = [viveA, viveB];
-
-    pollGamepads();
-
+    viveA.matrixAutoUpdate = false;
+    viveB.matrixAutoUpdate = false;
+    // viveA.visible = false;
+    // viveB.visible = false;
 
     function pollGamepads() {
         gamepads = navigator.getGamepads();
@@ -37,13 +34,26 @@ module.exports = ( function () {
                 for (var j = 0; j < gamepad.buttons.length; j++) {
                     buttonsPresseds[i].push(false);
                 }
+                onGamepadConnected({gamepad: gamepad});
             }
         }
     }
 
+    function setGamepadCommands(index, commands) {
+        gamepadCommands[index] = commands;
+    }
+
+    var _onGamepadConnected = null;
+
+    function setOnGamepadConnected(onGamepadConnected) {
+        _onGamepadConnected = onGamepadConnected;
+    }
+
     function onGamepadConnected(e) {
         console.log("Gamepad connected at index %d: %s - %d buttons, %d axes", e.gamepad.index, e.gamepad.id, e.gamepad.buttons.length, e.gamepad.axes.length);
-        pollGamepads();
+        if (_onGamepadConnected) {
+            _onGamepadConnected(e);
+        }
     }
     window.addEventListener("gamepadconnected", onGamepadConnected);
 
@@ -56,13 +66,17 @@ module.exports = ( function () {
     }
     window.addEventListener("gamepaddisconnected", onGamepadDisconnected);
 
-    function update(commands) {
+    // var lt = 0;
+    function update() { //t) {
+        // var dt = 0.001 * (t - lt);
+        // lt = t;
         var values = [];
         pollGamepads();
         for (var i = 0; i < gamepads.length; ++i) {
             var gamepad = gamepads[i];
             if (!gamepad) continue;
             var buttonsPressed = buttonsPresseds[i];
+            var commands = gamepadCommands[i] || {};
             for (var j = 0; j < gamepad.buttons.length; j++) {
                 if (gamepad.buttons[j]) {
                     if (gamepad.buttons[j].pressed && !buttonsPressed[j]) {
@@ -113,10 +127,12 @@ module.exports = ( function () {
         // update openvr controller poses:
         for (i = 0; i < vrGamepads.length; i++) {
             gamepad = vrGamepads[i];
-            var mesh = vrGamepadMeshes[i];
-            mesh.position.fromArray(gamepad.pose.position);
-            mesh.quaternion.fromArray(gamepad.pose.orientation);
-            mesh.updateMatrix();
+            if (gamepad && gamepad.pose) {
+                var mesh = vrGamepadMeshes[i];
+                mesh.position.fromArray(gamepad.pose.position);
+                mesh.quaternion.fromArray(gamepad.pose.orientation);
+                mesh.updateMatrix();
+            }
         }
         return values;
     }
@@ -148,7 +164,9 @@ module.exports = ( function () {
             RSY: 3
         },
         viveA: viveA,
-        viveB: viveB
+        viveB: viveB,
+        setGamepadCommands: setGamepadCommands,
+        setOnGamepadConnected: setOnGamepadConnected
     };
 
 } )();

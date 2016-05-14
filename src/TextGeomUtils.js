@@ -83,7 +83,7 @@ module.exports = ( function () {
             var lastLineObject = this.root.children[numChildren-1];
             if (lastLineObject.position.y < 0) {
                 for (var i = 0; i < numChildren; i++) {
-                    this.root.children[i].position.y += lineHeight * dt;
+                    this.root.children[i].position.y += 2 * lineHeight * dt;
                     this.root.children[i].updateMatrix();
                 }
             }

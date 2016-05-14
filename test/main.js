@@ -52,6 +52,48 @@ window.onLoad = function () {
 
     avatar.add(stage.stageRoot);
 
+    // var xboxGamepadCommands = {
+    //     resetVRSensor: {buttons: [YAWVRB.Gamepad.BUTTONS.back], commandDown: function () { app.resetVRSensor(); }},
+    //     cycleSelection: {buttons: [YAWVRB.Gamepad.BUTTONS.right], commandDown: objectSelector.cycleSelection},
+    //     cyclePrevSelection: {buttons: [YAWVRB.Gamepad.BUTTONS.left], commandDown: objectSelector.cycleSelection.bind(objectSelector, -1)},
+    //     moveFB: {axes: [YAWVRB.Gamepad.AXES.LSY]},
+    //     moveRL: {axes: [YAWVRB.Gamepad.AXES.LSX]},
+    //     turnRL: {axes: [YAWVRB.Gamepad.AXES.RSX]},
+    //     turnUD: {axes: [YAWVRB.Gamepad.AXES.RSY]},
+    //     toggleFloat: {buttons: [YAWVRB.Gamepad.BUTTONS.leftStick]},
+    //     toggleVR: {buttons: [YAWVRB.Gamepad.BUTTONS.start], commandDown: function () { console.log('entering VR'); app.toggleVR(); }},
+    //     logButton: {buttons: [0,1,2,3,4,5,6,7,8], commandDown: function (j) { console.log('pressed %d', j); }}
+    // };
+
+    var viveACommands = {
+        toggleVR: {buttons: [3], commandDown: function () { console.log('entering VR'); app.toggleVR(); }},
+        toggleFloat: {buttons: [0]},
+        logButton: {buttons: [0,1,2,3,4,5,6,7,8], commandDown: function (j) { console.log('pressed %d', j); }},
+        moveFB: {axes: [YAWVRB.Gamepad.AXES.LSY]},
+        moveRL: {axes: [YAWVRB.Gamepad.AXES.LSX]}
+    };
+    YAWVRB.Gamepad.setGamepadCommands(0, viveACommands);
+
+    var viveBCommands = {
+        resetVRSensor: {buttons: [3], commandDown: function () { app.resetVRSensor(); }},
+        turnRL: {axes: [YAWVRB.Gamepad.AXES.LSX]},
+        turnUD: {axes: [YAWVRB.Gamepad.AXES.LSY]}
+    };
+    YAWVRB.Gamepad.setGamepadCommands(1, viveBCommands);
+
+    // YAWVRB.Gamepad.setOnGamepadConnected( function (e) {
+    //     console.log('your custome gamepad connected routine!@!!!');
+    //     if (/openvr/i.test(e.gamepad.id)) {
+    //         if (e.index === 0) {
+    //             YAWVRB.Gamepad.viveA.visible = true;
+    //         } else if (e.index === 1) {
+    //             YAWVRB.Gamepad.viveB.visible = true;
+    //         }
+    //     } else if (/xbox/i.test(e.gamepad.id) || /xinput/i.test(e.gamepad.id)) {
+    //         YAWVRB.Gamepad.setGamepadCommands(e.gamepad.index, xboxGamepadCommands);
+    //     }
+    // } );
+
     stage.stageRoot.add(YAWVRB.Gamepad.viveA);
     stage.stageRoot.add(YAWVRB.Gamepad.viveB);
 
@@ -243,19 +285,6 @@ window.onLoad = function () {
     keyboardObject.name = 'keyboard';
     stage.objects.push(keyboardObject);
 
-    var gamepadCommands = {
-        resetVRSensor: {buttons: [YAWVRB.Gamepad.BUTTONS.back], commandDown: function () { app.resetVRSensor(); }},
-        cycleSelection: {buttons: [YAWVRB.Gamepad.BUTTONS.right], commandDown: objectSelector.cycleSelection},
-        cyclePrevSelection: {buttons: [YAWVRB.Gamepad.BUTTONS.left], commandDown: objectSelector.cycleSelection.bind(objectSelector, -1)},
-        moveFB: {axes: [YAWVRB.Gamepad.AXES.LSY]},
-        moveRL: {axes: [YAWVRB.Gamepad.AXES.LSX]},
-        turnRL: {axes: [YAWVRB.Gamepad.AXES.RSX]},
-        turnUD: {axes: [YAWVRB.Gamepad.AXES.RSY]},
-        toggleFloat: {buttons: [YAWVRB.Gamepad.BUTTONS.leftStick]},
-        toggleVR: {buttons: [YAWVRB.Gamepad.BUTTONS.start], commandDown: function () { console.log('entering VR'); app.toggleVR(); }},
-        logButton: {buttons: [0,1,2,3,4,5,6,7,8], commandDown: function (j) { console.log('pressed %d', j); }}
-    };
-
     // GfxTablet:
     var gfxTablet = new YAWVRB.GfxTablet(2560, 1600);
     avatar.add(gfxTablet.mesh);
@@ -276,7 +305,7 @@ window.onLoad = function () {
             turnRL = keyboard.turnRight - keyboard.turnLeft,
             turnUD = keyboard.turnUp - keyboard.turnDown;
 
-        var values = YAWVRB.Gamepad.update(gamepadCommands);
+        var values = YAWVRB.Gamepad.update();
 
         for (var i = 0; i < values.length; i++) {
             var vals = values[i];
