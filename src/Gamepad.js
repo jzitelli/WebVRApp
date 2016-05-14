@@ -53,9 +53,9 @@ module.exports = ( function () {
             buttonsPresseds[i][j] = false;
         }
     }
-    window.addEventListener("gamepaddisconnected", onGamepadDisconnected);
+    window.addEventListener("gamepaddfisconnected", onGamepadDisconnected);
 
-    function update(commands, vrCommands) {
+    function update(commands) {
         var values = [];
         pollGamepads();
         for (var i = 0; i < gamepads.length; ++i) {

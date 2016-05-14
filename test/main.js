@@ -209,10 +209,14 @@ window.onLoad = function () {
     stage.objects.push(leapToolRemote.toolRoot);
 
     var mouse = new YAWVRB.Mouse({eventTarget: window});
+    mouse.togglePointer();
     avatar.add(mouse.pointerMesh);
     mouse.pointerMesh.position.z = -0.4;
     mouse.pointerMesh.updateMatrix();
+    mouse.stageObject.name = 'mouse';
     objectSelector.addSelectable(mouse.stageObject);
+    mouse.stageObject.position.set(0, -12 * 0.254, -12 * 0.0254);
+    avatar.add(mouse.stageObject);
     stage.objects.push(mouse.stageObject);
 
     var keyboardCommands = {

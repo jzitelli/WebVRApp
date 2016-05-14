@@ -46,9 +46,12 @@ module.exports = ( function () {
 					pointerMesh.position.y -= evt.movementY / window.innerHeight / aspect;
 				} else {
 					pointerMesh.position.x = -0.5 + evt.screenX / window.innerWidth;
+					stageObject.position.x = -12 * 0.0254 + 0.1 * evt.screenX / window.innerWidth;
 					pointerMesh.position.y =  (0.5 - evt.screenY / window.innerHeight) / aspect;
+					stageObject.position.z =  -12 * 0.0254 + 0.1 * (0.5 - evt.screenY / window.innerHeight) / aspect;
 				}
 				pointerMesh.updateMatrix();
+				stageObject.updateMatrix();
 			}
 		};
 
