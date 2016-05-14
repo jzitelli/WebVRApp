@@ -77,34 +77,13 @@ module.exports = ( function () {
             if (!gamepad) continue;
             var buttonsPressed = buttonsPresseds[i];
             var commands = gamepadCommands[i] || {};
-            for (var j = 0; j < gamepad.buttons.length; j++) {
-                if (gamepad.buttons[j]) {
-                    if (gamepad.buttons[j].pressed && !buttonsPressed[j]) {
-                        buttonsPressed[j] = true;
-                        for (var name in commands) {
-                            var command = commands[name];
-                            if (command.commandDown && command.buttons && command.buttons.indexOf(j) !== -1) {
-                                command.commandDown(j);
-                            }
-                        }
-                    } else if (!gamepad.buttons[j].pressed && buttonsPressed[j]) {
-                        buttonsPressed[j] = false;
-                        for (name in commands) {
-                            command = commands[name];
-                            if (command.commandUp && command.buttons && command.buttons.indexOf(j) !== -1) {
-                                command.commandUp(j);
-                            }
-                        }
-                    }
-                }
-            }
             // get all button/axes values:
             var axesValues = {};
-            for (name in commands) {
+            for (var name in commands) {
                 axesValues[name] = 0;
-                command = commands[name];
+                var command = commands[name];
                 if (command.axes) {
-                    for (j = 0; j < gamepad.axes.length; j++) {
+                    for (var j = 0; j < gamepad.axes.length; j++) {
                         var axis = gamepad.axes[j];
                         if (Math.abs(axis) > DEADZONE) {
                             if (command.axes.indexOf(j) !== -1) {
@@ -123,6 +102,27 @@ module.exports = ( function () {
                 }
             }
             values.push(axesValues);
+            for (j = 0; j < gamepad.buttons.length; j++) {
+                if (gamepad.buttons[j]) {
+                    if (gamepad.buttons[j].pressed && !buttonsPressed[j]) {
+                        buttonsPressed[j] = true;
+                        for (name in commands) {
+                            command = commands[name];
+                            if (command.commandDown && command.buttons && command.buttons.indexOf(j) !== -1) {
+                                command.commandDown(j, gamepad.axes);
+                            }
+                        }
+                    } else if (!gamepad.buttons[j].pressed && buttonsPressed[j]) {
+                        buttonsPressed[j] = false;
+                        for (name in commands) {
+                            command = commands[name];
+                            if (command.commandUp && command.buttons && command.buttons.indexOf(j) !== -1) {
+                                command.commandUp(j, gamepad.axes);
+                            }
+                        }
+                    }
+                }
+            }
         }
         // update openvr controller poses:
         for (i = 0; i < vrGamepads.length; i++) {
