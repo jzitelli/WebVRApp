@@ -101,7 +101,7 @@ window.onLoad = function () {
     overlay.appendChild(infoElement);
 
     var plaintext = document.createElement('plaintext');
-    plaintext.style['font-size'] = '7pt';
+    plaintext.style['font-size'] = '5pt';
     plaintext.innerHTML = 'WebVRConfig = ' + JSON.stringify(window.WebVRConfig, undefined, 2);
     infoElement.appendChild(plaintext);
 
