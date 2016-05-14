@@ -25,11 +25,11 @@ window.onLoad = function () {
 
             setTimeout( function () {
                 textGeomLogger.log('another line');
-            }, 4000);
+            }, 3000);
 
             setTimeout( function () {
                 textGeomLogger.log('and another line');
-            }, 8000);
+            }, 7000);
 
         });
     } )();
@@ -212,8 +212,8 @@ window.onLoad = function () {
     avatar.add(mouse.pointerMesh);
     mouse.pointerMesh.position.z = -0.4;
     mouse.pointerMesh.updateMatrix();
-    // objectSelector.addSelectable(mouse.stageObject);
-    // stage.objects.push(mouse.stageObject);
+    objectSelector.addSelectable(mouse.stageObject);
+    stage.objects.push(mouse.stageObject);
 
     var keyboardCommands = {
         toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: function () { app.toggleVR(); }},
@@ -236,6 +236,7 @@ window.onLoad = function () {
     YAWVRB.Utils.displayText('Keyboard', {object: keyboardObject});
     objectSelector.addSelectable(keyboardObject);
     avatar.add(keyboardObject);
+    keyboardObject.name = 'keyboard';
     stage.objects.push(keyboardObject);
 
     var gamepadCommands = {
