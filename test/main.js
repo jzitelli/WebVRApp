@@ -247,7 +247,8 @@ window.onLoad = function () {
         turnRL: {axes: [YAWVRB.Gamepad.AXES.RSX]},
         turnUD: {axes: [YAWVRB.Gamepad.AXES.RSY]},
         toggleFloat: {buttons: [YAWVRB.Gamepad.BUTTONS.leftStick]},
-        toggleVR: {buttons: [YAWVRB.Gamepad.BUTTONS.start], commandDown: function () { console.log('entering VR'); app.toggleVR(); }}
+        toggleVR: {buttons: [YAWVRB.Gamepad.BUTTONS.start], commandDown: function () { console.log('entering VR'); app.toggleVR(); }},
+        logButton: {buttons: [0,1,2,3,4,5,6,7,8], commandDown: function (j) { console.log('pressed %d', j); }}
     };
 
     // GfxTablet:
