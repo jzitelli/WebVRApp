@@ -114,7 +114,7 @@ window.onLoad = function () {
         toggleVR: {buttons: [3], commandDown: function () { console.log('entering VR'); app.toggleVR(); }},
         toggleFloat: {buttons: [0]},
         logButton: {buttons: [0,1,2,3,4,5,6,7,8], commandDown: function (j) { console.log('pressed %d', j); }},
-        moveFB: {axes: [YAWVRB.Gamepad.AXES.LSY]},
+        moveFB: {axes: [YAWVRB.Gamepad.AXES.LSY], flipAxes: true},
         moveRL: {axes: [YAWVRB.Gamepad.AXES.LSX]}
     };
 

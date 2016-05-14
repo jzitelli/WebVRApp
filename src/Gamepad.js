@@ -10,7 +10,7 @@ module.exports = ( function () {
     var xboxGamepads = [];
     var vrGamepads = [];
 
-    var viveA = new THREE.Mesh(new THREE.BoxBufferGeometry(0.13, 0.06, 0.06), new THREE.MeshLambertMaterial({color: 0xff2222}));
+    var viveA = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.06, 0.13), new THREE.MeshLambertMaterial({color: 0xff2222}));
     var viveB = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.06, 0.13), new THREE.MeshLambertMaterial({color: 0x22ff22}));
     var vrGamepadMeshes = [viveA, viveB];
     viveA.matrixAutoUpdate = false;
@@ -88,6 +88,9 @@ module.exports = ( function () {
                         if (Math.abs(axis) > DEADZONE) {
                             if (command.axes.indexOf(j) !== -1) {
                                 axesValues[name] = gamepad.axes[j];
+                                if (command.flipAxes) {
+                                    axesValues[name] *= -1;
+                                }
                                 break;
                             }
                         }
