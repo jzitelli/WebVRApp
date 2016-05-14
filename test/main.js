@@ -25,11 +25,11 @@ window.onLoad = function () {
 
             setTimeout( function () {
                 textGeomLogger.log('another line');
-            }, 4000);
+            }, 3000);
 
             setTimeout( function () {
                 textGeomLogger.log('and another line');
-            }, 8000);
+            }, 7000);
 
         });
     } )();
@@ -101,7 +101,7 @@ window.onLoad = function () {
     overlay.appendChild(infoElement);
 
     var plaintext = document.createElement('plaintext');
-    plaintext.style['font-size'] = '7pt';
+    plaintext.style['font-size'] = '5pt';
     plaintext.innerHTML = 'WebVRConfig = ' + JSON.stringify(window.WebVRConfig, undefined, 2);
     infoElement.appendChild(plaintext);
 
@@ -209,11 +209,15 @@ window.onLoad = function () {
     stage.objects.push(leapToolRemote.toolRoot);
 
     var mouse = new YAWVRB.Mouse({eventTarget: window});
+    mouse.togglePointer();
     avatar.add(mouse.pointerMesh);
     mouse.pointerMesh.position.z = -0.4;
     mouse.pointerMesh.updateMatrix();
-    // objectSelector.addSelectable(mouse.stageObject);
-    // stage.objects.push(mouse.stageObject);
+    mouse.stageObject.name = 'mouse';
+    objectSelector.addSelectable(mouse.stageObject);
+    mouse.stageObject.position.set(0, -12 * 0.254, -12 * 0.0254);
+    avatar.add(mouse.stageObject);
+    stage.objects.push(mouse.stageObject);
 
     var keyboardCommands = {
         toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: function () { app.toggleVR(); }},
@@ -236,6 +240,7 @@ window.onLoad = function () {
     YAWVRB.Utils.displayText('Keyboard', {object: keyboardObject});
     objectSelector.addSelectable(keyboardObject);
     avatar.add(keyboardObject);
+    keyboardObject.name = 'keyboard';
     stage.objects.push(keyboardObject);
 
     var gamepadCommands = {

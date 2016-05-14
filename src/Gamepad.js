@@ -7,6 +7,8 @@ module.exports = ( function () {
     var gamepads;
     var buttonsPresseds = [];
 
+    var xboxGamepads;
+
     var vrGamepads;
     var viveA = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.18, 0.06), new THREE.MeshLambertMaterial({color: 0xff2222}));
     viveA.matrixAutoUpdate = false;
@@ -18,15 +20,22 @@ module.exports = ( function () {
 
     function pollGamepads() {
         gamepads = navigator.getGamepads();
+        xboxGamepads = [];
         vrGamepads = [];
         for (var i = 0; i < gamepads.length; i++) {
             var gamepad = gamepads[i];
             if (!gamepad) continue;
             if (buttonsPresseds[i] === undefined) {
-                buttonsPresseds.push([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
-            }
-            if (/openvr/i.test(gamepad.id)) {
-                vrGamepads.push(gamepad);
+                console.log('new gamepad: %s', gamepad.id);
+                if (/openvr/i.test(gamepad.id)) {
+                    vrGamepads.push(gamepad);
+                } else if (/xbox/i.test(gamepad.id) || /xinput/i.test(gamepad.id)) {
+                    xboxGamepads.push(gamepad);
+                }
+                buttonsPresseds[i] = [];
+                for (var j = 0; j < gamepad.buttons.length; j++) {
+                    buttonsPresseds[i].push(false);
+                }
             }
         }
     }
@@ -44,7 +53,7 @@ module.exports = ( function () {
             buttonsPresseds[i][j] = false;
         }
     }
-    window.addEventListener("gamepaddisconnected", onGamepadDisconnected);
+    window.addEventListener("gamepaddfisconnected", onGamepadDisconnected);
 
     function update(commands) {
         var values = [];
