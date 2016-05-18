@@ -44,7 +44,7 @@ window.onLoad = function () {
     }
 
     var avatar = new THREE.Object3D();
-    avatar.position.y = 1.2;
+    // avatar.position.y = 1.2;
     // avatar.position.z = -0.28;
     avatar.updateMatrix();
 
@@ -79,6 +79,8 @@ window.onLoad = function () {
         });
         return app;
     } )();
+
+    // app.scene.add(stage.stageRoot);
 
     window.app = app;
 
@@ -148,12 +150,10 @@ window.onLoad = function () {
         }
     } );
 
-    // stage.stageRoot.add(YAWVRB.Gamepads.viveMeshA);
-    // stage.stageRoot.add(YAWVRB.Gamepads.viveMeshB);
-    stage.stageRoot.add(YAWVRB.Gamepads.toolMeshes[0]);
-    stage.stageRoot.add(YAWVRB.Gamepads.toolMeshes[1]);
-    world.add(YAWVRB.Gamepads.vrGamepadBodies[0]);
-    world.add(YAWVRB.Gamepads.vrGamepadBodies[1]);
+    stage.stageRoot.add(YAWVRB.Gamepads.vrGamepadTools[0].toolMesh);
+    stage.stageRoot.add(YAWVRB.Gamepads.vrGamepadTools[1].toolMesh);
+    world.add(YAWVRB.Gamepads.vrGamepadTools[0].toolBody);
+    world.add(YAWVRB.Gamepads.vrGamepadTools[1].toolBody);
 
     var floorBody = new CANNON.Body({mass: 0, type: CANNON.Body.STATIC});
     floorBody.material = new CANNON.Material();
@@ -165,7 +165,7 @@ window.onLoad = function () {
     var ballBody = new CANNON.Body({mass: 0.1});
     ballBody.material = new CANNON.Material();
     ballBody.addShape(new CANNON.Sphere(0.25));
-    ballBody.position.set(-1, 3, -1.25);
+    ballBody.position.set(-1, 3, 1.25);
     world.add(ballBody);
     var ballMesh = new THREE.Mesh(new THREE.SphereBufferGeometry(0.25), new THREE.MeshLambertMaterial({color: 0xff0000}));
     ballMesh.position.copy(ballBody.position);

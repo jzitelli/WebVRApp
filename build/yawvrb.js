@@ -246,8 +246,7 @@ module.exports = ( function () {
     viveMeshB.matrixAutoUpdate = false;
     var vrGamepadMeshes = [viveMeshA, viveMeshB];
 
-    var toolMeshes = [];
-    const options = {
+    const DEFAULT_OPTIONS = {
         toolLength: 0.15,
         toolRadius: 0.0034,
         toolMass: 0.04,
@@ -261,33 +260,36 @@ module.exports = ( function () {
         shadowLightPosition: new THREE.Vector4(0, 7, 0, 0.1),
         tipMaterial: new CANNON.Material()
     };
-    var toolGeom = new THREE.CylinderGeometry(options.toolRadius, options.toolRadius, options.toolLength, 10, 1, false);
-    toolGeom.translate(0, -0.5 * options.toolLength, 0);
-    toolGeom.rotateX(-0.5 * Math.PI);
-    var bufferGeom = new THREE.BufferGeometry();
-    bufferGeom.fromGeometry(toolGeom);
-    toolGeom.dispose();
-    toolGeom = bufferGeom;
-    var toolMaterial = new THREE.MeshLambertMaterial({color: options.toolColor, transparent: true});
-    var toolMesh = new THREE.Mesh(toolGeom, toolMaterial);
-    toolMeshes.push(toolMesh);
-    toolMeshes.push(toolMesh.clone());
+    function makeTool(options) {
+        var _options = {};
+        options = options || _options;
+        for (var kwarg in options) {
+            _options[kwarg] = options[kwarg];
+        }
+        for (kwarg in DEFAULT_OPTIONS) {
+            if (_options[kwarg] === undefined) _options[kwarg] = DEFAULT_OPTIONS[kwarg];
+        }
+        options = _options;
+        var toolGeom = new THREE.CylinderGeometry(options.toolRadius, options.toolRadius, options.toolLength, 10, 1, false);
+        toolGeom.translate(0, -0.5 * options.toolLength, 0);
+        toolGeom.rotateX(-0.5 * Math.PI);
+        var bufferGeom = new THREE.BufferGeometry();
+        bufferGeom.fromGeometry(toolGeom);
+        toolGeom.dispose();
+        toolGeom = bufferGeom;
+        var toolMaterial = new THREE.MeshLambertMaterial({color: options.toolColor, transparent: true});
+        var toolMesh = new THREE.Mesh(toolGeom, toolMaterial);
+        var toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.STATIC});
+        toolBody.material = options.tipMaterial;
+        toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, 2*options.tipRadius, 8),
+            new CANNON.Vec3(0, 0, options.tipRadius));
+        return {
+            toolBody: toolBody,
+            toolMesh: toolMesh
+        };
+    }
 
-    var vrGamepadBodies = [],
-        toolBody,
-        shapePosition;
-
-    toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.STATIC});
-    toolBody.material = options.tipMaterial;
-    shapePosition = new CANNON.Vec3(0, 0, options.tipRadius);
-    toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, 2*options.tipRadius, 8), shapePosition);
-    vrGamepadBodies.push(toolBody);
-
-    toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.STATIC});
-    toolBody.material = options.tipMaterial;
-    shapePosition = new CANNON.Vec3(0, 0, options.tipRadius);
-    toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, 2*options.tipRadius, 8), shapePosition);
-    vrGamepadBodies.push(toolBody);
+    var vrGamepadTools = [makeTool(), makeTool()];
 
     function pollGamepads() {
         gamepads = navigator.getGamepads();
@@ -407,11 +409,11 @@ module.exports = ( function () {
             gamepad = vrGamepads[i];
             if (gamepad && gamepad.pose) {
                 // var mesh = vrGamepadMeshes[i];
-                var mesh = toolMeshes[i];
+                var mesh = vrGamepadTools[i].toolMesh;
                 mesh.position.fromArray(gamepad.pose.position);
                 mesh.quaternion.fromArray(gamepad.pose.orientation);
                 mesh.updateMatrix();
-                var body = vrGamepadBodies[i];
+                var body = vrGamepadTools[i].toolBody;
                 body.position.copy(mesh.position);
                 body.quaternion.copy(mesh.quaternion);
             }
@@ -448,8 +450,7 @@ module.exports = ( function () {
         viveMeshA: viveMeshA,
         viveMeshB: viveMeshB,
         vrGamepadMeshes: vrGamepadMeshes,
-        toolMeshes: toolMeshes,
-        vrGamepadBodies: vrGamepadBodies,
+        vrGamepadTools: vrGamepadTools,
         updatePostStep: updatePostStep,
         setGamepadCommands: setGamepadCommands,
         setOnGamepadConnected: setOnGamepadConnected
