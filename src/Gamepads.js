@@ -53,9 +53,36 @@ module.exports = ( function () {
         toolBody.material = options.tipMaterial;
         toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, 2*options.tipRadius, 8),
             new CANNON.Vec3(0, 0, options.tipRadius));
+        var position = new THREE.Vector3();
+        var velocity = new THREE.Vector3();
+        var quaternion = new THREE.Quaternion();
+        var worldPosition = new THREE.Vector3();
+        var worldQuaternion = new THREE.Quaternion();
+        var worldScale = new THREE.Vector3();
+        function update(pose, dt) {
+            var mesh = toolMesh;
+            mesh.position.fromArray(pose.position);
+            mesh.quaternion.fromArray(pose.orientation);
+            mesh.updateMatrix();
+            var body = toolBody;
+            mesh.parent.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
+            position.copy(mesh.position);
+            position.applyMatrix4(mesh.parent.matrixWorld);
+            // body.velocity.copy(body.position);
+            velocity.copy(body.position);
+            body.position.copy(position);
+            // body.velocity.vsub(body.position, body.velocity);
+            velocity.sub(position);
+            //body.velocity.mult(1 / dt, body.velocity);
+            velocity.multiplyScalar(1 / dt);
+            body.velocity.copy(velocity);
+            quaternion.multiplyQuaternions(worldQuaternion, mesh.quaternion);
+            body.quaternion.copy(quaternion);
+        }
         return {
             toolBody: toolBody,
-            toolMesh: toolMesh
+            toolMesh: toolMesh,
+            update: update
         };
     }
 
@@ -109,11 +136,6 @@ module.exports = ( function () {
     }
     window.addEventListener("gamepaddisconnected", onGamepadDisconnected);
 
-    var worldQuaternion = new THREE.Quaternion();
-    var worldPosition = new THREE.Vector3();
-    var worldScale = new THREE.Vector3();
-    var quaternion = new THREE.Quaternion();
-    var position = new THREE.Vector3();
     var lt = 0;
     function update(t) {
         var dt = 0.001 * (t - lt);
@@ -179,21 +201,22 @@ module.exports = ( function () {
         for (i = 0; i < vrGamepads.length; i++) {
             gamepad = vrGamepads[i];
             if (gamepad && gamepad.pose) {
+                vrGamepadTools[i].update(gamepad.pose, dt);
                 // var mesh = vrGamepadMeshes[i];
-                var mesh = vrGamepadTools[i].toolMesh;
-                mesh.position.fromArray(gamepad.pose.position);
-                mesh.quaternion.fromArray(gamepad.pose.orientation);
-                mesh.updateMatrix();
-                var body = vrGamepadTools[i].toolBody;
-                mesh.parent.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
-                position.copy(mesh.position);
-                position.applyMatrix4(mesh.parent.matrixWorld);
-                body.velocity.copy(body.position);
-                body.position.copy(position);
-                body.velocity.vsub(body.position, body.velocity);
-                body.velocity.mult(1 / dt, body.velocity);
-                quaternion.multiplyQuaternions(worldQuaternion, mesh.quaternion);
-                body.quaternion.copy(quaternion);
+                // var mesh = vrGamepadTools[i].toolMesh;
+                // mesh.position.fromArray(gamepad.pose.position);
+                // mesh.quaternion.fromArray(gamepad.pose.orientation);
+                // mesh.updateMatrix();
+                // var body = vrGamepadTools[i].toolBody;
+                // mesh.parent.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
+                // position.copy(mesh.position);
+                // position.applyMatrix4(mesh.parent.matrixWorld);
+                // body.velocity.copy(body.position);
+                // body.position.copy(position);
+                // body.velocity.vsub(body.position, body.velocity);
+                // body.velocity.mult(1 / dt, body.velocity);
+                // quaternion.multiplyQuaternions(worldQuaternion, mesh.quaternion);
+                // body.quaternion.copy(quaternion);
             }
         }
         return values;

@@ -11,6 +11,14 @@ module.exports = ( function () {
         stageRoot.matrixAutoUpdate = false;
         this.stageRoot = stageRoot;
 
+        this.updateSittingToStandingTransform = function () {
+            if (vrDisplay && vrDisplay.stageParameters && vrDisplay.stageParameters.sittingToStandingTransform) {
+                console.log('sittingToStandingTransform:\n' + vrDisplay.stageParameters.sittingToStandingTransform);
+                stageRoot.matrix.fromArray(vrDisplay.stageParameters.sittingToStandingTransform);
+                stageRoot.matrix.decompose(stageRoot.position, stageRoot.quaternion, stageRoot.scale);
+            }
+        };
+
         if (navigator.getVRDisplays) {
             console.log('checking VRDisplays for stage parameters...');
             navigator.getVRDisplays().then( function (displays) {

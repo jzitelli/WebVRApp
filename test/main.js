@@ -23,8 +23,7 @@ window.onLoad = function () {
     }
 
     var avatar = stage.stageRoot;
-
-    objectSelector.addSelectable(avatar);
+    // objectSelector.addSelectable(avatar);
 
     var textGeomLogger;
     ( function () {
@@ -58,14 +57,18 @@ window.onLoad = function () {
                 // maintain poses of stage objects:
                 stage.stageRoot.children.forEach( function (object) {
                     // maintain rotation of object (relative heading of object w.r.t. HMD):
+                    if (object === app.camera) return;
                     euler.setFromQuaternion(object.quaternion);
                     euler.y -= lastRotation;
                     object.quaternion.setFromEuler(euler);
                     // maintain position of object w.r.t. HMD:
                     object.position.sub(lastPosition);
                     object.position.applyAxisAngle(THREE.Object3D.DefaultUp, -lastRotation);
+                    object.position.add(app.camera.position);
                     object.updateMatrix();
                 } );
+                stage.updateSittingToStandingTransform();
+                stage.stageRoot.updateMatrixWorld(true);
             }
         }, {
             canvas: document.getElementById('webgl-canvas'),
@@ -121,7 +124,8 @@ window.onLoad = function () {
 
     var viveBCommands = {
         toggleVRMenu: {buttons: [3], commandDown: toggleVRMenu},
-        padButton: {buttons: [0], commandDown: padButtonDown}
+        padButton: {buttons: [0], commandDown: padButtonDown},
+        turnRL: {axes: [YAWVRB.Gamepads.AXES.LSX]}
     };
 
     YAWVRB.Gamepads.setGamepadCommands(0, viveACommands);
@@ -279,15 +283,15 @@ window.onLoad = function () {
     leapToolRemote.toolRoot.name = 'remoteToolRoot';
     stage.stageRoot.add(leapToolRemote.toolRoot);
 
-    var mouse = new YAWVRB.Mouse({eventTarget: window});
-    mouse.togglePointer();
-    avatar.add(mouse.pointerMesh);
-    mouse.pointerMesh.position.z = -0.4;
-    mouse.pointerMesh.updateMatrix();
-    mouse.stageObject.name = 'mouse';
-    objectSelector.addSelectable(mouse.stageObject);
-    mouse.stageObject.position.set(0, -12 * 0.254, -12 * 0.0254);
-    stage.stageRoot.add(mouse.stageObject);
+    // var mouse = new YAWVRB.Mouse({eventTarget: window});
+    // mouse.togglePointer();
+    // avatar.add(mouse.pointerMesh);
+    // mouse.pointerMesh.position.z = -0.4;
+    // mouse.pointerMesh.updateMatrix();
+    // mouse.stageObject.name = 'mouse';
+    // objectSelector.addSelectable(mouse.stageObject);
+    // mouse.stageObject.position.set(0, -12 * 0.254, -12 * 0.0254);
+    // stage.stageRoot.add(mouse.stageObject);
 
     var keyboardCommands = {
         toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: function () { app.toggleVR(); }},
