@@ -45,7 +45,7 @@ window.onLoad = function () {
 
     var avatar = new THREE.Object3D();
     avatar.position.y = 1.2;
-    avatar.position.z = -0.28;
+    // avatar.position.z = -0.28;
     avatar.updateMatrix();
 
     objectSelector.addSelectable(avatar);
@@ -53,6 +53,7 @@ window.onLoad = function () {
     avatar.add(stage.stageRoot);
 
     var world = new CANNON.World();
+    world.gravity.set(0, -9.8, 0);
 
     var app = ( function () {
         var euler = new THREE.Euler(0, 0, 0, 'YXZ');
@@ -153,6 +154,22 @@ window.onLoad = function () {
     stage.stageRoot.add(YAWVRB.Gamepads.toolMeshes[1]);
     world.add(YAWVRB.Gamepads.vrGamepadBodies[0]);
     world.add(YAWVRB.Gamepads.vrGamepadBodies[1]);
+
+    var floorBody = new CANNON.Body({mass: 0, type: CANNON.Body.STATIC});
+    floorBody.material = new CANNON.Material();
+    var quaternion = new CANNON.Quaternion();
+    quaternion.setFromEuler(-Math.PI / 2, 0, 0, 'XYZ');
+    floorBody.addShape(new CANNON.Plane(), undefined, quaternion);
+    world.add(floorBody);
+
+    var ballBody = new CANNON.Body({mass: 0.1});
+    ballBody.material = new CANNON.Material();
+    ballBody.addShape(new CANNON.Sphere(0.25));
+    ballBody.position.set(-1, 3, -1.25);
+    world.add(ballBody);
+    var ballMesh = new THREE.Mesh(new THREE.SphereBufferGeometry(0.25), new THREE.MeshLambertMaterial({color: 0xff0000}));
+    ballMesh.position.copy(ballBody.position);
+    stage.stageRoot.add(ballMesh);
 
     // menu setup:
     var infoElement = document.createElement('div');
@@ -393,6 +410,10 @@ window.onLoad = function () {
                     app.render();
 
                     world.step(Math.min(dt, 1/60), dt, 10);
+
+                    ballMesh.position.copy(ballBody.position);
+                    ballMesh.quaternion.copy(ballBody.quaternion);
+                    ballMesh.updateMatrix();
 
                     YAWVRB.Gamepads.updatePostStep();
 
