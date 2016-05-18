@@ -117,7 +117,7 @@ window.onLoad = function () {
     var viveACommands = {
         toggleVR: {buttons: [3], commandDown: function () { console.log('entering VR'); app.toggleVR(); }},
         toggleFloat: {buttons: [0]},
-        logButton: {buttons: [0,1,2,3,4,5,6,7,8], commandDown: function (j) { console.log('pressed %d', j); }},
+        logButton: {buttons: [0,1,2,3], commandDown: function (j) { console.log('pressed %d', j); }},
         moveFB: {axes: [YAWVRB.Gamepads.AXES.LSY], flipAxes: true},
         moveRL: {axes: [YAWVRB.Gamepads.AXES.LSX]}
     };
@@ -147,8 +147,12 @@ window.onLoad = function () {
         }
     } );
 
-    stage.stageRoot.add(YAWVRB.Gamepads.viveMeshA);
-    stage.stageRoot.add(YAWVRB.Gamepads.viveMeshB);
+    // stage.stageRoot.add(YAWVRB.Gamepads.viveMeshA);
+    // stage.stageRoot.add(YAWVRB.Gamepads.viveMeshB);
+    stage.stageRoot.add(YAWVRB.Gamepads.toolMeshes[0]);
+    stage.stageRoot.add(YAWVRB.Gamepads.toolMeshes[1]);
+    world.add(YAWVRB.Gamepads.vrGamepadBodies[0]);
+    world.add(YAWVRB.Gamepads.vrGamepadBodies[1]);
 
     // menu setup:
     var infoElement = document.createElement('div');
@@ -318,33 +322,6 @@ window.onLoad = function () {
 
     stage.load();
 
-    function moveByKeyboard(dt) {
-        var moveFB = keyboard.moveForward - keyboard.moveBackward,
-            moveRL = keyboard.moveRight - keyboard.moveLeft,
-            moveUD = keyboard.moveUp - keyboard.moveDown,
-            turnRL = keyboard.turnRight - keyboard.turnLeft,
-            turnUD = keyboard.turnUp - keyboard.turnDown;
-
-        var values = YAWVRB.Gamepads.update();
-
-        for (var i = 0; i < values.length; i++) {
-            var vals = values[i];
-            if (vals.moveFB) {
-                if (vals.toggleFloat) {
-                    moveUD -= vals.moveFB;
-                } else {
-                    moveFB -= vals.moveFB;
-                }
-            }
-            if (vals.moveRL) moveRL += vals.moveRL;
-            if (vals.turnRL) turnRL += vals.turnRL;
-            if (vals.turnUD) turnUD += vals.turnUD;
-        }
-
-        if (objectSelector.selection === avatar) turnUD = 0;
-        YAWVRB.Utils.moveObject(objectSelector.selection, dt, moveFB, moveRL, moveUD, turnRL, turnUD);
-    }
-
     ( function () {
 
         // load the WebVRDesk scene and start
@@ -384,7 +361,29 @@ window.onLoad = function () {
 
                     if (textGeomLogger) textGeomLogger.update(t);
 
-                    moveByKeyboard(dt, t);
+                    var moveFB = keyboard.moveForward - keyboard.moveBackward,
+                        moveRL = keyboard.moveRight - keyboard.moveLeft,
+                        moveUD = keyboard.moveUp - keyboard.moveDown,
+                        turnRL = keyboard.turnRight - keyboard.turnLeft,
+                        turnUD = keyboard.turnUp - keyboard.turnDown;
+
+                    var values = YAWVRB.Gamepads.update();
+                    for (var i = 0; i < values.length; i++) {
+                        var vals = values[i];
+                        if (vals.moveFB) {
+                            if (vals.toggleFloat) {
+                                moveUD -= vals.moveFB;
+                            } else {
+                                moveFB -= vals.moveFB;
+                            }
+                        }
+                        if (vals.moveRL) moveRL += vals.moveRL;
+                        if (vals.turnRL) turnRL += vals.turnRL;
+                        if (vals.turnUD) turnUD += vals.turnUD;
+                    }
+
+                    if (objectSelector.selection === avatar) turnUD = 0;
+                    YAWVRB.Utils.moveObject(objectSelector.selection, dt, moveFB, moveRL, moveUD, turnRL, turnUD);
 
                     leapTool.updateToolMapping();
                     if (leapToolRemote) leapToolRemote.updateToolMapping();
@@ -394,6 +393,8 @@ window.onLoad = function () {
                     app.render();
 
                     world.step(Math.min(dt, 1/60), dt, 10);
+
+                    YAWVRB.Gamepads.updatePostStep();
 
                     leapTool.updateToolPostStep();
                     if (leapToolRemote) leapToolRemote.updateToolPostStep();

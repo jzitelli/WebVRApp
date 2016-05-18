@@ -56,9 +56,13 @@ module.exports = ( function () {
             textSize: 21
         };
         function displayText(text, options) {
-            options = options || {};
-            for (var kwarg in DEFAULT_OPTIONS) {
-                if (options[kwarg] === undefined) options[kwarg] = DEFAULT_OPTIONS[kwarg];
+            var _options = {};
+            options = options || _options;
+            for (var kwarg in options) {
+                _options[kwarg] = options[kwarg];
+            }
+            for (kwarg in DEFAULT_OPTIONS) {
+                if (options[kwarg] === undefined) _options[kwarg] = DEFAULT_OPTIONS[kwarg];
             }
             var uuid = options.object.uuid;
             var key = JSON.stringify({text, uuid});
@@ -96,6 +100,53 @@ module.exports = ( function () {
         return displayText;
     } )();
 
+
+
+    function TextLabel(options) {
+        const DEFAULT_OPTIONS = {
+            object: DEADSCENE,
+            position: [0, 0.05, -0.05],
+            quaternion: [0, 0, 0, 1],
+            coordSystem: 'local',
+            textSize: 21
+        };
+        var _options = {};
+        options = options || _options;
+        for (var kwarg in options) {
+            _options[kwarg] = options[kwarg];
+        }
+        for (kwarg in DEFAULT_OPTIONS) {
+            if (options[kwarg] === undefined) _options[kwarg] = DEFAULT_OPTIONS[kwarg];
+        }
+        var canvas = document.createElement('canvas');
+        canvas.height = 2 * options.textSize;
+        canvas.width = 256; //2*ctx.measureText(text).width;
+        var ctx = canvas.getContext('2d');
+        ctx.font = String(options.textSize) + "px serif";
+        ctx.fillStyle   = 'rgb(255, 72, 23)';
+        ctx.strokeStyle = 'rgb(240, 70, 20)';
+        var texture = new THREE.Texture(canvas, THREE.UVMapping, THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
+        var aspect = canvas.width / canvas.height;
+        var material = new THREE.MeshBasicMaterial({color: 0xffffff, map: texture, transparent: true});
+        var quadGeom = new THREE.PlaneBufferGeometry(1, 1);
+        quadGeom.translate(0.5, 0.5, 0);
+        var mesh = new THREE.Mesh(quadGeom, material);
+        if (options.coordSystem === 'local') {
+            options.object.add(mesh);
+            mesh.position.fromArray(options.position);
+            mesh.quaternion.fromArray(options.quaternion);
+            var worldScale = options.object.getWorldScale();
+            mesh.scale.set(aspect * 0.075 / worldScale.x, 0.075 / worldScale.y, 1 / worldScale.z);
+            mesh.updateMatrix();
+        }
+        this.mesh = mesh;
+        this.setText = function (text) {
+            ctx.fillText(  text, 0, options.textSize);
+            ctx.strokeText(text, 0, options.textSize);
+            material.map.needsUpdate = true;
+        }.bind(this);
+    }
+
     var URL_PARAMS = ( function () {
         var params = {};
         location.search.substr(1).split("&").forEach( function(item) {
@@ -123,7 +174,8 @@ module.exports = ( function () {
         displayText: displayText,
         moveObject: moveObject,
         DEADSCENE: DEADSCENE,
-        URL_PARAMS: URL_PARAMS
+        URL_PARAMS: URL_PARAMS,
+        TextLabel: TextLabel
     };
 
 } )();

@@ -1,4 +1,4 @@
-/* global THREE */
+/* global THREE, CANNON */
 module.exports = ( function () {
     "use strict";
 
@@ -12,9 +12,52 @@ module.exports = ( function () {
 
     var viveMeshA = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.06, 0.13), new THREE.MeshLambertMaterial({color: 0xff2222}));
     var viveMeshB = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.06, 0.13), new THREE.MeshLambertMaterial({color: 0x22ff22}));
-    var vrGamepadMeshes = [viveMeshA, viveMeshB];
     viveMeshA.matrixAutoUpdate = false;
     viveMeshB.matrixAutoUpdate = false;
+    var vrGamepadMeshes = [viveMeshA, viveMeshB];
+
+    var toolMeshes = [];
+    const options = {
+        toolLength: 0.15,
+        toolRadius: 0.0034,
+        toolMass: 0.04,
+        tipShape: 'Cylinder',
+        tipRadius: 0.0034,
+        toolColor: 0xeebb99,
+        tipColor: 0x99bbee,
+        useShadowMesh: true,
+        shadowPlane: 0,
+        shadowMaterial: new THREE.MeshBasicMaterial({color: 0x333333}),
+        shadowLightPosition: new THREE.Vector4(0, 7, 0, 0.1),
+        tipMaterial: new CANNON.Material()
+    };
+    var toolGeom = new THREE.CylinderGeometry(options.toolRadius, options.toolRadius, options.toolLength, 10, 1, false);
+    toolGeom.translate(0, -0.5 * options.toolLength, 0);
+    toolGeom.rotateX(-0.5 * Math.PI);
+    var bufferGeom = new THREE.BufferGeometry();
+    bufferGeom.fromGeometry(toolGeom);
+    toolGeom.dispose();
+    toolGeom = bufferGeom;
+    var toolMaterial = new THREE.MeshLambertMaterial({color: options.toolColor, transparent: true});
+    var toolMesh = new THREE.Mesh(toolGeom, toolMaterial);
+    toolMeshes.push(toolMesh);
+    toolMeshes.push(toolMesh.clone());
+
+    var vrGamepadBodies = [],
+        toolBody,
+        shapePosition;
+
+    toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.STATIC});
+    toolBody.material = options.tipMaterial;
+    shapePosition = new CANNON.Vec3(0, 0, options.tipRadius);
+    toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, 2*options.tipRadius, 8), shapePosition);
+    vrGamepadBodies.push(toolBody);
+
+    toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.STATIC});
+    toolBody.material = options.tipMaterial;
+    shapePosition = new CANNON.Vec3(0, 0, options.tipRadius);
+    toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, 2*options.tipRadius, 8), shapePosition);
+    vrGamepadBodies.push(toolBody);
 
     function pollGamepads() {
         gamepads = navigator.getGamepads();
@@ -63,6 +106,10 @@ module.exports = ( function () {
         }
     }
     window.addEventListener("gamepaddisconnected", onGamepadDisconnected);
+
+    function updatePostStep() {
+
+    }
 
     // var lt = 0;
     function update() { //t) {
@@ -129,10 +176,14 @@ module.exports = ( function () {
         for (i = 0; i < vrGamepads.length; i++) {
             gamepad = vrGamepads[i];
             if (gamepad && gamepad.pose) {
-                var mesh = vrGamepadMeshes[i];
+                // var mesh = vrGamepadMeshes[i];
+                var mesh = toolMeshes[i];
                 mesh.position.fromArray(gamepad.pose.position);
                 mesh.quaternion.fromArray(gamepad.pose.orientation);
                 mesh.updateMatrix();
+                var body = vrGamepadBodies[i];
+                body.position.copy(mesh.position);
+                body.quaternion.copy(mesh.quaternion);
             }
         }
         return values;
@@ -166,6 +217,10 @@ module.exports = ( function () {
         },
         viveMeshA: viveMeshA,
         viveMeshB: viveMeshB,
+        vrGamepadMeshes: vrGamepadMeshes,
+        toolMeshes: toolMeshes,
+        vrGamepadBodies: vrGamepadBodies,
+        updatePostStep: updatePostStep,
         setGamepadCommands: setGamepadCommands,
         setOnGamepadConnected: setOnGamepadConnected
     };
