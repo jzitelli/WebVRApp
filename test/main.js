@@ -149,6 +149,9 @@ window.onLoad = function () {
     stage.stageRoot.add(YAWVRB.Gamepads.vrGamepadTools[0].toolMesh);
     stage.stageRoot.add(YAWVRB.Gamepads.vrGamepadTools[1].toolMesh);
 
+    YAWVRB.Utils.displayText('OpenVR Gamepad A', {object: YAWVRB.Gamepads.vrGamepadTools[0].toolMesh});
+    YAWVRB.Utils.displayText('OpenVR Gamepad B', {object: YAWVRB.Gamepads.vrGamepadTools[1].toolMesh});
+
     world.add(YAWVRB.Gamepads.vrGamepadTools[0].toolBody);
     world.add(YAWVRB.Gamepads.vrGamepadTools[1].toolBody);
 

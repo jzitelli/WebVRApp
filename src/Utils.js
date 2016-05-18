@@ -64,6 +64,7 @@ module.exports = ( function () {
             for (kwarg in DEFAULT_OPTIONS) {
                 if (options[kwarg] === undefined) _options[kwarg] = DEFAULT_OPTIONS[kwarg];
             }
+            options = _options;
             var uuid = options.object.uuid;
             var key = JSON.stringify({text, uuid});
             var mesh = textMeshes[key];
@@ -100,8 +101,6 @@ module.exports = ( function () {
         return displayText;
     } )();
 
-
-
     function TextLabel(options) {
         const DEFAULT_OPTIONS = {
             object: DEADSCENE,
@@ -118,6 +117,7 @@ module.exports = ( function () {
         for (kwarg in DEFAULT_OPTIONS) {
             if (options[kwarg] === undefined) _options[kwarg] = DEFAULT_OPTIONS[kwarg];
         }
+        options = _options;
         var canvas = document.createElement('canvas');
         canvas.height = 2 * options.textSize;
         canvas.width = 256; //2*ctx.measureText(text).width;
