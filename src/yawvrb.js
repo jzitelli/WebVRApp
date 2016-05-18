@@ -2,7 +2,7 @@ window.YAWVRB = {};
 
 window.YAWVRB.App           = require('./App.js');
 window.YAWVRB.Utils         = require('./Utils.js');
-window.YAWVRB.Gamepad       = require('./Gamepad.js');
+window.YAWVRB.Gamepads      = require('./Gamepads.js');
 window.YAWVRB.GfxTablet     = require('./GfxTablet.js');
 window.YAWVRB.Keyboard      = require('./Keyboard.js');
 window.YAWVRB.LeapMotion    = require('./LeapMotion.js');

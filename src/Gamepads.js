@@ -10,13 +10,11 @@ module.exports = ( function () {
     var xboxGamepads = [];
     var vrGamepads = [];
 
-    var viveA = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.06, 0.13), new THREE.MeshLambertMaterial({color: 0xff2222}));
-    var viveB = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.06, 0.13), new THREE.MeshLambertMaterial({color: 0x22ff22}));
-    var vrGamepadMeshes = [viveA, viveB];
-    viveA.matrixAutoUpdate = false;
-    viveB.matrixAutoUpdate = false;
-    // viveA.visible = false;
-    // viveB.visible = false;
+    var viveMeshA = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.06, 0.13), new THREE.MeshLambertMaterial({color: 0xff2222}));
+    var viveMeshB = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.06, 0.13), new THREE.MeshLambertMaterial({color: 0x22ff22}));
+    var vrGamepadMeshes = [viveMeshA, viveMeshB];
+    viveMeshA.matrixAutoUpdate = false;
+    viveMeshB.matrixAutoUpdate = false;
 
     function pollGamepads() {
         gamepads = navigator.getGamepads();
@@ -166,8 +164,8 @@ module.exports = ( function () {
             RSX: 2,
             RSY: 3
         },
-        viveA: viveA,
-        viveB: viveB,
+        viveMeshA: viveMeshA,
+        viveMeshB: viveMeshB,
         setGamepadCommands: setGamepadCommands,
         setOnGamepadConnected: setOnGamepadConnected
     };
