@@ -253,7 +253,8 @@ module.exports = ( function () {
         vrGamepadMeshes: vrGamepadMeshes,
         vrGamepadTools: vrGamepadTools,
         setGamepadCommands: setGamepadCommands,
-        setOnGamepadConnected: setOnGamepadConnected
+        setOnGamepadConnected: setOnGamepadConnected,
+        makeTool: makeTool
     };
 
 } )();
