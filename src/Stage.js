@@ -4,8 +4,6 @@ module.exports = ( function () {
 
     function Stage() {
         this.hmdCalibrationPose = null;
-        this.deskHeight = 29 * 0.0254;
-        this.objects = [];
 
         var vrDisplay;
 
@@ -21,6 +19,8 @@ module.exports = ( function () {
                     console.log('%s:\n%s', vrDisplay.deviceName, JSON.stringify(vrDisplay, undefined, 2));
                     if (vrDisplay.stageParameters && vrDisplay.stageParameters.sittingToStandingTransform) {
                         console.log('sittingToStandingTransform:\n' + vrDisplay.stageParameters.sittingToStandingTransform);
+                        stageRoot.matrix.fromArray(vrDisplay.stageParameters.sittingToStandingTransform);
+                        stageRoot.matrix.decompose(stageRoot.position, stageRoot.quaternion, stageRoot.scale);
                     } else {
                         console.warn('no sittingToStandingTransform provided by the VRDisplay');
                     }
@@ -38,7 +38,7 @@ module.exports = ( function () {
         this.save = function () {
             console.log('saving poses of stage objects...');
             var transforms = {};
-            this.objects.forEach( function (object) {
+            stageRoot.children.forEach( function (object) {
                 if (object.name) {
                     object.updateMatrix();
                     object.updateMatrixWorld();
@@ -65,7 +65,7 @@ module.exports = ( function () {
                 }
             }
             console.log('loading poses of stage objects...');
-            this.objects.forEach( function (object) {
+            stageRoot.children.forEach( function (object) {
                 if (object.name && transforms[object.name]) {
                     var transform = transforms[object.name];
                     object.position.fromArray(transform.position);

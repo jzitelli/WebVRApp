@@ -10,6 +10,22 @@ window.onLoad = function () {
 
     THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
+    var world = new CANNON.World();
+    world.gravity.set(0, -9.8, 0);
+
+    var objectSelector = new YAWVRB.Utils.ObjectSelector();
+
+    var stage = new YAWVRB.Stage();
+
+    function saveStage() {
+        var transforms = stage.save();
+        textGeomLogger.log(JSON.stringify(transforms, undefined, 2));
+    }
+
+    var avatar = stage.stageRoot;
+
+    objectSelector.addSelectable(avatar);
+
     var textGeomLogger;
     ( function () {
         var fontLoader = new THREE.FontLoader();
@@ -34,35 +50,13 @@ window.onLoad = function () {
         });
     } )();
 
-    var objectSelector = new YAWVRB.Utils.ObjectSelector();
-
-    var stage = new YAWVRB.Stage();
-
-    function saveStage() {
-        var transforms = stage.save();
-        textGeomLogger.log(JSON.stringify(transforms, undefined, 2));
-    }
-
-    var avatar = new THREE.Object3D();
-    // avatar.position.y = 1.2;
-    // avatar.position.z = -0.28;
-    avatar.updateMatrix();
-
-    objectSelector.addSelectable(avatar);
-
-    avatar.add(stage.stageRoot);
-
-    var world = new CANNON.World();
-    world.gravity.set(0, -9.8, 0);
-
     var app = ( function () {
         var euler = new THREE.Euler(0, 0, 0, 'YXZ');
-        var app;
-        app = new YAWVRB.App(undefined, {
+        return new YAWVRB.App(undefined, {
             onResetVRSensor: function (lastRotation, lastPosition) {
                 console.log('lastRotation: %f, lastPosition: (%f, %f, %f)', lastRotation, lastPosition.x, lastPosition.y, lastPosition.z);
                 // maintain poses of stage objects:
-                stage.objects.forEach( function (object) {
+                stage.stageRoot.children.forEach( function (object) {
                     // maintain rotation of object (relative heading of object w.r.t. HMD):
                     euler.setFromQuaternion(object.quaternion);
                     euler.y -= lastRotation;
@@ -77,26 +71,26 @@ window.onLoad = function () {
             canvas: document.getElementById('webgl-canvas'),
             alpha: true
         });
-        return app;
     } )();
 
-    // app.scene.add(stage.stageRoot);
+    avatar.add(app.camera);
+    app.scene.add(stage.stageRoot);
 
     window.app = app;
-
-    var overlay = document.getElementById('overlay');
 
     function toggleVRMenu() {
         textGeomLogger.log('vr menu enabled');
     }
 
-    // function toggleHTMLMenu() {
-    //     if (overlay.style.display === 'none') {
-    //         overlay.style.display = 'block';
-    //     } else {
-    //         overlay.style.display = 'none';
-    //     }
-    // }
+    var overlay = document.getElementById('overlay');
+
+    function toggleHTMLMenu() {
+        if (overlay.style.display === 'none') {
+            overlay.style.display = 'block';
+        } else {
+            overlay.style.display = 'none';
+        }
+    }
 
     var xboxGamepadCommands = {
         toggleVR: {buttons: [YAWVRB.Gamepads.BUTTONS.start], commandDown: function () { console.log('entering VR'); app.toggleVR(); }},
@@ -127,9 +121,7 @@ window.onLoad = function () {
 
     var viveBCommands = {
         toggleVRMenu: {buttons: [3], commandDown: toggleVRMenu},
-        padButton: {buttons: [0], commandDown: padButtonDown},
-        turnRL: {axes: [YAWVRB.Gamepads.AXES.LSX]},
-        turnUD: {axes: [YAWVRB.Gamepads.AXES.LSY]}
+        padButton: {buttons: [0], commandDown: padButtonDown}
     };
 
     YAWVRB.Gamepads.setGamepadCommands(0, viveACommands);
@@ -152,6 +144,7 @@ window.onLoad = function () {
 
     stage.stageRoot.add(YAWVRB.Gamepads.vrGamepadTools[0].toolMesh);
     stage.stageRoot.add(YAWVRB.Gamepads.vrGamepadTools[1].toolMesh);
+
     world.add(YAWVRB.Gamepads.vrGamepadTools[0].toolBody);
     world.add(YAWVRB.Gamepads.vrGamepadTools[1].toolBody);
 
@@ -165,11 +158,11 @@ window.onLoad = function () {
     var ballBody = new CANNON.Body({mass: 0.1});
     ballBody.material = new CANNON.Material();
     ballBody.addShape(new CANNON.Sphere(0.25));
-    ballBody.position.set(-1, 3, 1.25);
+    ballBody.position.set(2, 2, 1.25);
     world.add(ballBody);
     var ballMesh = new THREE.Mesh(new THREE.SphereBufferGeometry(0.25), new THREE.MeshLambertMaterial({color: 0xff0000}));
     ballMesh.position.copy(ballBody.position);
-    stage.stageRoot.add(ballMesh);
+    app.scene.add(ballMesh);
 
     // menu setup:
     var infoElement = document.createElement('div');
@@ -184,7 +177,7 @@ window.onLoad = function () {
     infoElement.appendChild(plaintext);
 
     var profileNameInput = document.getElementById('profileName');
-    profileNameInput.value = 'dev';
+    profileNameInput.value = 'default';
 
     var vrButton = document.getElementById('vrButton');
     vrButton.addEventListener('click', function () {
@@ -207,9 +200,6 @@ window.onLoad = function () {
     saveStageButton.addEventListener('click', function () {
         saveStage();
     });
-
-    app.scene.add(avatar);
-    avatar.add(app.camera);
 
     app.renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -242,9 +232,8 @@ window.onLoad = function () {
     YAWVRB.Utils.displayText('Leap Motion (local)', {object: leapTool.toolRoot});
     leapTool.leapController.connect();
     objectSelector.addSelectable(leapTool.toolRoot);
-    avatar.add(leapTool.toolRoot);
     world.add(leapTool.toolBody);
-    stage.objects.push(leapTool.toolRoot);
+    stage.stageRoot.add(leapTool.toolRoot);
 
     // remote leap motion controller:
     var remoteLeapStatusIndicator = document.getElementById('remoteLeapStatus');
@@ -286,10 +275,9 @@ window.onLoad = function () {
     YAWVRB.Utils.displayText('Leap Motion (remote)', {object: leapToolRemote.toolRoot});
     leapToolRemote.leapController.connect();
     objectSelector.addSelectable(leapToolRemote.toolRoot);
-    avatar.add(leapToolRemote.toolRoot);
     world.add(leapToolRemote.toolBody);
     leapToolRemote.toolRoot.name = 'remoteToolRoot';
-    stage.objects.push(leapToolRemote.toolRoot);
+    stage.stageRoot.add(leapToolRemote.toolRoot);
 
     var mouse = new YAWVRB.Mouse({eventTarget: window});
     mouse.togglePointer();
@@ -299,8 +287,7 @@ window.onLoad = function () {
     mouse.stageObject.name = 'mouse';
     objectSelector.addSelectable(mouse.stageObject);
     mouse.stageObject.position.set(0, -12 * 0.254, -12 * 0.0254);
-    avatar.add(mouse.stageObject);
-    stage.objects.push(mouse.stageObject);
+    stage.stageRoot.add(mouse.stageObject);
 
     var keyboardCommands = {
         toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: function () { app.toggleVR(); }},
@@ -309,7 +296,8 @@ window.onLoad = function () {
         cyclePrevSelection: {buttons: [YAWVRB.Keyboard.KEYCODES.OPENBRACKET], commandDown: objectSelector.cycleSelection.bind(objectSelector, -1)},
         toggleWireframe: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER1], commandDown: function () { app.toggleWireframe(); }},
         toggleNormalMaterial: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER2], commandDown: function () { app.toggleNormalMaterial(); }},
-        saveStageConfiguration: {buttons: [YAWVRB.Keyboard.KEYCODES.X], commandDown: saveStage}
+        saveStageConfiguration: {buttons: [YAWVRB.Keyboard.KEYCODES.X], commandDown: saveStage},
+        toggleHTMLMenu: {buttons: [YAWVRB.Keyboard.KEYCODES.M], commandDown: toggleHTMLMenu}
     };
     for (var k in YAWVRB.Keyboard.STANDARD_COMMANDS) {
         keyboardCommands[k] = YAWVRB.Keyboard.STANDARD_COMMANDS[k];
@@ -322,20 +310,18 @@ window.onLoad = function () {
     keyboardObject.updateMatrix();
     YAWVRB.Utils.displayText('Keyboard', {object: keyboardObject});
     objectSelector.addSelectable(keyboardObject);
-    avatar.add(keyboardObject);
     keyboardObject.name = 'keyboard';
-    stage.objects.push(keyboardObject);
+    stage.stageRoot.add(keyboardObject);
 
     // GfxTablet:
     var gfxTablet = new YAWVRB.GfxTablet(2560, 1600);
-    avatar.add(gfxTablet.mesh);
     gfxTablet.mesh.position.set(-0.32, -0.3, -0.05);
     gfxTablet.mesh.quaternion.setFromAxisAngle(UP, 0.5 * Math.PI).multiply((new THREE.Quaternion()).setFromAxisAngle(RIGHT, -0.125 * Math.PI));
     gfxTablet.mesh.updateMatrix();
     gfxTablet.mesh.name = 'GfxTablet';
     YAWVRB.Utils.displayText('GfxTablet', {object: gfxTablet.mesh, position: [0, 0.5, 0.05]});
     objectSelector.addSelectable(gfxTablet.mesh);
-    stage.objects.push(gfxTablet.mesh);
+    stage.stageRoot.add(gfxTablet.mesh);
 
     stage.load();
 
@@ -384,7 +370,7 @@ window.onLoad = function () {
                         turnRL = keyboard.turnRight - keyboard.turnLeft,
                         turnUD = keyboard.turnUp - keyboard.turnDown;
 
-                    var values = YAWVRB.Gamepads.update();
+                    var values = YAWVRB.Gamepads.update(t);
                     for (var i = 0; i < values.length; i++) {
                         var vals = values[i];
                         if (vals.moveFB) {
@@ -414,8 +400,6 @@ window.onLoad = function () {
                     ballMesh.position.copy(ballBody.position);
                     ballMesh.quaternion.copy(ballBody.quaternion);
                     ballMesh.updateMatrix();
-
-                    YAWVRB.Gamepads.updatePostStep();
 
                     leapTool.updateToolPostStep();
                     if (leapToolRemote) leapToolRemote.updateToolPostStep();

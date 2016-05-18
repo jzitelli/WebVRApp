@@ -109,14 +109,15 @@ module.exports = ( function () {
     }
     window.addEventListener("gamepaddisconnected", onGamepadDisconnected);
 
-    function updatePostStep() {
-
-    }
-
-    // var lt = 0;
-    function update() { //t) {
-        // var dt = 0.001 * (t - lt);
-        // lt = t;
+    var worldQuaternion = new THREE.Quaternion();
+    var worldPosition = new THREE.Vector3();
+    var worldScale = new THREE.Vector3();
+    var quaternion = new THREE.Quaternion();
+    var position = new THREE.Vector3();
+    var lt = 0;
+    function update(t) {
+        var dt = 0.001 * (t - lt);
+        lt = t;
         var values = [];
         pollGamepads();
         for (var i = 0; i < gamepads.length; ++i) {
@@ -184,8 +185,15 @@ module.exports = ( function () {
                 mesh.quaternion.fromArray(gamepad.pose.orientation);
                 mesh.updateMatrix();
                 var body = vrGamepadTools[i].toolBody;
-                body.position.copy(mesh.position);
-                body.quaternion.copy(mesh.quaternion);
+                mesh.parent.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
+                position.copy(mesh.position);
+                position.applyMatrix4(mesh.parent.matrixWorld);
+                body.velocity.copy(body.position);
+                body.position.copy(position);
+                body.velocity.vsub(body.position, body.velocity);
+                body.velocity.mult(1 / dt, body.velocity);
+                quaternion.multiplyQuaternions(worldQuaternion, mesh.quaternion);
+                body.quaternion.copy(quaternion);
             }
         }
         return values;
@@ -221,7 +229,6 @@ module.exports = ( function () {
         viveMeshB: viveMeshB,
         vrGamepadMeshes: vrGamepadMeshes,
         vrGamepadTools: vrGamepadTools,
-        updatePostStep: updatePostStep,
         setGamepadCommands: setGamepadCommands,
         setOnGamepadConnected: setOnGamepadConnected
     };

@@ -339,14 +339,15 @@ module.exports = ( function () {
     }
     window.addEventListener("gamepaddisconnected", onGamepadDisconnected);
 
-    function updatePostStep() {
-
-    }
-
-    // var lt = 0;
-    function update() { //t) {
-        // var dt = 0.001 * (t - lt);
-        // lt = t;
+    var worldQuaternion = new THREE.Quaternion();
+    var worldPosition = new THREE.Vector3();
+    var worldScale = new THREE.Vector3();
+    var quaternion = new THREE.Quaternion();
+    var position = new THREE.Vector3();
+    var lt = 0;
+    function update(t) {
+        var dt = 0.001 * (t - lt);
+        lt = t;
         var values = [];
         pollGamepads();
         for (var i = 0; i < gamepads.length; ++i) {
@@ -414,8 +415,15 @@ module.exports = ( function () {
                 mesh.quaternion.fromArray(gamepad.pose.orientation);
                 mesh.updateMatrix();
                 var body = vrGamepadTools[i].toolBody;
-                body.position.copy(mesh.position);
-                body.quaternion.copy(mesh.quaternion);
+                mesh.parent.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
+                position.copy(mesh.position);
+                position.applyMatrix4(mesh.parent.matrixWorld);
+                body.velocity.copy(body.position);
+                body.position.copy(position);
+                body.velocity.vsub(body.position, body.velocity);
+                body.velocity.mult(1 / dt, body.velocity);
+                quaternion.multiplyQuaternions(worldQuaternion, mesh.quaternion);
+                body.quaternion.copy(quaternion);
             }
         }
         return values;
@@ -451,7 +459,6 @@ module.exports = ( function () {
         viveMeshB: viveMeshB,
         vrGamepadMeshes: vrGamepadMeshes,
         vrGamepadTools: vrGamepadTools,
-        updatePostStep: updatePostStep,
         setGamepadCommands: setGamepadCommands,
         setOnGamepadConnected: setOnGamepadConnected
     };
@@ -1295,8 +1302,6 @@ module.exports = ( function () {
 
     function Stage() {
         this.hmdCalibrationPose = null;
-        this.deskHeight = 29 * 0.0254;
-        this.objects = [];
 
         var vrDisplay;
 
@@ -1312,6 +1317,8 @@ module.exports = ( function () {
                     console.log('%s:\n%s', vrDisplay.deviceName, JSON.stringify(vrDisplay, undefined, 2));
                     if (vrDisplay.stageParameters && vrDisplay.stageParameters.sittingToStandingTransform) {
                         console.log('sittingToStandingTransform:\n' + vrDisplay.stageParameters.sittingToStandingTransform);
+                        stageRoot.matrix.fromArray(vrDisplay.stageParameters.sittingToStandingTransform);
+                        stageRoot.matrix.decompose(stageRoot.position, stageRoot.quaternion, stageRoot.scale);
                     } else {
                         console.warn('no sittingToStandingTransform provided by the VRDisplay');
                     }
@@ -1329,7 +1336,7 @@ module.exports = ( function () {
         this.save = function () {
             console.log('saving poses of stage objects...');
             var transforms = {};
-            this.objects.forEach( function (object) {
+            stageRoot.children.forEach( function (object) {
                 if (object.name) {
                     object.updateMatrix();
                     object.updateMatrixWorld();
@@ -1356,7 +1363,7 @@ module.exports = ( function () {
                 }
             }
             console.log('loading poses of stage objects...');
-            this.objects.forEach( function (object) {
+            stageRoot.children.forEach( function (object) {
                 if (object.name && transforms[object.name]) {
                     var transform = transforms[object.name];
                     object.position.fromArray(transform.position);
