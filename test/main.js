@@ -122,9 +122,35 @@ window.onLoad = function () {
         moveRL: {axes: [YAWVRB.Gamepads.AXES.LSX]}
     };
 
+    var grabbed;
+    var parent;
+    function grab() {
+        console.log('grabbing!');
+        var toolMesh = YAWVRB.Gamepads.vrGamepadTools[1].toolMesh;
+        grabbed = leapTool.toolRoot;
+        parent = grabbed.parent;
+        var scale = new THREE.Vector3();
+        grabbed.matrixWorld.decompose(grabbed.position, grabbed.quaternion, scale);
+        parent.remove(grabbed);
+        toolMesh.worldToLocal(grabbed.position);
+        toolMesh.add(grabbed);
+        grabbed.updateMatrix();
+    }
+
+    function release() {
+        console.log('releasing!');
+        var toolMesh = YAWVRB.Gamepads.vrGamepadTools[1].toolMesh;
+        toolMesh.remove(grabbed);
+        toolMesh.localToWorld(grabbed.position);
+        parent.worldToLocal(grabbed.position);
+        parent.add(grabbed);
+        grabbed.updateMatrix();
+    }
+
     var viveBCommands = {
         toggleVRMenu: {buttons: [3], commandDown: toggleVRMenu},
         padButton: {buttons: [0], commandDown: padButtonDown},
+        grab: {buttons: [1], commandDown: grab, commandUp: release},
         turnRL: {axes: [YAWVRB.Gamepads.AXES.LSX]}
     };
 
@@ -135,10 +161,8 @@ window.onLoad = function () {
         console.log('your custome gamepad connected routine!@!!!');
         if (/openvr/i.test(e.gamepad.id)) {
             if (e.index === 0) {
-                YAWVRB.Gamepads.viveMeshA.visible = true;
                 YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, viveACommands);
             } else if (e.index === 1) {
-                YAWVRB.Gamepads.viveMeshB.visible = true;
                 YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, viveBCommands);
             }
         } else if (/xbox/i.test(e.gamepad.id) || /xinput/i.test(e.gamepad.id)) {

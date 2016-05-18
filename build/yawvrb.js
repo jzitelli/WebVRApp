@@ -308,6 +308,7 @@ module.exports = ( function () {
             body.velocity.copy(velocity);
             quaternion.multiplyQuaternions(worldQuaternion, mesh.quaternion);
             body.quaternion.copy(quaternion);
+            mesh.updateMatrixWorld();
         }
         return {
             toolBody: toolBody,
