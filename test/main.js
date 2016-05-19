@@ -156,19 +156,25 @@ window.onLoad = function () {
     YAWVRB.Gamepads.setGamepadCommands(0, viveACommands);
     YAWVRB.Gamepads.setGamepadCommands(1, viveBCommands);
 
+    stage.stageRoot.add(YAWVRB.Gamepads.vrGamepadTools[0].toolMesh);
+    // YAWVRB.Gamepads.vrGamepadTools[0].toolMesh.visible = false;
+    YAWVRB.Utils.displayText('OpenVR Gamepad A', {object: YAWVRB.Gamepads.vrGamepadTools[0].toolMesh});
+    world.add(YAWVRB.Gamepads.vrGamepadTools[0].toolBody);
+
+    stage.stageRoot.add(YAWVRB.Gamepads.vrGamepadTools[1].toolMesh);
+    // YAWVRB.Gamepads.vrGamepadTools[1].toolMesh.visible = false;
+    YAWVRB.Utils.displayText('OpenVR Gamepad B', {object: YAWVRB.Gamepads.vrGamepadTools[1].toolMesh});
+    world.add(YAWVRB.Gamepads.vrGamepadTools[1].toolBody);
+
     YAWVRB.Gamepads.setOnGamepadConnected( function (e) {
         console.log('your custome gamepad connected routine!@!!!');
         if (/openvr/i.test(e.gamepad.id)) {
             if (e.index === 0) {
                 YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, viveACommands);
-                stage.stageRoot.add(YAWVRB.Gamepads.vrGamepadTools[0].toolMesh);
-                YAWVRB.Utils.displayText('OpenVR Gamepad A', {object: YAWVRB.Gamepads.vrGamepadTools[0].toolMesh});
-                world.add(YAWVRB.Gamepads.vrGamepadTools[0].toolBody);
+                YAWVRB.Gamepads.vrGamepadTools[0].toolMesh.visible = true;
             } else if (e.index === 1) {
                 YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, viveBCommands);
-                stage.stageRoot.add(YAWVRB.Gamepads.vrGamepadTools[1].toolMesh);
-                YAWVRB.Utils.displayText('OpenVR Gamepad B', {object: YAWVRB.Gamepads.vrGamepadTools[1].toolMesh});
-                world.add(YAWVRB.Gamepads.vrGamepadTools[1].toolBody);
+                YAWVRB.Gamepads.vrGamepadTools[1].toolMesh.visible = true;
             }
         } else if (/xbox/i.test(e.gamepad.id) || /xinput/i.test(e.gamepad.id)) {
             YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, xboxGamepadCommands);

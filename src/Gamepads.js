@@ -64,21 +64,20 @@ module.exports = ( function () {
             mesh.position.fromArray(pose.position);
             mesh.quaternion.fromArray(pose.orientation);
             mesh.updateMatrix();
+            var parent = mesh.parent;
             var body = toolBody;
-            mesh.parent.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
             position.copy(mesh.position);
-            position.applyMatrix4(mesh.parent.matrixWorld);
-            // body.velocity.copy(body.position);
             velocity.copy(body.position);
+            if (parent) {
+                parent.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
+                position.applyMatrix4(parent.matrixWorld);
+                quaternion.multiplyQuaternions(worldQuaternion, mesh.quaternion);
+            }
             body.position.copy(position);
-            // body.velocity.vsub(body.position, body.velocity);
+            body.quaternion.copy(quaternion);
             velocity.sub(position);
-            //body.velocity.mult(1 / dt, body.velocity);
             velocity.multiplyScalar(1 / dt);
             body.velocity.copy(velocity);
-            quaternion.multiplyQuaternions(worldQuaternion, mesh.quaternion);
-            body.quaternion.copy(quaternion);
-            mesh.updateMatrixWorld();
         }
         return {
             toolBody: toolBody,
