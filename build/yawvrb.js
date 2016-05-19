@@ -288,7 +288,7 @@ module.exports = ( function () {
         var worldPosition = new THREE.Vector3();
         var worldQuaternion = new THREE.Quaternion();
         var worldScale = new THREE.Vector3();
-        // var matrixWorldInverse = new THREE.Matrix4();
+        var matrixWorldInverse = new THREE.Matrix4();
         var lt = 0;
         function update(t) {
             var dt = 0.001 * (t - lt);
@@ -309,21 +309,24 @@ module.exports = ( function () {
                 velocity.sub(position);
                 velocity.multiplyScalar(-1 / dt);
                 body.velocity.copy(velocity);
+                toolMesh.updateMatrix();
+                toolMesh.updateMatrixWorld();
             } else {
-                // update mesh based on kinematic projection:
                 toolBody.sleep();
-                // toolMesh.position.copy(toolBody.interpolatedPosition);
-                // matrixWorldInverse.getInverse(toolMesh.parent.matrixWorld);
-                // toolMesh.position.applyMatrix4(matrixWorldInverse);
             }
-            toolMesh.updateMatrix();
-            toolMesh.updateMatrixWorld();
             lt = t;
+        }
+        function updatePostStep() {
+            // update mesh based on kinematic projection:
+            toolMesh.position.copy(toolBody.interpolatedPosition);
+            matrixWorldInverse.getInverse(toolMesh.parent.matrixWorld);
+            toolMesh.position.applyMatrix4(matrixWorldInverse);
         }
         return {
             body: toolBody,
             mesh: toolMesh,
-            update: update
+            update: update,
+            updatePostStep: updatePostStep
         };
     }
 
@@ -835,6 +838,7 @@ module.exports = ( function () {
         toolMass: 0.04,
         tipShape: 'Cylinder',
         tipRadius: 0.0034,
+        tipMaterial: new CANNON.Material(),
         interactionPlaneOpacity: 0.22,
         timeA: 0.25,
         timeB: 0.25 + 1.5,
@@ -958,7 +962,7 @@ module.exports = ( function () {
 
         var toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.KINEMATIC});
         // TODO: rename, avoid confusion b/t cannon and three materials
-        toolBody.material = options.tipMaterial || new CANNON.Material();
+        toolBody.material = options.tipMaterial;
 
         var tipMesh = null;
         if (options.tipShape === 'Sphere') {

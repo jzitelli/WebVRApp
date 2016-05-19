@@ -22,6 +22,7 @@ module.exports = ( function () {
         toolMass: 0.04,
         tipShape: 'Cylinder',
         tipRadius: 0.0034,
+        tipMaterial: new CANNON.Material(),
         interactionPlaneOpacity: 0.22,
         timeA: 0.25,
         timeB: 0.25 + 1.5,
@@ -145,7 +146,7 @@ module.exports = ( function () {
 
         var toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.KINEMATIC});
         // TODO: rename, avoid confusion b/t cannon and three materials
-        toolBody.material = options.tipMaterial || new CANNON.Material();
+        toolBody.material = options.tipMaterial;
 
         var tipMesh = null;
         if (options.tipShape === 'Sphere') {
