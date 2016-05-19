@@ -29,7 +29,7 @@ module.exports = ( function () {
         shadowLightPosition: new THREE.Vector4(0, 7, 0, 0.1),
         tipMaterial: new CANNON.Material()
     };
-    function makeTool(options) {
+    function makeTool(vrGamepad, options) {
         var _options = {};
         options = options || _options;
         for (var kwarg in options) {
@@ -58,34 +58,34 @@ module.exports = ( function () {
         var worldPosition = new THREE.Vector3();
         var worldQuaternion = new THREE.Quaternion();
         var worldScale = new THREE.Vector3();
-        function update(pose, dt) {
-            var mesh = toolMesh;
-            mesh.position.fromArray(pose.position);
-            mesh.quaternion.fromArray(pose.orientation);
-            mesh.updateMatrix();
-            var parent = mesh.parent;
-            var body = toolBody;
-            position.copy(mesh.position);
-            velocity.copy(body.position);
-            if (parent) {
-                parent.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
-                position.applyMatrix4(parent.matrixWorld);
-                quaternion.multiplyQuaternions(worldQuaternion, mesh.quaternion);
+        function update(dt) {
+            if (vrGamepad && vrGamepad.pose) {
+                var mesh = toolMesh;
+                mesh.position.fromArray(vrGamepad.pose.position);
+                mesh.quaternion.fromArray(vrGamepad.pose.orientation);
+                mesh.updateMatrix();
+                var parent = mesh.parent;
+                var body = toolBody;
+                position.copy(mesh.position);
+                velocity.copy(body.position);
+                if (parent) {
+                    parent.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
+                    position.applyMatrix4(parent.matrixWorld);
+                    quaternion.multiplyQuaternions(worldQuaternion, mesh.quaternion);
+                }
+                body.position.copy(position);
+                body.quaternion.copy(quaternion);
+                velocity.sub(position);
+                velocity.multiplyScalar(1 / dt);
+                body.velocity.copy(velocity);
             }
-            body.position.copy(position);
-            body.quaternion.copy(quaternion);
-            velocity.sub(position);
-            velocity.multiplyScalar(1 / dt);
-            body.velocity.copy(velocity);
         }
         return {
-            toolBody: toolBody,
-            toolMesh: toolMesh,
+            body: toolBody,
+            mesh: toolMesh,
             update: update
         };
     }
-
-    var vrGamepadTools = [makeTool(), makeTool()];
 
     function pollGamepads() {
         gamepads = navigator.getGamepads();
@@ -135,10 +135,7 @@ module.exports = ( function () {
     }
     window.addEventListener("gamepaddisconnected", onGamepadDisconnected);
 
-    var lt = 0;
-    function update(t) {
-        var dt = 0.001 * (t - lt);
-        lt = t;
+    function update() {
         var values = [];
         pollGamepads();
         for (var i = 0; i < gamepads.length; ++i) {
@@ -196,35 +193,12 @@ module.exports = ( function () {
                 }
             }
         }
-        // update openvr controller poses:
-        for (i = 0; i < vrGamepads.length; i++) {
-            gamepad = vrGamepads[i];
-            if (gamepad && gamepad.pose) {
-                vrGamepadTools[i].update(gamepad.pose, dt);
-                // var mesh = vrGamepadMeshes[i];
-                // var mesh = vrGamepadTools[i].toolMesh;
-                // mesh.position.fromArray(gamepad.pose.position);
-                // mesh.quaternion.fromArray(gamepad.pose.orientation);
-                // mesh.updateMatrix();
-                // var body = vrGamepadTools[i].toolBody;
-                // mesh.parent.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
-                // position.copy(mesh.position);
-                // position.applyMatrix4(mesh.parent.matrixWorld);
-                // body.velocity.copy(body.position);
-                // body.position.copy(position);
-                // body.velocity.vsub(body.position, body.velocity);
-                // body.velocity.mult(1 / dt, body.velocity);
-                // quaternion.multiplyQuaternions(worldQuaternion, mesh.quaternion);
-                // body.quaternion.copy(quaternion);
-            }
-        }
         return values;
     }
 
     pollGamepads();
 
     return {
-        update: update,
         BUTTONS: {
             A: 0,
             B: 1,
@@ -252,11 +226,10 @@ module.exports = ( function () {
         viveMeshA: viveMeshA,
         viveMeshB: viveMeshB,
         vrGamepadMeshes: vrGamepadMeshes,
-        vrGamepadTools: vrGamepadTools,
         setGamepadCommands: setGamepadCommands,
         setOnGamepadConnected: setOnGamepadConnected,
+        update: update,
         makeTool: makeTool,
-        gamepads: gamepads,
         vrGamepads: vrGamepads,
         xboxGamepads: xboxGamepads
     };

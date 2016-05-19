@@ -37,15 +37,12 @@ window.onLoad = function () {
             avatar.add(textGeomLogger.root);
             textGeomLogger.log('textGeomLogger: hello world');
             avatar.updateMatrixWorld(true);
-
             setTimeout( function () {
                 textGeomLogger.log('another line');
             }, 3000);
-
             setTimeout( function () {
                 textGeomLogger.log('and another line');
             }, 7000);
-
         });
     } )();
 
@@ -104,8 +101,7 @@ window.onLoad = function () {
         moveRL: {axes: [YAWVRB.Gamepads.AXES.LSX]},
         turnRL: {axes: [YAWVRB.Gamepads.AXES.RSX]},
         turnUD: {axes: [YAWVRB.Gamepads.AXES.RSY]},
-        toggleFloat: {buttons: [YAWVRB.Gamepads.BUTTONS.leftStick]},
-        logButton: {buttons: [0,1,2,3,4,5,6,7,8], commandDown: function (j) { console.log('pressed %d', j); }}
+        toggleFloat: {buttons: [YAWVRB.Gamepads.BUTTONS.leftStick]}
     };
 
     function padButtonDown(button, axes) {
@@ -126,7 +122,7 @@ window.onLoad = function () {
     var parent;
     function grab() {
         console.log('grabbing!');
-        var toolMesh = YAWVRB.Gamepads.vrGamepadTools[1].toolMesh;
+        var toolMesh = openVRTools[1].mesh;
         grabbed = leapTool.toolRoot;
         parent = grabbed.parent;
         var scale = new THREE.Vector3();
@@ -138,7 +134,7 @@ window.onLoad = function () {
     }
     function release() {
         console.log('releasing!');
-        var toolMesh = YAWVRB.Gamepads.vrGamepadTools[1].toolMesh;
+        var toolMesh = openVRTools[1].mesh;
         toolMesh.remove(grabbed);
         toolMesh.localToWorld(grabbed.position);
         parent.worldToLocal(grabbed.position);
@@ -153,26 +149,29 @@ window.onLoad = function () {
         turnRL: {axes: [YAWVRB.Gamepads.AXES.LSX]}
     };
 
-    YAWVRB.Gamepads.setGamepadCommands(0, viveACommands);
-    YAWVRB.Gamepads.setGamepadCommands(1, viveBCommands);
-
-    var vrGamepadMeshA = YAWVRB.Gamepads.vrGamepadTools[0].toolMesh;
-    stage.stageRoot.add(vrGamepadMeshA);
-    var textLabel = new YAWVRB.Utils.TextLabel({object: vrGamepadMeshA});
-    textLabel.setText('OpenVR Gamepad A');
-    world.add(YAWVRB.Gamepads.vrGamepadTools[0].toolBody);
-
-    var vrGamepadMeshB = YAWVRB.Gamepads.vrGamepadTools[1].toolMesh;
-    stage.stageRoot.add(vrGamepadMeshB);
-    YAWVRB.Utils.displayText('OpenVR Gamepad B', {object: vrGamepadMeshB});
-    world.add(YAWVRB.Gamepads.vrGamepadTools[1].toolBody);
-
+    var openVRTools = [];
+    var textLabel;
+    for (var i = 0; i < YAWVRB.Gamepads.vrGamepads.length; i++) {
+        var vrGamepad = YAWVRB.Gamepads.vrGamepads[i];
+        var openVRTool = YAWVRB.Gamepads.makeTool(vrGamepad);
+        stage.stageRoot.add(openVRTool.mesh);
+        world.add(openVRTool.body);
+        openVRTools.push(openVRTool);
+        if (i === 0) {
+            YAWVRB.Gamepads.setGamepadCommands(vrGamepad.index, viveACommands);
+            textLabel = new YAWVRB.Utils.TextLabel({object: openVRTool.mesh});
+            textLabel.setText('OpenVR Gamepad A');
+        } else if (i === 1) {
+            YAWVRB.Gamepads.setGamepadCommands(vrGamepad.index, viveBCommands);
+        }
+    }
     YAWVRB.Gamepads.setOnGamepadConnected( function (e) {
-        console.log('your custome gamepad connected routine!@!!!');
         if (/openvr/i.test(e.gamepad.id)) {
             if (e.index === 0) {
+                console.log('setting gamepad commands for Vive controller A...');
                 YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, viveACommands);
             } else if (e.index === 1) {
+                console.log('setting gamepad commands for Vive controller B...');
                 YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, viveBCommands);
             }
         } else if (/xbox/i.test(e.gamepad.id) || /xinput/i.test(e.gamepad.id)) {
@@ -187,11 +186,11 @@ window.onLoad = function () {
     floorBody.addShape(new CANNON.Plane(), undefined, quaternion);
     world.add(floorBody);
 
-    var ballBody = new CANNON.Body({mass: 0.1});
+    var ballBody = new CANNON.Body({mass: 0.1, angularDamping: 0.2, linearDamping: 0.2});
     var ballRadius = 0.25;
     ballBody.material = new CANNON.Material();
     ballBody.addShape(new CANNON.Sphere(ballRadius));
-    ballBody.position.set(2, 2, 1.25);
+    ballBody.position.set(-2, 3, 0.25);
     world.add(ballBody);
     var ballMesh = new THREE.Mesh(new THREE.SphereBufferGeometry(ballRadius, 16, 12), new THREE.MeshLambertMaterial({color: 0xff0000}));
     ballMesh.position.copy(ballBody.position);
@@ -405,7 +404,7 @@ window.onLoad = function () {
                         turnRL = keyboard.turnRight - keyboard.turnLeft,
                         turnUD = keyboard.turnUp - keyboard.turnDown;
 
-                    var values = YAWVRB.Gamepads.update(t);
+                    var values = YAWVRB.Gamepads.update();
                     for (var i = 0; i < values.length; i++) {
                         var vals = values[i];
                         if (vals.moveFB) {
@@ -428,6 +427,10 @@ window.onLoad = function () {
                     leapTool.updateTool(dt);
                     if (leapToolRemote) leapToolRemote.updateTool(dt);
 
+                    for (i = 0; i < openVRTools.length; i++) {
+                        openVRTools[i].update(dt);
+                    }
+
                     app.render();
 
                     world.step(Math.min(dt, 1/60), dt, 10);
@@ -439,7 +442,7 @@ window.onLoad = function () {
                     leapTool.updateToolPostStep();
                     if (leapToolRemote) leapToolRemote.updateToolPostStep();
 
-                    textLabel.setText(JSON.stringify(vrGamepadMeshA.position));
+                    if (textLabel) textLabel.setText(`${openVRTools[0].mesh.position.x.toFixed(3)}, ${openVRTools[0].mesh.position.y.toFixed(3)}, ${openVRTools[0].mesh.position.z.toFixed(3)}`);
 
                     lt = t;
                     requestAnimationFrame(animate);

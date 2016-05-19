@@ -363,7 +363,7 @@ module.exports = ( function () {
         leftRoot.add(joint2s[0][0], joint2s[0][1], joint2s[0][2], joint2s[0][3], joint2s[0][4]);
         rightRoot.add(joint2s[1][0], joint2s[1][1], joint2s[1][2], joint2s[1][3], joint2s[1][4]);
         var joint3Mesh = fingerTipMesh.clone();
-        joint3Mesh.scale.set(7.2/5, 7.2/5, 7.2/5);
+        joint3Mesh.scale.set(7/5, 7/5, 7/5);
         var joint3s = [[joint3Mesh, joint3Mesh.clone(), joint3Mesh.clone(), joint3Mesh.clone()],
                        [joint3Mesh.clone(), joint3Mesh.clone(), joint3Mesh.clone(), joint3Mesh.clone()]];
         leftRoot.add(joint3s[0][0], joint3s[0][1], joint3s[0][2], joint3s[0][3]);
