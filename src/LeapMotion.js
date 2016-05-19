@@ -314,7 +314,7 @@ module.exports = ( function () {
         var handMaterial = new THREE.MeshBasicMaterial({color: options.handColor, transparent: true, opacity: 0});
 
         // arms:
-        var armRadius = METERS2LEAP*0.0216,
+        var armRadius = METERS2LEAP*0.021,
             armLength = METERS2LEAP*0.22;
         var armGeom = new THREE.CylinderGeometry(armRadius, armRadius, armLength);
         bufferGeom = new THREE.BufferGeometry();
@@ -326,16 +326,25 @@ module.exports = ( function () {
         leftRoot.add(arms[0]);
         rightRoot.add(arms[1]);
         // palms:
-        var radius = METERS2LEAP*0.025;
-        var palmGeom = new THREE.SphereBufferGeometry(radius).scale(1, 0.5, 1);
+        var radius = METERS2LEAP*0.02;
+        var palmGeom = new THREE.SphereBufferGeometry(radius).scale(1, 0.4, 1);
         var palmMesh = new THREE.Mesh(palmGeom, handMaterial);
         var palms = [palmMesh, palmMesh.clone()];
         leftRoot.add(palms[0]);
         rightRoot.add(palms[1]);
+
+        // var textureLoader = new THREE.TextureLoader();
+        // var spriteTexture = textureLoader.load('/node_modules/three.js/examples/textures/sprite1.png'); , function (texture) {
+        // } );
+        // var spriteMaterial = new THREE.SpriteMaterial({map: spriteTexture});
+        // var sphereSprite = new THREE.Sprite(spriteMaterial);
+
         // fingertips:
         radius = METERS2LEAP*0.005;
         var fingerTipGeom = new THREE.SphereBufferGeometry(radius);
         var fingerTipMesh = new THREE.Mesh(fingerTipGeom, handMaterial);
+        // var fingerTipMesh = sphereSprite.clone();
+        // fingerTipMesh.scale.set(radius, radius, radius);
         var fingerTips = [[fingerTipMesh, fingerTipMesh.clone(), fingerTipMesh.clone(), fingerTipMesh.clone(), fingerTipMesh.clone()],
                           [fingerTipMesh.clone(), fingerTipMesh.clone(), fingerTipMesh.clone(), fingerTipMesh.clone(), fingerTipMesh.clone()]];
         leftRoot.add(fingerTips[0][0], fingerTips[0][1], fingerTips[0][2], fingerTips[0][3], fingerTips[0][4]);
@@ -347,14 +356,18 @@ module.exports = ( function () {
                       [jointMesh.clone(), jointMesh.clone(), jointMesh.clone(), jointMesh.clone(), jointMesh.clone()]];
         leftRoot.add(joints[0][0], joints[0][1], joints[0][2], joints[0][3], joints[0][4]);
         rightRoot.add(joints[1][0], joints[1][1], joints[1][2], joints[1][3], joints[1][4]);
-        // TODO: use the anatomical names
-        // TODO: reduce fractions
         var joint2Mesh = fingerTipMesh.clone();
         joint2Mesh.scale.set(55/50, 55/50, 55/50);
         var joint2s = [[joint2Mesh, joint2Mesh.clone(), joint2Mesh.clone(), joint2Mesh.clone(), joint2Mesh.clone()],
-                      [joint2Mesh.clone(), joint2Mesh.clone(), joint2Mesh.clone(), joint2Mesh.clone(), joint2Mesh.clone()]];
+                       [joint2Mesh.clone(), joint2Mesh.clone(), joint2Mesh.clone(), joint2Mesh.clone(), joint2Mesh.clone()]];
         leftRoot.add(joint2s[0][0], joint2s[0][1], joint2s[0][2], joint2s[0][3], joint2s[0][4]);
         rightRoot.add(joint2s[1][0], joint2s[1][1], joint2s[1][2], joint2s[1][3], joint2s[1][4]);
+        var joint3Mesh = fingerTipMesh.clone();
+        joint3Mesh.scale.set(7.2/5, 7.2/5, 7.2/5);
+        var joint3s = [[joint3Mesh, joint3Mesh.clone(), joint3Mesh.clone(), joint3Mesh.clone()],
+                       [joint3Mesh.clone(), joint3Mesh.clone(), joint3Mesh.clone(), joint3Mesh.clone()]];
+        leftRoot.add(joint3s[0][0], joint3s[0][1], joint3s[0][2], joint3s[0][3]);
+        rightRoot.add(joint3s[1][0], joint3s[1][1], joint3s[1][2], joint3s[1][3]);
 
         function updateHands(frame) {
             leftRoot.visible = rightRoot.visible = false;
@@ -380,6 +393,7 @@ module.exports = ( function () {
                     var handFingerTips = fingerTips[i];
                     var handJoints = joints[i];
                     var handJoint2s = joint2s[i];
+                    var handJoint3s = joint3s[i];
                     for (var j = 0; j < hand.fingers.length; j++) {
                         var finger = hand.fingers[j];
                         handFingerTips[j].position.fromArray(finger.tipPosition);
@@ -388,6 +402,11 @@ module.exports = ( function () {
                         handJoints[j].updateMatrix();
                         handJoint2s[j].position.fromArray(finger.bones[2].nextJoint);
                         handJoint2s[j].updateMatrix();
+                    }
+                    for (j = 0; j < 4; j++) {
+                        finger = hand.fingers[j+1];
+                        handJoint3s[j].position.fromArray(finger.bones[1].prevJoint);
+                        handJoint3s[j].updateMatrix();
                     }
                 }
             }

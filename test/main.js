@@ -136,7 +136,6 @@ window.onLoad = function () {
         toolMesh.add(grabbed);
         grabbed.updateMatrix();
     }
-
     function release() {
         console.log('releasing!');
         var toolMesh = YAWVRB.Gamepads.vrGamepadTools[1].toolMesh;
@@ -162,22 +161,19 @@ window.onLoad = function () {
         if (/openvr/i.test(e.gamepad.id)) {
             if (e.index === 0) {
                 YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, viveACommands);
+                stage.stageRoot.add(YAWVRB.Gamepads.vrGamepadTools[0].toolMesh);
+                YAWVRB.Utils.displayText('OpenVR Gamepad A', {object: YAWVRB.Gamepads.vrGamepadTools[0].toolMesh});
+                world.add(YAWVRB.Gamepads.vrGamepadTools[0].toolBody);
             } else if (e.index === 1) {
                 YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, viveBCommands);
+                stage.stageRoot.add(YAWVRB.Gamepads.vrGamepadTools[1].toolMesh);
+                YAWVRB.Utils.displayText('OpenVR Gamepad B', {object: YAWVRB.Gamepads.vrGamepadTools[1].toolMesh});
+                world.add(YAWVRB.Gamepads.vrGamepadTools[1].toolBody);
             }
         } else if (/xbox/i.test(e.gamepad.id) || /xinput/i.test(e.gamepad.id)) {
             YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, xboxGamepadCommands);
         }
     } );
-
-    stage.stageRoot.add(YAWVRB.Gamepads.vrGamepadTools[0].toolMesh);
-    stage.stageRoot.add(YAWVRB.Gamepads.vrGamepadTools[1].toolMesh);
-
-    YAWVRB.Utils.displayText('OpenVR Gamepad A', {object: YAWVRB.Gamepads.vrGamepadTools[0].toolMesh});
-    YAWVRB.Utils.displayText('OpenVR Gamepad B', {object: YAWVRB.Gamepads.vrGamepadTools[1].toolMesh});
-
-    world.add(YAWVRB.Gamepads.vrGamepadTools[0].toolBody);
-    world.add(YAWVRB.Gamepads.vrGamepadTools[1].toolBody);
 
     var floorBody = new CANNON.Body({mass: 0, type: CANNON.Body.STATIC});
     floorBody.material = new CANNON.Material();
@@ -187,11 +183,12 @@ window.onLoad = function () {
     world.add(floorBody);
 
     var ballBody = new CANNON.Body({mass: 0.1});
+    var ballRadius = 0.25;
     ballBody.material = new CANNON.Material();
-    ballBody.addShape(new CANNON.Sphere(0.25));
+    ballBody.addShape(new CANNON.Sphere(ballRadius));
     ballBody.position.set(2, 2, 1.25);
     world.add(ballBody);
-    var ballMesh = new THREE.Mesh(new THREE.SphereBufferGeometry(0.25), new THREE.MeshLambertMaterial({color: 0xff0000}));
+    var ballMesh = new THREE.Mesh(new THREE.SphereBufferGeometry(ballRadius, 16, 12), new THREE.MeshLambertMaterial({color: 0xff0000}));
     ballMesh.position.copy(ballBody.position);
     app.scene.add(ballMesh);
 

@@ -31,6 +31,8 @@ module.exports = ( function () {
                         stageRoot.matrix.decompose(stageRoot.position, stageRoot.quaternion, stageRoot.scale);
                     } else {
                         console.warn('no sittingToStandingTransform provided by the VRDisplay');
+                        stageRoot.position.y = 1.2;
+                        stageRoot.updateMatrix();
                     }
                 }
             } );
