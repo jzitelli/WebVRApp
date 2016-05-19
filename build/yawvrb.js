@@ -278,7 +278,7 @@ module.exports = ( function () {
         toolGeom = bufferGeom;
         var toolMaterial = new THREE.MeshLambertMaterial({color: options.toolColor, transparent: true});
         var toolMesh = new THREE.Mesh(toolGeom, toolMaterial);
-        var toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.KINEMATIC});
+        var toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.STATIC});
         toolBody.material = options.tipMaterial;
         toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, 2*options.tipRadius, 8),
             new CANNON.Vec3(0, 0, options.tipRadius));
