@@ -6,9 +6,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jzitelli/yawvrb.js.git"
+    "url": "git+https://github.com/jzitelli/yawvrb.git"
   },
-  "bugs": "https://github.com/jzitelli/yawvrb.js/issues",
+  "bugs": "https://github.com/jzitelli/yawvrb/issues",
   "files": [
     "build/",
     "spec/",
