@@ -9,7 +9,6 @@ module.exports = ( function () {
     var gamepadCommands = [];
     var xboxGamepads = [];
     var vrGamepads = [];
-
     var viveMeshA = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.06, 0.13), new THREE.MeshLambertMaterial({color: 0xff2222}));
     var viveMeshB = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.06, 0.13), new THREE.MeshLambertMaterial({color: 0x22ff22}));
     viveMeshA.matrixAutoUpdate = false;
@@ -254,7 +253,10 @@ module.exports = ( function () {
         vrGamepadTools: vrGamepadTools,
         setGamepadCommands: setGamepadCommands,
         setOnGamepadConnected: setOnGamepadConnected,
-        makeTool: makeTool
+        makeTool: makeTool,
+        gamepads: gamepads,
+        vrGamepads: vrGamepads,
+        xboxGamepads: xboxGamepads
     };
 
 } )();
