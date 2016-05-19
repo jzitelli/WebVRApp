@@ -254,9 +254,9 @@ module.exports = ( function () {
         toolColor: 0xeebb99,
         tipColor: 0x99bbee,
         useShadowMesh: true,
-        shadowPlane: 0,
+        shadowPlane: 0.001,
         shadowMaterial: new THREE.MeshBasicMaterial({color: 0x333333}),
-        shadowLightPosition: new THREE.Vector4(0, 7, 0, 0.1),
+        shadowLightPosition: new THREE.Vector4(3, 7, 0, 0.1),
         tipMaterial: new CANNON.Material()
     };
     function makeTool(vrGamepad, options) {
@@ -278,7 +278,7 @@ module.exports = ( function () {
         toolGeom = bufferGeom;
         var toolMaterial = new THREE.MeshLambertMaterial({color: options.toolColor, transparent: true});
         var toolMesh = new THREE.Mesh(toolGeom, toolMaterial);
-        var toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.STATIC});
+        var toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.KINEMATIC});
         toolBody.material = options.tipMaterial;
         toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, 2*options.tipRadius, 8),
             new CANNON.Vec3(0, 0, options.tipRadius));
@@ -288,27 +288,37 @@ module.exports = ( function () {
         var worldPosition = new THREE.Vector3();
         var worldQuaternion = new THREE.Quaternion();
         var worldScale = new THREE.Vector3();
-        function update(dt) {
+        // var matrixWorldInverse = new THREE.Matrix4();
+        var lt = 0;
+        function update(t) {
+            var dt = 0.001 * (t - lt);
             if (vrGamepad && vrGamepad.pose) {
-                var mesh = toolMesh;
-                mesh.position.fromArray(vrGamepad.pose.position);
-                mesh.quaternion.fromArray(vrGamepad.pose.orientation);
-                mesh.updateMatrix();
-                var parent = mesh.parent;
+                toolMesh.position.fromArray(vrGamepad.pose.position);
+                toolMesh.quaternion.fromArray(vrGamepad.pose.orientation);
+                var parent = toolMesh.parent;
                 var body = toolBody;
-                position.copy(mesh.position);
+                position.copy(toolMesh.position);
                 velocity.copy(body.position);
                 if (parent) {
                     parent.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
                     position.applyMatrix4(parent.matrixWorld);
-                    quaternion.multiplyQuaternions(worldQuaternion, mesh.quaternion);
+                    quaternion.multiplyQuaternions(worldQuaternion, toolMesh.quaternion);
                 }
                 body.position.copy(position);
                 body.quaternion.copy(quaternion);
                 velocity.sub(position);
                 velocity.multiplyScalar(-1 / dt);
                 body.velocity.copy(velocity);
+            } else {
+                // update mesh based on kinematic projection:
+                toolBody.sleep();
+                // toolMesh.position.copy(toolBody.interpolatedPosition);
+                // matrixWorldInverse.getInverse(toolMesh.parent.matrixWorld);
+                // toolMesh.position.applyMatrix4(matrixWorldInverse);
             }
+            toolMesh.updateMatrix();
+            toolMesh.updateMatrixWorld();
+            lt = t;
         }
         return {
             body: toolBody,

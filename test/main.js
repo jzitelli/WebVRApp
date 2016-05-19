@@ -428,7 +428,7 @@ window.onLoad = function () {
                     if (leapToolRemote) leapToolRemote.updateTool(dt);
 
                     for (i = 0; i < openVRTools.length; i++) {
-                        openVRTools[i].update(dt);
+                        openVRTools[i].update(t);
                     }
 
                     app.render();
