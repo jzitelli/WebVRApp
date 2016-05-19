@@ -451,6 +451,8 @@ module.exports = ( function () {
         return values;
     }
 
+    pollGamepads();
+
     return {
         update: update,
         BUTTONS: {
