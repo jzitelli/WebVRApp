@@ -141,6 +141,7 @@ module.exports = ( function () {
         }
         this.mesh = mesh;
         this.setText = function (text) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillText(  text, 0, options.textSize);
             ctx.strokeText(text, 0, options.textSize);
             material.map.needsUpdate = true;

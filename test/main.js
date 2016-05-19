@@ -156,12 +156,15 @@ window.onLoad = function () {
     YAWVRB.Gamepads.setGamepadCommands(0, viveACommands);
     YAWVRB.Gamepads.setGamepadCommands(1, viveBCommands);
 
-    stage.stageRoot.add(YAWVRB.Gamepads.vrGamepadTools[0].toolMesh);
-    YAWVRB.Utils.displayText('OpenVR Gamepad A', {object: YAWVRB.Gamepads.vrGamepadTools[0].toolMesh});
+    var vrGamepadMeshA = YAWVRB.Gamepads.vrGamepadTools[0].toolMesh;
+    stage.stageRoot.add(vrGamepadMeshA);
+    var textLabel = new YAWVRB.Utils.TextLabel({object: vrGamepadMeshA});
+    textLabel.setText('OpenVR Gamepad A');
     world.add(YAWVRB.Gamepads.vrGamepadTools[0].toolBody);
 
-    stage.stageRoot.add(YAWVRB.Gamepads.vrGamepadTools[1].toolMesh);
-    YAWVRB.Utils.displayText('OpenVR Gamepad B', {object: YAWVRB.Gamepads.vrGamepadTools[1].toolMesh});
+    var vrGamepadMeshB = YAWVRB.Gamepads.vrGamepadTools[1].toolMesh;
+    stage.stageRoot.add(vrGamepadMeshB);
+    YAWVRB.Utils.displayText('OpenVR Gamepad B', {object: vrGamepadMeshB});
     world.add(YAWVRB.Gamepads.vrGamepadTools[1].toolBody);
 
     YAWVRB.Gamepads.setOnGamepadConnected( function (e) {
@@ -230,8 +233,6 @@ window.onLoad = function () {
     saveStageButton.addEventListener('click', function () {
         saveStage();
     });
-
-    app.renderer.setSize(window.innerWidth, window.innerHeight);
 
     // local leap motion controller:
     var localLeapStatusIndicator = document.getElementById('localLeapStatus');
@@ -387,6 +388,10 @@ window.onLoad = function () {
             leapTool.updateToolMapping();
             if (leapToolRemote) leapToolRemote.updateToolMapping();
 
+            app.renderer.setSize(window.innerWidth, window.innerHeight);
+
+            startAnimateLoop();
+
             function startAnimateLoop() {
                 var lt = 0;
                 function animate(t) {
@@ -434,13 +439,13 @@ window.onLoad = function () {
                     leapTool.updateToolPostStep();
                     if (leapToolRemote) leapToolRemote.updateToolPostStep();
 
+                    textLabel.setText(JSON.stringify(vrGamepadMeshA.position));
+
                     lt = t;
                     requestAnimationFrame(animate);
                 }
                 requestAnimationFrame(animate);
             }
-
-            startAnimateLoop();
 
         });
 
