@@ -251,7 +251,8 @@ module.exports = ( function () {
         toolMass: 0.04,
         tipRadius: 0.0034,
         toolColor: 0xeebb99,
-        tipColor: 0x99bbee
+        tipColor: 0x99bbee,
+        tipMaterial: new CANNON.Material()
     };
     function makeTool(vrGamepad, options) {
         var _options = {};
@@ -275,6 +276,7 @@ module.exports = ( function () {
         var toolMaterial = new THREE.MeshLambertMaterial({color: options.toolColor, transparent: true});
         var toolMesh = new THREE.Mesh(toolGeom, toolMaterial);
         var toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.KINEMATIC});
+        toolBody.material = options.tipMaterial;
         toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, 2*options.tipRadius, 8),
             new CANNON.Vec3(0, 0, options.tipRadius));
         var position = new THREE.Vector3();
