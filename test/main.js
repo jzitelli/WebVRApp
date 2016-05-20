@@ -27,7 +27,7 @@ window.onLoad = function () {
     var textGeomLogger;
     ( function () {
         var fontLoader = new THREE.FontLoader();
-        fontLoader.load('/node_modules/three.js/examples/fonts/droid/droid_sans_mono_regular.typeface.js', function (font) {
+        fontLoader.load('/node_modules/three.js/examples/fonts/droid/droid_sans_mono_regular.typeface.json', function (font) {
             textGeomLogger = new YAWVRB.TextGeomUtils.TextGeomLogger(new YAWVRB.TextGeomUtils.TextGeomCacher(font, {size: 0.015, height: 0, curveSegments: 4}), {
                 lineHeight: 0.03
             });
@@ -420,8 +420,7 @@ window.onLoad = function () {
                         if (vals.turnUD) turnUD += vals.turnUD;
                     }
 
-                    // if (objectSelector.selection === avatar) turnUD = 0;
-                    // YAWVRB.Utils.moveObject(objectSelector.selection, dt, moveFB, moveRL, moveUD, turnRL, turnUD);
+                    YAWVRB.Utils.moveObject(objectSelector.selection, dt, moveFB, moveRL, moveUD, turnRL, turnUD);
 
                     leapTool.updateToolMapping();
                     if (leapToolRemote) leapToolRemote.updateToolMapping();
