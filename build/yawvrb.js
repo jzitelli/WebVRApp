@@ -249,15 +249,9 @@ module.exports = ( function () {
         toolLength: 0.15,
         toolRadius: 0.0034,
         toolMass: 0.04,
-        tipShape: 'Cylinder',
         tipRadius: 0.0034,
         toolColor: 0xeebb99,
-        tipColor: 0x99bbee,
-        useShadowMesh: true,
-        shadowPlane: 0.001,
-        shadowMaterial: new THREE.MeshBasicMaterial({color: 0x333333}),
-        shadowLightPosition: new THREE.Vector4(3, 7, 0, 0.1),
-        tipMaterial: new CANNON.Material()
+        tipColor: 0x99bbee
     };
     function makeTool(vrGamepad, options) {
         var _options = {};
@@ -269,6 +263,8 @@ module.exports = ( function () {
             if (_options[kwarg] === undefined) _options[kwarg] = DEFAULT_OPTIONS[kwarg];
         }
         options = _options;
+        console.log('OpenVR tool options:');
+        console.log(options);
         var toolGeom = new THREE.CylinderGeometry(options.toolRadius, options.toolRadius, options.toolLength, 10, 1, false);
         toolGeom.translate(0, -0.5 * options.toolLength, 0);
         toolGeom.rotateX(-0.5 * Math.PI);
@@ -279,7 +275,6 @@ module.exports = ( function () {
         var toolMaterial = new THREE.MeshLambertMaterial({color: options.toolColor, transparent: true});
         var toolMesh = new THREE.Mesh(toolGeom, toolMaterial);
         var toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.KINEMATIC});
-        toolBody.material = options.tipMaterial;
         toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, 2*options.tipRadius, 8),
             new CANNON.Vec3(0, 0, options.tipRadius));
         var position = new THREE.Vector3();
@@ -288,45 +283,35 @@ module.exports = ( function () {
         var worldPosition = new THREE.Vector3();
         var worldQuaternion = new THREE.Quaternion();
         var worldScale = new THREE.Vector3();
-        var matrixWorldInverse = new THREE.Matrix4();
-        var lt = 0;
-        function update(t) {
-            var dt = 0.001 * (t - lt);
+        function update(dt) {
             if (vrGamepad && vrGamepad.pose) {
                 toolMesh.position.fromArray(vrGamepad.pose.position);
                 toolMesh.quaternion.fromArray(vrGamepad.pose.orientation);
-                var parent = toolMesh.parent;
-                var body = toolBody;
                 position.copy(toolMesh.position);
-                velocity.copy(body.position);
+                velocity.copy(toolBody.interpolatedPosition);
+                var parent = toolMesh.parent;
                 if (parent) {
+                    parent.updateMatrix();
+                    parent.updateMatrixWorld();
                     parent.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
                     position.applyMatrix4(parent.matrixWorld);
                     quaternion.multiplyQuaternions(worldQuaternion, toolMesh.quaternion);
+                    toolBody.position.copy(position);
+                    toolBody.quaternion.copy(quaternion);
+                    velocity.sub(position);
+                    velocity.multiplyScalar(-1 / dt);
+                    toolBody.velocity.copy(velocity);
                 }
-                body.position.copy(position);
-                body.quaternion.copy(quaternion);
-                velocity.sub(position);
-                velocity.multiplyScalar(-1 / dt);
-                body.velocity.copy(velocity);
-                toolMesh.updateMatrix();
-                toolMesh.updateMatrixWorld();
             } else {
                 toolBody.sleep();
             }
-            lt = t;
-        }
-        function updatePostStep() {
-            // update mesh based on kinematic projection:
-            toolMesh.position.copy(toolBody.interpolatedPosition);
-            matrixWorldInverse.getInverse(toolMesh.parent.matrixWorld);
-            toolMesh.position.applyMatrix4(matrixWorldInverse);
+            toolMesh.updateMatrix();
+            toolMesh.updateMatrixWorld();
         }
         return {
             body: toolBody,
             mesh: toolMesh,
-            update: update,
-            updatePostStep: updatePostStep
+            update: update
         };
     }
 
@@ -1413,9 +1398,9 @@ module.exports = ( function () {
                     object.position.fromArray(transform.position);
                     object.quaternion.fromArray(transform.quaternion);
                     object.updateMatrix();
-                    object.updateMatrixWorld();
                 }
             } );
+            stageRoot.updateMatrixWorld(true);
         }.bind(this);
 
     }

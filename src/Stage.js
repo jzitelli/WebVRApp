@@ -81,9 +81,9 @@ module.exports = ( function () {
                     object.position.fromArray(transform.position);
                     object.quaternion.fromArray(transform.quaternion);
                     object.updateMatrix();
-                    object.updateMatrixWorld();
                 }
             } );
+            stageRoot.updateMatrixWorld(true);
         }.bind(this);
 
     }

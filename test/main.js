@@ -23,7 +23,6 @@ window.onLoad = function () {
     }
 
     var avatar = stage.stageRoot;
-    // objectSelector.addSelectable(avatar);
 
     var textGeomLogger;
     ( function () {
@@ -155,6 +154,7 @@ window.onLoad = function () {
         var vrGamepad = YAWVRB.Gamepads.vrGamepads[i];
         var openVRTool = YAWVRB.Gamepads.makeTool(vrGamepad);
         stage.stageRoot.add(openVRTool.mesh);
+        openVRTool.body.material = new CANNON.Material();
         world.add(openVRTool.body);
         openVRTools.push(openVRTool);
         if (i === 0) {
@@ -165,6 +165,7 @@ window.onLoad = function () {
             YAWVRB.Gamepads.setGamepadCommands(vrGamepad.index, viveBCommands);
         }
     }
+
     YAWVRB.Gamepads.setOnGamepadConnected( function (e) {
         if (/openvr/i.test(e.gamepad.id)) {
             if (e.index === 0) {
@@ -190,7 +191,7 @@ window.onLoad = function () {
     var ballRadius = 0.25;
     ballBody.material = new CANNON.Material();
     ballBody.addShape(new CANNON.Sphere(ballRadius));
-    ballBody.position.set(-2, 3, 0.25);
+    ballBody.position.set(-1, 3, 0.25);
     world.add(ballBody);
     var ballMesh = new THREE.Mesh(new THREE.SphereBufferGeometry(ballRadius, 16, 12), new THREE.MeshLambertMaterial({color: 0xff0000}));
     ballMesh.position.copy(ballBody.position);
@@ -419,8 +420,8 @@ window.onLoad = function () {
                         if (vals.turnUD) turnUD += vals.turnUD;
                     }
 
-                    if (objectSelector.selection === avatar) turnUD = 0;
-                    YAWVRB.Utils.moveObject(objectSelector.selection, dt, moveFB, moveRL, moveUD, turnRL, turnUD);
+                    // if (objectSelector.selection === avatar) turnUD = 0;
+                    // YAWVRB.Utils.moveObject(objectSelector.selection, dt, moveFB, moveRL, moveUD, turnRL, turnUD);
 
                     leapTool.updateToolMapping();
                     if (leapToolRemote) leapToolRemote.updateToolMapping();
@@ -428,16 +429,17 @@ window.onLoad = function () {
                     if (leapToolRemote) leapToolRemote.updateTool(dt);
 
                     for (i = 0; i < openVRTools.length; i++) {
-                        openVRTools[i].update(t);
+                        openVRTools[i].update(dt);
                     }
 
                     app.render();
 
                     world.step(Math.min(dt, 1/60), dt, 10);
 
-                    ballMesh.position.copy(ballBody.position);
-                    ballMesh.quaternion.copy(ballBody.quaternion);
+                    ballMesh.position.copy(ballBody.interpolatedPosition);
+                    ballMesh.quaternion.copy(ballBody.interpolatedQuaternion);
                     ballMesh.updateMatrix();
+                    ballMesh.updateMatrixWorld();
 
                     leapTool.updateToolPostStep();
                     if (leapToolRemote) leapToolRemote.updateToolPostStep();
