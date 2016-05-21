@@ -1564,6 +1564,9 @@ module.exports = ( function () {
 
         this.log = function (msg) {
             var lines = msg.split(/\n/);
+            var y = 0;
+            var lastLineObject = this.root.children[this.root.children.length - 1];
+            if (lastLineObject) y = lastLineObject.position.y;
             // create / clone lines:
             for (var i = 0; i < lines.length; i++) {
                 var line = lines[i];
@@ -1576,7 +1579,7 @@ module.exports = ( function () {
                     lineObjects[line] = lineObject;
                     this.root.add(lineObject);
                 }
-                lineObject.position.y = -(i + 1) * lineHeight;
+                lineObject.position.y = y - (i + 1) * lineHeight;
                 lineObject.updateMatrix();
             }
             this.root.updateMatrixWorld(true);
