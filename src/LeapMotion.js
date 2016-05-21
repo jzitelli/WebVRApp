@@ -33,7 +33,7 @@ module.exports = ( function () {
         tipColor: 0x99bbee,
         handColor: 0x113399,
         useShadowMesh: true,
-        shadowPlane: 0,
+        shadowPlane: 0.002,
         shadowMaterial: new THREE.MeshBasicMaterial({color: 0x333333}),
         shadowLightPosition: new THREE.Vector4(0, 7, 0, 0.1),
         host: '127.0.0.1',

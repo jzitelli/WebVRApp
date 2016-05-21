@@ -11,29 +11,29 @@ module.exports = ( function () {
         stageRoot.matrixAutoUpdate = false;
         this.stageRoot = stageRoot;
 
-        this.updateSittingToStandingTransform = function () {
+        function updateSittingToStandingTransform() {
             if (vrDisplay && vrDisplay.stageParameters && vrDisplay.stageParameters.sittingToStandingTransform) {
                 console.log('sittingToStandingTransform:\n' + vrDisplay.stageParameters.sittingToStandingTransform);
                 stageRoot.matrix.fromArray(vrDisplay.stageParameters.sittingToStandingTransform);
                 stageRoot.matrix.decompose(stageRoot.position, stageRoot.quaternion, stageRoot.scale);
+                console.log('  position: %f, %f, %f', stageRoot.position.x, stageRoot.position.y, stageRoot.position.z);
+                console.log('  rotation: %f, %f, %f', stageRoot.rotation.x, stageRoot.rotation.y, stageRoot.rotation.z);
+                console.log('  quaternion: %f, %f, %f, %f', stageRoot.quaternion.x, stageRoot.quaternion.y, stageRoot.quaternion.z, stageRoot.quaternion.w);
+                console.log('  scale: %f, %f, %f', stageRoot.scale.x, stageRoot.scale.y, stageRoot.scale.z);
+            } else {
+                console.warn('no sittingToStandingTransform provided by the VRDisplay');
+                stageRoot.position.y = 1.2;
+                stageRoot.updateMatrix();
             }
-        };
+        }
 
         if (navigator.getVRDisplays) {
             console.log('checking VRDisplays for stage parameters...');
             navigator.getVRDisplays().then( function (displays) {
                 for (var i = 0; i < displays.length; i++) {
                     vrDisplay = displays[i];
-                    console.log('%s:\n%s', vrDisplay.deviceName, JSON.stringify(vrDisplay, undefined, 2));
-                    if (vrDisplay.stageParameters && vrDisplay.stageParameters.sittingToStandingTransform) {
-                        console.log('sittingToStandingTransform:\n' + vrDisplay.stageParameters.sittingToStandingTransform);
-                        stageRoot.matrix.fromArray(vrDisplay.stageParameters.sittingToStandingTransform);
-                        stageRoot.matrix.decompose(stageRoot.position, stageRoot.quaternion, stageRoot.scale);
-                    } else {
-                        console.warn('no sittingToStandingTransform provided by the VRDisplay');
-                        stageRoot.position.y = 1.2;
-                        stageRoot.updateMatrix();
-                    }
+                    console.log('%s:\n%s', vrDisplay.displayName, JSON.stringify(vrDisplay, undefined, 2));
+                    updateSittingToStandingTransform();
                 }
             } );
         } else {

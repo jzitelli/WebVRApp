@@ -152,8 +152,7 @@ window.onLoad = function () {
     var textLabel;
     for (var i = 0; i < YAWVRB.Gamepads.vrGamepads.length; i++) {
         var vrGamepad = YAWVRB.Gamepads.vrGamepads[i];
-        var tipMaterial = new CANNON.Material();
-        var openVRTool = YAWVRB.Gamepads.makeTool(vrGamepad, {tipMaterial: tipMaterial});
+        var openVRTool = YAWVRB.Gamepads.makeTool(vrGamepad);
         stage.stageRoot.add(openVRTool.mesh);
         world.add(openVRTool.body);
         openVRTools.push(openVRTool);
