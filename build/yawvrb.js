@@ -248,11 +248,16 @@ module.exports = ( function () {
     const DEFAULT_OPTIONS = {
         toolLength: 0.15,
         toolRadius: 0.0034,
-        toolMass: 0.04,
+        tipLength: 0.15,
         tipRadius: 0.0034,
+        toolMass: 0.04,
         toolColor: 0xeebb99,
         tipColor: 0x99bbee,
-        tipMaterial: new CANNON.Material()
+        tipMaterial: new CANNON.Material(),
+        useShadowMesh: true,
+        shadowMaterial: new THREE.MeshBasicMaterial({color: 0x212121}),
+        shadowLightPosition: new THREE.Vector4(0, 8, 3, 0.1),
+        shadowPlane: 0.002
     };
     function makeTool(vrGamepad, options) {
         var _options = {};
@@ -264,8 +269,9 @@ module.exports = ( function () {
             if (_options[kwarg] === undefined) _options[kwarg] = DEFAULT_OPTIONS[kwarg];
         }
         options = _options;
-        console.log('OpenVR tool options:');
+        console.log('OpenVR tool options, gamepad %d:', vrGamepad.index);
         console.log(options);
+
         var toolGeom = new THREE.CylinderGeometry(options.toolRadius, options.toolRadius, options.toolLength, 10, 1, false);
         toolGeom.translate(0, -0.5 * options.toolLength, 0);
         toolGeom.rotateX(-0.5 * Math.PI);
@@ -275,16 +281,28 @@ module.exports = ( function () {
         toolGeom = bufferGeom;
         var toolMaterial = new THREE.MeshLambertMaterial({color: options.toolColor, transparent: true});
         var toolMesh = new THREE.Mesh(toolGeom, toolMaterial);
+
+        var toolShadowMesh;
+        if (options.useShadowMesh) {
+            toolShadowMesh = new THREE.ShadowMesh(toolMesh, options.shadowMaterial);
+            var shadowPlane = new THREE.Plane(THREE.Object3D.DefaultUp, options.shadowPlane);
+            toolShadowMesh.updateShadowMatrix(shadowPlane, options.shadowLightPosition);
+        } else {
+            toolMesh.castShadow = true;
+        }
+
         var toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.KINEMATIC});
         toolBody.material = options.tipMaterial;
-        toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, 2*options.tipRadius, 8),
-            new CANNON.Vec3(0, 0, options.tipRadius));
+        toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, options.tipLength, 8),
+            new CANNON.Vec3(0, 0, 0.5 * options.tipLength));
+
         var position = new THREE.Vector3();
         var velocity = new THREE.Vector3();
         var quaternion = new THREE.Quaternion();
         var worldPosition = new THREE.Vector3();
         var worldQuaternion = new THREE.Quaternion();
         var worldScale = new THREE.Vector3();
+
         function update(dt) {
             if (vrGamepad && vrGamepad.pose) {
                 toolMesh.position.fromArray(vrGamepad.pose.position);
@@ -308,6 +326,7 @@ module.exports = ( function () {
                 toolBody.sleep();
             }
             toolMesh.updateMatrix();
+            if (toolShadowMesh) toolShadowMesh.updateMatrix();
             toolMesh.updateMatrixWorld();
         }
         return {
@@ -836,7 +855,7 @@ module.exports = ( function () {
         tipColor: 0x99bbee,
         handColor: 0x113399,
         useShadowMesh: true,
-        shadowPlane: 0,
+        shadowPlane: 0.002,
         shadowMaterial: new THREE.MeshBasicMaterial({color: 0x333333}),
         shadowLightPosition: new THREE.Vector4(0, 7, 0, 0.1),
         host: '127.0.0.1',
@@ -1330,29 +1349,29 @@ module.exports = ( function () {
         stageRoot.matrixAutoUpdate = false;
         this.stageRoot = stageRoot;
 
-        this.updateSittingToStandingTransform = function () {
+        function updateSittingToStandingTransform() {
             if (vrDisplay && vrDisplay.stageParameters && vrDisplay.stageParameters.sittingToStandingTransform) {
                 console.log('sittingToStandingTransform:\n' + vrDisplay.stageParameters.sittingToStandingTransform);
                 stageRoot.matrix.fromArray(vrDisplay.stageParameters.sittingToStandingTransform);
                 stageRoot.matrix.decompose(stageRoot.position, stageRoot.quaternion, stageRoot.scale);
+                console.log('  position: %f, %f, %f', stageRoot.position.x, stageRoot.position.y, stageRoot.position.z);
+                console.log('  rotation: %f, %f, %f', stageRoot.rotation.x, stageRoot.rotation.y, stageRoot.rotation.z);
+                console.log('  quaternion: %f, %f, %f, %f', stageRoot.quaternion.x, stageRoot.quaternion.y, stageRoot.quaternion.z, stageRoot.quaternion.w);
+                console.log('  scale: %f, %f, %f', stageRoot.scale.x, stageRoot.scale.y, stageRoot.scale.z);
+            } else {
+                console.warn('no sittingToStandingTransform provided by the VRDisplay');
+                stageRoot.position.y = 1.2;
+                stageRoot.updateMatrix();
             }
-        };
+        }
 
         if (navigator.getVRDisplays) {
             console.log('checking VRDisplays for stage parameters...');
             navigator.getVRDisplays().then( function (displays) {
                 for (var i = 0; i < displays.length; i++) {
                     vrDisplay = displays[i];
-                    console.log('%s:\n%s', vrDisplay.deviceName, JSON.stringify(vrDisplay, undefined, 2));
-                    if (vrDisplay.stageParameters && vrDisplay.stageParameters.sittingToStandingTransform) {
-                        console.log('sittingToStandingTransform:\n' + vrDisplay.stageParameters.sittingToStandingTransform);
-                        stageRoot.matrix.fromArray(vrDisplay.stageParameters.sittingToStandingTransform);
-                        stageRoot.matrix.decompose(stageRoot.position, stageRoot.quaternion, stageRoot.scale);
-                    } else {
-                        console.warn('no sittingToStandingTransform provided by the VRDisplay');
-                        stageRoot.position.y = 1.2;
-                        stageRoot.updateMatrix();
-                    }
+                    console.log('%s:\n%s', vrDisplay.displayName, JSON.stringify(vrDisplay, undefined, 2));
+                    updateSittingToStandingTransform();
                 }
             } );
         } else {
