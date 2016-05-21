@@ -102,6 +102,7 @@ module.exports = ( function () {
         return {
             body: toolBody,
             mesh: toolMesh,
+            shadowMesh: toolShadowMesh,
             update: update
         };
     }
