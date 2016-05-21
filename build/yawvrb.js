@@ -326,8 +326,11 @@ module.exports = ( function () {
                 toolBody.sleep();
             }
             toolMesh.updateMatrix();
-            if (toolShadowMesh) toolShadowMesh.updateMatrix();
             toolMesh.updateMatrixWorld();
+            if (toolShadowMesh) {
+                toolShadowMesh.updateMatrix();
+                toolShadowMesh.updateMatrixWorld();
+            }
         }
         return {
             body: toolBody,
