@@ -259,7 +259,7 @@ window.onLoad = function () {
     };
     var leapTool = YAWVRB.LeapMotion.makeTool(leapToolOptions);
     leapTool.toolRoot.name = 'toolRoot';
-    YAWVRB.Utils.displayText('Leap Motion (local)', {object: leapTool.toolRoot});
+    ( new YAWVRB.Utils.TextLabel({object: leapTool.toolRoot}) ).setText('Leap Motion (local)');
     leapTool.leapController.connect();
     objectSelector.addSelectable(leapTool.toolRoot);
     world.add(leapTool.toolBody);
@@ -302,7 +302,7 @@ window.onLoad = function () {
     }
     leapToolRemote.toolRoot.position.x -= 20 * INCH2METERS;
     leapToolRemote.toolRoot.updateMatrix();
-    YAWVRB.Utils.displayText('Leap Motion (remote)', {object: leapToolRemote.toolRoot});
+    ( new YAWVRB.Utils.TextLabel({object: leapToolRemote.toolRoot}) ).setText('Leap Motion (remote)');
     leapToolRemote.leapController.connect();
     objectSelector.addSelectable(leapToolRemote.toolRoot);
     world.add(leapToolRemote.toolBody);
@@ -338,7 +338,7 @@ window.onLoad = function () {
     keyboardObject.position.z = -12 * INCH2METERS;
     keyboardObject.position.y = -5 * INCH2METERS;
     keyboardObject.updateMatrix();
-    YAWVRB.Utils.displayText('Keyboard', {object: keyboardObject});
+    ( new YAWVRB.Utils.TextLabel({object: keyboardObject}) ).setText('Keyboard');
     objectSelector.addSelectable(keyboardObject);
     keyboardObject.name = 'keyboard';
     stage.stageRoot.add(keyboardObject);
@@ -349,7 +349,7 @@ window.onLoad = function () {
     gfxTablet.mesh.quaternion.setFromAxisAngle(UP, 0.5 * Math.PI).multiply((new THREE.Quaternion()).setFromAxisAngle(RIGHT, -0.125 * Math.PI));
     gfxTablet.mesh.updateMatrix();
     gfxTablet.mesh.name = 'GfxTablet';
-    YAWVRB.Utils.displayText('GfxTablet', {object: gfxTablet.mesh, position: [0, 0.5, 0.05]});
+    ( new YAWVRB.Utils.TextLabel({object: gfxTablet.mesh, position: [0, 0.5, 0.05]}) ).setText('GfxTablet');
     objectSelector.addSelectable(gfxTablet.mesh);
     stage.stageRoot.add(gfxTablet.mesh);
 
@@ -370,6 +370,8 @@ window.onLoad = function () {
         var chairMaterial = new THREE.MeshBasicMaterial({map: chairTexture});
 
         objectLoader.load("/test/models/WebVRDesk.json", function (scene) {
+            console.log(scene.matrix);
+            console.log(scene.position);
             while (scene.children.length > 0) {
                 var child = scene.children[0];
                 scene.remove(child);

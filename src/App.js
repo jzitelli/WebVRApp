@@ -1,4 +1,5 @@
 /* global THREE */
+var Utils = require('./Utils.js');
 
 const DEFAULT_OPTIONS = {
     useImmediatePose: false,
@@ -10,15 +11,7 @@ const DEFAULT_OPTIONS = {
 
 function App(scene, config, rendererOptions) {
     "use strict";
-    var _config = {};
-    config = config || _config;
-    for (var kwarg in config) {
-        _config[kwarg] = config[kwarg];
-    }
-    for (kwarg in DEFAULT_OPTIONS) {
-        if (config[kwarg] === undefined) _config[kwarg] = DEFAULT_OPTIONS[kwarg];
-    }
-    config = _config;
+    config = Utils.combineObjects(DEFAULT_OPTIONS, config || {});
     console.log('YAWVRB.App config:');
     console.log(config);
 

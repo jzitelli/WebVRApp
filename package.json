@@ -11,11 +11,9 @@
   "bugs": "https://github.com/jzitelli/yawvrb/issues",
   "files": [
     "build/",
-    "spec/",
     "src/",
     "test/",
     "favicon.ico",
-    "server.js",
     "LICENSE",
     "README.md"
   ],
@@ -40,8 +38,6 @@
     "leapjs": "latest",
     "gfxtablet": "git://github.com/jzitelli/GfxTablet.js.git",
     "cannon": "git://github.com/jzitelli/cannon.js.git",
-    "jasmine": "latest",
-    "selenium-webdriver": "latest",
     "browserify": "latest",
     "watchify": "latest",
     "eslint": "latest"
@@ -49,7 +45,6 @@
   "scripts": {
     "lint": "eslint src/*.js && eslint test/*.js",
     "build": "npm run lint && browserify src/yawvrb.js -o build/yawvrb.js",
-    "test": "npm run build && jasmine",
     "start": "npm run build && cd ./test && python tornado_server.py",
     "watch": "watchify src/yawvrb.js -o build/yawvrb.js"
   }

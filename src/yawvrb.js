@@ -10,3 +10,4 @@ window.YAWVRB.Mouse         = require('./Mouse.js');
 window.YAWVRB.Stage         = require('./Stage.js');
 window.YAWVRB.SynthSpeaker  = require('./SynthSpeaker.js');
 window.YAWVRB.TextGeomUtils = require('./TextGeomUtils.js');
+window.YAWVRB.Audio         = require('./Audio.js');

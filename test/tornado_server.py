@@ -27,7 +27,7 @@ if os.path.exists(GFXTABLET_DIR):
 
 class MainHandler(RequestHandler):
     def get(self):
-        self.render("index.html")
+        self.render("template.html")
 
 
 
