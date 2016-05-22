@@ -68,6 +68,7 @@ window.onLoad = function () {
             }
         }, {
             canvas: document.getElementById('webgl-canvas'),
+            antialias: !YAWVRB.Utils.isMobile(),
             alpha: true
         });
     } )();
