@@ -1,5 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /* global THREE */
+var Utils = require('./Utils.js');
 
 const DEFAULT_OPTIONS = {
     useImmediatePose: false,
@@ -11,15 +12,7 @@ const DEFAULT_OPTIONS = {
 
 function App(scene, config, rendererOptions) {
     "use strict";
-    var _config = {};
-    config = config || _config;
-    for (var kwarg in config) {
-        _config[kwarg] = config[kwarg];
-    }
-    for (kwarg in DEFAULT_OPTIONS) {
-        if (config[kwarg] === undefined) _config[kwarg] = DEFAULT_OPTIONS[kwarg];
-    }
-    config = _config;
+    config = Utils.combineObjects(DEFAULT_OPTIONS, config || {});
     console.log('YAWVRB.App config:');
     console.log(config);
 
@@ -227,7 +220,46 @@ function App(scene, config, rendererOptions) {
 
 module.exports = App;
 
-},{}],2:[function(require,module,exports){
+},{"./Utils.js":11}],2:[function(require,module,exports){
+module.exports = ( function (numGainNodes) {
+    "use strict";
+    numGainNodes = numGainNodes || 4;
+
+    var audioContext = new AudioContext();
+
+    var gainNodes = [];
+    for (var i = 0; i < numGainNodes; i++) {
+        var gainNode = audioContext.createGain();
+        gainNode.connect(audioContext.destination);
+        gainNode.gain.value = 1;
+        gainNodes.push(gainNode);
+    }
+
+    var iGainNode = 0;
+    function getNextGainNode() {
+        var node = gainNodes[iGainNode];
+        iGainNode = (iGainNode + 1) % numGainNodes;
+        return node;
+    }
+
+    var playBuffer = function (buffer, vol) {
+        var source = audioContext.createBufferSource();
+        var gainNode = getNextGainNode();
+        gainNode.gain.value = vol;
+        source.connect(gainNode);
+        source.buffer = buffer;
+        source.start(0);
+    };
+
+    return {
+        audioContext: audioContext,
+        getNextGainNode: getNextGainNode,
+        playBuffer: playBuffer
+    };
+
+} )();
+
+},{}],3:[function(require,module,exports){
 /* global THREE, CANNON */
 module.exports = ( function () {
     "use strict";
@@ -489,7 +521,7 @@ module.exports = ( function () {
 
 } )();
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 /* global THREE, GFXTABLET */
 
 module.exports = ( function () {
@@ -518,7 +550,7 @@ module.exports = ( function () {
 	return GfxTablet;
 } )();
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /* global THREE */
 
 module.exports = ( function () {
@@ -823,7 +855,7 @@ module.exports = ( function () {
     return Keyboard;
 } )();
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 /* *********************************************************************************************
 
    To connect to remote Leap Motion controllers, add this to the host's Leap Motion config.json:
@@ -1272,7 +1304,7 @@ module.exports = ( function () {
 
 } )();
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /* global THREE */
 
 module.exports = ( function () {
@@ -1339,7 +1371,7 @@ module.exports = ( function () {
 	return Mouse;
 } )();
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /* global THREE */
 module.exports = ( function () {
     "use strict";
@@ -1433,7 +1465,7 @@ module.exports = ( function () {
     return Stage;
 } )();
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 module.exports = ( function() {
     "use strict";
     function SynthSpeaker(options) {
@@ -1508,7 +1540,7 @@ module.exports = ( function() {
     }
 } )();
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 /* global THREE */
 module.exports = ( function () {
     "use strict";
@@ -1623,11 +1655,22 @@ module.exports = ( function () {
 
 } )();
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /* global THREE */
 
 module.exports = ( function () {
     "use strict";
+
+    var combineObjects = function (a, b) {
+        var c = {}, k;
+        for (k in a) {
+            c[k] = a[k];
+        }
+        for (k in b) {
+            c[k] = b[k];
+        }
+        return c;
+    };
 
     var moveObject = ( function () {
         const MOVESPEED = 0.3;
@@ -1668,12 +1711,9 @@ module.exports = ( function () {
         } )().bind(this);
     }
 
-    var DEADSCENE = new THREE.Scene();
-    DEADSCENE.name = 'DEADSCENE';
-    var displayText = ( function () {
-        var textMeshes = {};
-        var quadGeom = new THREE.PlaneBufferGeometry(1, 1);
-        quadGeom.translate(0.5, 0.5, 0);
+    var TextLabel = ( function () {
+        var DEADSCENE = new THREE.Scene();
+        DEADSCENE.name = 'DEADSCENE';
         const DEFAULT_OPTIONS = {
             object: DEADSCENE,
             position: [0, 0.05, -0.05],
@@ -1681,98 +1721,38 @@ module.exports = ( function () {
             coordSystem: 'local',
             textSize: 21
         };
-        function displayText(text, options) {
-            var _options = {};
-            options = options || _options;
-            for (var kwarg in options) {
-                _options[kwarg] = options[kwarg];
+        return function (options) {
+            options = combineObjects(DEFAULT_OPTIONS, options || {});
+            var canvas = document.createElement('canvas');
+            canvas.height = 2 * options.textSize;
+            canvas.width = 256; //2*ctx.measureText(text).width;
+            var ctx = canvas.getContext('2d');
+            ctx.font = String(options.textSize) + "px serif";
+            ctx.fillStyle   = 'rgb(255, 72, 23)';
+            ctx.strokeStyle = 'rgb(240, 70, 20)';
+            var texture = new THREE.Texture(canvas, THREE.UVMapping, THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
+            var aspect = canvas.width / canvas.height;
+            var material = new THREE.MeshBasicMaterial({color: 0xffffff, map: texture, transparent: true});
+            var quadGeom = new THREE.PlaneBufferGeometry(1, 1);
+            quadGeom.translate(0.5, 0.5, 0);
+            var mesh = new THREE.Mesh(quadGeom, material);
+            if (options.coordSystem === 'local') {
+                options.object.add(mesh);
+                mesh.position.fromArray(options.position);
+                mesh.quaternion.fromArray(options.quaternion);
+                var worldScale = options.object.getWorldScale();
+                mesh.scale.set(aspect * 0.075 / worldScale.x, 0.075 / worldScale.y, 1 / worldScale.z);
+                mesh.updateMatrix();
             }
-            for (kwarg in DEFAULT_OPTIONS) {
-                if (options[kwarg] === undefined) _options[kwarg] = DEFAULT_OPTIONS[kwarg];
-            }
-            options = _options;
-            var uuid = options.object.uuid;
-            var key = JSON.stringify({text, uuid});
-            var mesh = textMeshes[key];
-            if (!mesh) {
-                var canvas = document.createElement('canvas');
-                canvas.height = 2 * options.textSize;
-                canvas.width = 256; //2*ctx.measureText(text).width;
-                var ctx = canvas.getContext('2d');
-                ctx.font = String(options.textSize) + "px serif";
-                // ctx.fillStyle   = 'rgba(23, 23, 23, 0.3)';
-                // ctx.strokeStyle = 'rgba(23, 23, 23, 0.3)';
-                // ctx.fillRect(  0, 0, canvas.width, canvas.height);
-                // ctx.strokeRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle   = 'rgb(255, 72, 23)';
-                ctx.strokeStyle = 'rgb(240, 70, 20)';
+            this.mesh = mesh;
+            this.setText = function (text) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillText(  text, 0, options.textSize);
                 ctx.strokeText(text, 0, options.textSize);
-                var aspect = canvas.width / canvas.height;
-                var texture = new THREE.Texture(canvas, THREE.UVMapping, THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
-                var material = new THREE.MeshBasicMaterial({color: 0xffffff, map: texture, transparent: true});
-                mesh = new THREE.Mesh(quadGeom, material);
                 material.map.needsUpdate = true;
-                if (options.coordSystem === 'local') {
-                    options.object.add(mesh);
-                    mesh.position.fromArray(options.position);
-                    mesh.quaternion.fromArray(options.quaternion);
-                    var worldScale = options.object.getWorldScale();
-                    mesh.scale.set(aspect * 0.075 / worldScale.x, 0.075 / worldScale.y, 1 / worldScale.z);
-                    mesh.updateMatrix();
-                }
-                textMeshes[key] = mesh;
-            }
-        }
-        return displayText;
-    } )();
-
-    function TextLabel(options) {
-        const DEFAULT_OPTIONS = {
-            object: DEADSCENE,
-            position: [0, 0.05, -0.05],
-            quaternion: [0, 0, 0, 1],
-            coordSystem: 'local',
-            textSize: 21
+            };
         };
-        var _options = {};
-        options = options || _options;
-        for (var kwarg in options) {
-            _options[kwarg] = options[kwarg];
-        }
-        for (kwarg in DEFAULT_OPTIONS) {
-            if (options[kwarg] === undefined) _options[kwarg] = DEFAULT_OPTIONS[kwarg];
-        }
-        options = _options;
-        var canvas = document.createElement('canvas');
-        canvas.height = 2 * options.textSize;
-        canvas.width = 256; //2*ctx.measureText(text).width;
-        var ctx = canvas.getContext('2d');
-        ctx.font = String(options.textSize) + "px serif";
-        ctx.fillStyle   = 'rgb(255, 72, 23)';
-        ctx.strokeStyle = 'rgb(240, 70, 20)';
-        var texture = new THREE.Texture(canvas, THREE.UVMapping, THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping, THREE.LinearFilter, THREE.LinearFilter);
-        var aspect = canvas.width / canvas.height;
-        var material = new THREE.MeshBasicMaterial({color: 0xffffff, map: texture, transparent: true});
-        var quadGeom = new THREE.PlaneBufferGeometry(1, 1);
-        quadGeom.translate(0.5, 0.5, 0);
-        var mesh = new THREE.Mesh(quadGeom, material);
-        if (options.coordSystem === 'local') {
-            options.object.add(mesh);
-            mesh.position.fromArray(options.position);
-            mesh.quaternion.fromArray(options.quaternion);
-            var worldScale = options.object.getWorldScale();
-            mesh.scale.set(aspect * 0.075 / worldScale.x, 0.075 / worldScale.y, 1 / worldScale.z);
-            mesh.updateMatrix();
-        }
-        this.mesh = mesh;
-        this.setText = function (text) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillText(  text, 0, options.textSize);
-            ctx.strokeText(text, 0, options.textSize);
-            material.map.needsUpdate = true;
-        }.bind(this);
-    }
+    } )();
 
     var URL_PARAMS = ( function () {
         var params = {};
@@ -1796,20 +1776,6 @@ module.exports = ( function () {
         return params;
     } )();
 
-    var combineObjects = function (a, b) {
-        var c = {},
-            k;
-        for (k in a) {
-            c[k] = a[k];
-        }
-        for (k in b) {
-            if (!c.hasOwnProperty(k)) {
-                c[k] = b[k];
-            }
-        }
-        return c;
-    };
-
     var makeObjectArray = function (obj, keyKey) {
         keyKey = keyKey || "key";
         return Object.keys(obj).map(function (k) {
@@ -1831,7 +1797,6 @@ module.exports = ( function () {
     return {
         ObjectSelector: ObjectSelector,
         moveObject: moveObject,
-        displayText: displayText,
         TextLabel: TextLabel,
         URL_PARAMS: URL_PARAMS,
         combineObjects: combineObjects,
@@ -1841,7 +1806,7 @@ module.exports = ( function () {
 
 } )();
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 window.YAWVRB = {};
 
 window.YAWVRB.App           = require('./App.js');
@@ -1854,5 +1819,6 @@ window.YAWVRB.Mouse         = require('./Mouse.js');
 window.YAWVRB.Stage         = require('./Stage.js');
 window.YAWVRB.SynthSpeaker  = require('./SynthSpeaker.js');
 window.YAWVRB.TextGeomUtils = require('./TextGeomUtils.js');
+window.YAWVRB.Audio         = require('./Audio.js');
 
-},{"./App.js":1,"./Gamepads.js":2,"./GfxTablet.js":3,"./Keyboard.js":4,"./LeapMotion.js":5,"./Mouse.js":6,"./Stage.js":7,"./SynthSpeaker.js":8,"./TextGeomUtils.js":9,"./Utils.js":10}]},{},[11]);
+},{"./App.js":1,"./Audio.js":2,"./Gamepads.js":3,"./GfxTablet.js":4,"./Keyboard.js":5,"./LeapMotion.js":6,"./Mouse.js":7,"./Stage.js":8,"./SynthSpeaker.js":9,"./TextGeomUtils.js":10,"./Utils.js":11}]},{},[12]);
