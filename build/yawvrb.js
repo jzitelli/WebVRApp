@@ -221,9 +221,9 @@ function App(scene, config, rendererOptions) {
 module.exports = App;
 
 },{"./Utils.js":11}],2:[function(require,module,exports){
-module.exports = ( function (numGainNodes) {
+module.exports = ( function () {
     "use strict";
-    numGainNodes = numGainNodes || 4;
+    var numGainNodes = 4;
 
     var audioContext = new AudioContext();
 
@@ -251,12 +251,22 @@ module.exports = ( function (numGainNodes) {
         source.start(0);
     };
 
+    var loadBuffer = function (url, onLoad) {
+        var request = new XMLHttpRequest();
+        request.responseType = 'arraybuffer';
+        request.open('GET', url);
+        request.onload = function () {
+            audioContext.decodeAudioData(this.response, onLoad);
+        };
+        request.send();
+    };
+
     return {
         audioContext: audioContext,
         getNextGainNode: getNextGainNode,
-        playBuffer: playBuffer
+        playBuffer: playBuffer,
+        loadBuffer: loadBuffer
     };
-
 } )();
 
 },{}],3:[function(require,module,exports){
