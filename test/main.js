@@ -75,6 +75,9 @@ window.onLoad = function () {
         moveFB: {axes: [YAWVRB.Gamepads.AXES.LSY], flipAxes: true},
         moveRL: {axes: [YAWVRB.Gamepads.AXES.LSX]}
     };
+    var viveATool = YAWVRB.Gamepads.makeTool();
+    viveATool.mesh.visible = false;
+    stage.stageRoot.add(viveATool.mesh);
     var viveAConnected = false;
     YAWVRB.Gamepads.setOnGamepadConnected( function (e) {
         if (/xbox/i.test(e.gamepad.id) || /xinput/i.test(e.gamepad.id)) {
@@ -82,6 +85,8 @@ window.onLoad = function () {
         } else if (/openvr/i.test(e.gamepad.id)) {
             if (!viveAConnected) {
                 YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, viveAGamepadCommands);
+                viveATool.setGamepad(e.gamepad);
+                viveATool.mesh.visible = true;
                 viveAConnected = true;
             }
         }
@@ -160,6 +165,7 @@ window.onLoad = function () {
                         if (vals.turnUD) turnUD += vals.turnUD;
                     }
                     YAWVRB.Utils.moveObject(objectSelector.selection, dt, moveFB, moveRL, moveUD, turnRL, turnUD);
+                    viveATool.update(dt);
                     app.render();
                     lt = t;
                     requestAnimationFrame(animate);

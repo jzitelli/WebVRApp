@@ -31,9 +31,9 @@ module.exports = ( function () {
         shadowLightPosition: new THREE.Vector4(0, 8, 3, 0.1),
         shadowPlane: 0.002
     };
-    function makeTool(vrGamepad, options) {
+    function makeTool(options) {
         options = Utils.combineObjects(DEFAULT_OPTIONS, options || {});
-        console.log('tool options, gamepad %d:', vrGamepad.index);
+        console.log('OpenVR tool options:');
         console.log(options);
         var toolGeom = new THREE.CylinderGeometry(options.toolRadius, options.toolRadius, options.toolLength, 10, 1, false);
         toolGeom.translate(0, -0.5 * options.toolLength, 0);
@@ -62,6 +62,10 @@ module.exports = ( function () {
         var worldPosition = new THREE.Vector3();
         var worldQuaternion = new THREE.Quaternion();
         var worldScale = new THREE.Vector3();
+        var vrGamepad;
+        function setGamepad(gamepad) {
+            vrGamepad = gamepad;
+        }
         function update(dt) {
             if (vrGamepad && vrGamepad.pose) {
                 toolMesh.position.fromArray(vrGamepad.pose.position);
@@ -93,7 +97,8 @@ module.exports = ( function () {
             body: toolBody,
             mesh: toolMesh,
             shadowMesh: toolShadowMesh,
-            update: update
+            update: update,
+            setGamepad: setGamepad
         };
     }
 
