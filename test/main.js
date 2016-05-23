@@ -70,9 +70,20 @@ window.onLoad = function () {
         turnUD: {axes: [YAWVRB.Gamepads.AXES.RSY]},
         toggleFloat: {buttons: [YAWVRB.Gamepads.BUTTONS.leftStick]}
     };
+    var viveAGamepadCommands = {
+        toggleVR: {buttons: [3], commandDown: app.toggleVR},
+        moveFB: {axes: [YAWVRB.Gamepads.AXES.LSY], flipAxes: true},
+        moveRL: {axes: [YAWVRB.Gamepads.AXES.LSX]}
+    };
+    var viveAConnected = false;
     YAWVRB.Gamepads.setOnGamepadConnected( function (e) {
         if (/xbox/i.test(e.gamepad.id) || /xinput/i.test(e.gamepad.id)) {
             YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, xboxGamepadCommands);
+        } else if (/openvr/i.test(e.gamepad.id)) {
+            if (!viveAConnected) {
+                YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, viveAGamepadCommands);
+                viveAConnected = true;
+            }
         }
     } );
 

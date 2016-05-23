@@ -1,4 +1,5 @@
 /* global THREE */
+var Utils = require('./Utils.js');
 
 module.exports = ( function () {
 	"use strict";
@@ -8,15 +9,7 @@ module.exports = ( function () {
 	};
 
 	function Mouse(options) {
-		var _options = {};
-		options = options || _options;
-		for (var option in DEFAULT_OPTIONS) {
-			_options[option] = options[option];
-		}
-		for (option in DEFAULT_OPTIONS) {
-			if (options[option] === undefined) _options[option] = DEFAULT_OPTIONS[option];
-		}
-		options = _options;
+		options = Utils.combineObjects(DEFAULT_OPTIONS, options || {});
 
 		var stageObject = new THREE.Mesh(new THREE.BoxBufferGeometry(5.75 * 0.01, 3.75 * 0.01, 9.5 * 0.01));
 		this.stageObject = stageObject;

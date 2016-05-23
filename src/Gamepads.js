@@ -1,8 +1,10 @@
 /* global THREE, CANNON */
+var Utils = require('./Utils.js');
+
 module.exports = ( function () {
     "use strict";
 
-    const DEADZONE = 0.145;
+    const DEADZONE = 0.15;
 
     var gamepads;
     var buttonsPresseds = [];
@@ -30,18 +32,9 @@ module.exports = ( function () {
         shadowPlane: 0.002
     };
     function makeTool(vrGamepad, options) {
-        var _options = {};
-        options = options || _options;
-        for (var kwarg in options) {
-            _options[kwarg] = options[kwarg];
-        }
-        for (kwarg in DEFAULT_OPTIONS) {
-            if (_options[kwarg] === undefined) _options[kwarg] = DEFAULT_OPTIONS[kwarg];
-        }
-        options = _options;
-        console.log('OpenVR tool options, gamepad %d:', vrGamepad.index);
+        options = Utils.combineObjects(DEFAULT_OPTIONS, options || {});
+        console.log('tool options, gamepad %d:', vrGamepad.index);
         console.log(options);
-
         var toolGeom = new THREE.CylinderGeometry(options.toolRadius, options.toolRadius, options.toolLength, 10, 1, false);
         toolGeom.translate(0, -0.5 * options.toolLength, 0);
         toolGeom.rotateX(-0.5 * Math.PI);
@@ -51,7 +44,6 @@ module.exports = ( function () {
         toolGeom = bufferGeom;
         var toolMaterial = new THREE.MeshLambertMaterial({color: options.toolColor, transparent: true});
         var toolMesh = new THREE.Mesh(toolGeom, toolMaterial);
-
         var toolShadowMesh;
         if (options.useShadowMesh) {
             toolShadowMesh = new THREE.ShadowMesh(toolMesh, options.shadowMaterial);
@@ -60,23 +52,26 @@ module.exports = ( function () {
         } else {
             toolMesh.castShadow = true;
         }
-
         var toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.KINEMATIC});
         toolBody.material = options.tipMaterial;
         toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, options.tipLength, 8),
             new CANNON.Vec3(0, 0, 0.5 * options.tipLength));
-
         var position = new THREE.Vector3();
         var velocity = new THREE.Vector3();
         var quaternion = new THREE.Quaternion();
         var worldPosition = new THREE.Vector3();
         var worldQuaternion = new THREE.Quaternion();
         var worldScale = new THREE.Vector3();
-
         function update(dt) {
             if (vrGamepad && vrGamepad.pose) {
                 toolMesh.position.fromArray(vrGamepad.pose.position);
                 toolMesh.quaternion.fromArray(vrGamepad.pose.orientation);
+                toolMesh.updateMatrix();
+                toolMesh.updateMatrixWorld();
+                if (toolShadowMesh) {
+                    toolShadowMesh.updateMatrix();
+                    toolShadowMesh.updateMatrixWorld();
+                }
                 position.copy(toolMesh.position);
                 velocity.copy(toolBody.interpolatedPosition);
                 var parent = toolMesh.parent;
@@ -92,14 +87,6 @@ module.exports = ( function () {
                     velocity.multiplyScalar(-1 / dt);
                     toolBody.velocity.copy(velocity);
                 }
-            } else {
-                toolBody.sleep();
-            }
-            toolMesh.updateMatrix();
-            toolMesh.updateMatrixWorld();
-            if (toolShadowMesh) {
-                toolShadowMesh.updateMatrix();
-                toolShadowMesh.updateMatrixWorld();
             }
         }
         return {
@@ -108,6 +95,12 @@ module.exports = ( function () {
             shadowMesh: toolShadowMesh,
             update: update
         };
+    }
+
+    var _onGamepadConnected = null;
+
+    function setOnGamepadConnected(onGamepadConnected) {
+        _onGamepadConnected = onGamepadConnected;
     }
 
     function pollGamepads() {
@@ -135,17 +128,8 @@ module.exports = ( function () {
         gamepadCommands[index] = commands;
     }
 
-    var _onGamepadConnected = null;
-
-    function setOnGamepadConnected(onGamepadConnected) {
-        _onGamepadConnected = onGamepadConnected;
-    }
-
     function onGamepadConnected(e) {
         console.log("Gamepad connected at index %d: %s - %d buttons, %d axes", e.gamepad.index, e.gamepad.id, e.gamepad.buttons.length, e.gamepad.axes.length);
-        if (_onGamepadConnected) {
-            _onGamepadConnected(e);
-        }
     }
     window.addEventListener("gamepadconnected", onGamepadConnected);
 

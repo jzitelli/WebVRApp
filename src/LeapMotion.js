@@ -6,6 +6,7 @@
    ********************************************************************************************* */
 
 /* global Leap, THREE, CANNON */
+var Utils = require('./Utils.js');
 
 module.exports = ( function () {
     "use strict";
@@ -41,20 +42,7 @@ module.exports = ( function () {
     };
 
     function makeTool(options) {
-        /*************************************
-
-        returns: stuff
-
-        *************************************/
-        var _options = {};
-        options = options || _options;
-        for (var option in options) {
-            _options[option] = options[option];
-        }
-        for (option in DEFAULT_OPTIONS) {
-            if (options[option] === undefined) _options[option] = DEFAULT_OPTIONS[option];
-        }
-        options = _options;
+        options = Utils.combineObjects(DEFAULT_OPTIONS, options || {});
         console.log('Leap Motion tool options:');
         console.log(options);
 
