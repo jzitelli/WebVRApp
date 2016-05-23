@@ -123,7 +123,6 @@ window.onLoad = function () {
     function grab() {
         console.log('grabbing!');
         var toolMesh = openVRTools[1].mesh;
-        grabbed = leapTool.toolRoot;
         parent = grabbed.parent;
         var scale = new THREE.Vector3();
         grabbed.matrixWorld.decompose(grabbed.position, grabbed.quaternion, scale);
@@ -209,117 +208,6 @@ window.onLoad = function () {
     plaintext.innerHTML = 'WebVRConfig = ' + JSON.stringify(window.WebVRConfig, undefined, 2);
     infoElement.appendChild(plaintext);
 
-    var profileNameInput = document.getElementById('profileName');
-    profileNameInput.value = 'default';
-
-    var vrButton = document.getElementById('vrButton');
-    vrButton.addEventListener('click', function () {
-        app.toggleVR();
-        vrButton.blur();
-    });
-
-    var fsButton = document.getElementById('fsButton');
-    fsButton.addEventListener('click', function () {
-        app.toggleFullscreen();
-        fsButton.blur();
-    });
-
-    var wireframeInput = document.getElementById('wireframeInput');
-    wireframeInput.addEventListener('click', function () {
-        app.toggleWireframe();
-    });
-
-    var saveStageButton = document.getElementById('saveStageButton');
-    saveStageButton.addEventListener('click', function () {
-        saveStage();
-    });
-
-    // local leap motion controller:
-    var localLeapStatusIndicator = document.getElementById('localLeapStatus');
-    var leapToolOptions = {
-        onConnect: function () {
-            localLeapStatusIndicator.textContent = 'local websocket connected';
-            localLeapStatusIndicator.style['background-color'] = 'rgba(60, 60, 20, 0.7)';
-        },
-        onStreamingStarted: function () {
-            localLeapStatusIndicator.textContent = 'local websocket connected, streaming';
-            localLeapStatusIndicator.style['background-color'] = 'rgba(60, 100, 30, 0.5)';
-        },
-        onStreamingStopped: function () {
-            localLeapStatusIndicator.textContent = 'local websocket connected, streaming stopped';
-            localLeapStatusIndicator.style['background-color'] = 'rgba(60, 50, 30, 0.6)';
-        },
-        onDisconnect: function () {
-            localLeapStatusIndicator.textContent = 'local websocket disconnected';
-            localLeapStatusIndicator.style['background-color'] = 'rgba(60, 20, 20, 0.5)';
-        },
-        toolColor: 0xbb9999,
-        handColor: 0x99bbbb,
-        shadowPlane: avatar.position.y - 0.25,
-        shadowMaterial: new THREE.MeshBasicMaterial({color: 0x222233})
-    };
-    var leapTool = YAWVRB.LeapMotion.makeTool(leapToolOptions);
-    leapTool.toolRoot.name = 'toolRoot';
-    ( new YAWVRB.Utils.TextLabel({object: leapTool.toolRoot}) ).setText('Leap Motion (local)');
-    leapTool.leapController.connect();
-    objectSelector.addSelectable(leapTool.toolRoot);
-    world.add(leapTool.toolBody);
-    stage.stageRoot.add(leapTool.toolRoot);
-
-    // remote leap motion controller:
-    var remoteLeapStatusIndicator = document.getElementById('remoteLeapStatus');
-    var remoteLeapToolOptions = {
-        host: YAWVRB.Utils.URL_PARAMS.remoteLeapHost || '192.168.1.201',
-        onConnect: function () {
-            remoteLeapStatusIndicator.textContent = 'remote websocket connected';
-            remoteLeapStatusIndicator.style['background-color'] = 'rgba(60, 60, 20, 0.7)';
-        },
-        onStreamingStarted: function () {
-            remoteLeapStatusIndicator.textContent = 'remote websocket connected, streaming';
-            remoteLeapStatusIndicator.style['background-color'] = 'rgba(60, 100, 30, 0.5)';
-        },
-        onStreamingStopped: function () {
-            remoteLeapStatusIndicator.textContent = 'remote websocket connected, streaming stopped';
-            remoteLeapStatusIndicator.style['background-color'] = 'rgba(60, 50, 30, 0.6)';
-        },
-        onDisconnect: function () {
-            remoteLeapStatusIndicator.textContent = 'remote websocket disconnected';
-            remoteLeapStatusIndicator.style['background-color'] = 'rgba(60, 20, 20, 0.7)';
-        },
-        toolColor: 0x99bb99,
-        handColor: 0xbb99bb,
-        shadowPlane: leapToolOptions.shadowPlane,
-        shadowMaterial: leapToolOptions.shadowMaterial
-    };
-    var leapToolRemote = YAWVRB.LeapMotion.makeTool(remoteLeapToolOptions);
-    var remoteLeapAddressInput = document.getElementById('remoteLeapAddress');
-    remoteLeapAddressInput.value = remoteLeapToolOptions.host;
-    remoteLeapAddressInput.addEventListener('change', onLeapAddressChange, false);
-    function onLeapAddressChange() {
-        var host = remoteLeapAddressInput.value;
-        leapToolRemote.leapController.connection.host = host;
-        leapToolRemote.leapController.connection.disconnect(true);
-        leapToolRemote.leapController.connect();
-    }
-    leapToolRemote.toolRoot.position.x -= 20 * INCH2METERS;
-    leapToolRemote.toolRoot.updateMatrix();
-    ( new YAWVRB.Utils.TextLabel({object: leapToolRemote.toolRoot}) ).setText('Leap Motion (remote)');
-    leapToolRemote.leapController.connect();
-    objectSelector.addSelectable(leapToolRemote.toolRoot);
-    world.add(leapToolRemote.toolBody);
-    leapToolRemote.toolRoot.name = 'remoteToolRoot';
-    stage.stageRoot.add(leapToolRemote.toolRoot);
-
-    // var mouse = new YAWVRB.Mouse({eventTarget: window});
-    // mouse.togglePointer();
-    // avatar.add(mouse.pointerMesh);
-    // mouse.pointerMesh.position.z = -0.4;
-    // mouse.pointerMesh.updateMatrix();
-    // mouse.stageObject.name = 'mouse';
-    // objectSelector.addSelectable(mouse.stageObject);
-    // mouse.stageObject.position.set(0, -12 * 0.254, -12 * 0.0254);
-    // stage.stageRoot.add(mouse.stageObject);
-
     var keyboardCommands = {
         toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: function () { app.toggleVR(); }},
         resetVRSensor: {buttons: [YAWVRB.Keyboard.KEYCODES.Z], commandDown: function () { app.resetVRSensor(); }},
@@ -387,9 +275,6 @@ window.onLoad = function () {
 
             app.scene.updateMatrixWorld(true);
 
-            leapTool.updateToolMapping();
-            if (leapToolRemote) leapToolRemote.updateToolMapping();
-
             app.renderer.setSize(window.innerWidth, window.innerHeight);
 
             startAnimateLoop();
@@ -424,11 +309,6 @@ window.onLoad = function () {
 
                     YAWVRB.Utils.moveObject(objectSelector.selection, dt, moveFB, moveRL, moveUD, turnRL, turnUD);
 
-                    leapTool.updateToolMapping();
-                    if (leapToolRemote) leapToolRemote.updateToolMapping();
-                    leapTool.updateTool(dt);
-                    if (leapToolRemote) leapToolRemote.updateTool(dt);
-
                     for (i = 0; i < openVRTools.length; i++) {
                         openVRTools[i].update(dt);
                     }
@@ -441,9 +321,6 @@ window.onLoad = function () {
                     ballMesh.quaternion.copy(ballBody.interpolatedQuaternion);
                     ballMesh.updateMatrix();
                     ballMesh.updateMatrixWorld();
-
-                    leapTool.updateToolPostStep();
-                    if (leapToolRemote) leapToolRemote.updateToolPostStep();
 
                     if (textLabel) textLabel.setText(`${openVRTools[0].mesh.position.x.toFixed(3)}, ${openVRTools[0].mesh.position.y.toFixed(3)}, ${openVRTools[0].mesh.position.z.toFixed(3)}`);
 
