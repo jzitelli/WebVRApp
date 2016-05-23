@@ -60,8 +60,8 @@ window.onLoad = function () {
     }
 
     var xboxGamepadCommands = {
-        toggleVR: {buttons: [YAWVRB.Gamepads.BUTTONS.start], commandDown: function () { console.log('entering VR'); app.toggleVR(); }},
-        resetVRSensor: {buttons: [YAWVRB.Gamepads.BUTTONS.back], commandDown: function () { app.resetVRSensor(); }},
+        toggleVR: {buttons: [YAWVRB.Gamepads.BUTTONS.start], commandDown: app.toggleVR},
+        resetVRSensor: {buttons: [YAWVRB.Gamepads.BUTTONS.back], commandDown: app.resetVRSensor},
         cycleSelection: {buttons: [YAWVRB.Gamepads.BUTTONS.right], commandDown: objectSelector.cycleSelection},
         cyclePrevSelection: {buttons: [YAWVRB.Gamepads.BUTTONS.left], commandDown: objectSelector.cycleSelection.bind(objectSelector, -1)},
         moveFB: {axes: [YAWVRB.Gamepads.AXES.LSY]},
@@ -77,7 +77,7 @@ window.onLoad = function () {
     } );
 
     var keyboard = new YAWVRB.Keyboard(window, YAWVRB.Utils.combineObjects(YAWVRB.Keyboard.STANDARD_COMMANDS, {
-        toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: app.toggleVR()},
+        toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: app.toggleVR},
         resetVRSensor: {buttons: [YAWVRB.Keyboard.KEYCODES.Z], commandDown: app.resetVRSensor},
         cycleSelection: {buttons: [YAWVRB.Keyboard.KEYCODES.CLOSEDBRACKET], commandDown: objectSelector.cycleSelection},
         cyclePrevSelection: {buttons: [YAWVRB.Keyboard.KEYCODES.OPENBRACKET], commandDown: objectSelector.cycleSelection.bind(objectSelector, -1)},
