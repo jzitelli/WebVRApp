@@ -44,7 +44,7 @@
   },
   "scripts": {
     "lint": "eslint src/*.js && eslint test/*.js",
-    "build": "npm run lint && browserify src/yawvrb.js -o build/yawvrb.js",
+    "build": "npm run lint && mkdir -p build && browserify src/yawvrb.js -o build/yawvrb.js",
     "postinstall": "npm run build",
     "start": "npm run build && cd ./test && python tornado_server.py",
     "watch": "watchify src/yawvrb.js -o build/yawvrb.js"
