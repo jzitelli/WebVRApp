@@ -126,7 +126,7 @@ module.exports = ( function () {
                 for (var j = 0; j < gamepad.buttons.length; j++) {
                     buttonsPresseds[i].push(false);
                 }
-                onGamepadConnected({gamepad: gamepad});
+                if (_onGamepadConnected) _onGamepadConnected({gamepad: gamepad});
             }
         }
     }
@@ -218,8 +218,6 @@ module.exports = ( function () {
         }
         return values;
     }
-
-    pollGamepads();
 
     return {
         BUTTONS: {
