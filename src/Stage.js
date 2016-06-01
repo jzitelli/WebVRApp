@@ -3,27 +3,24 @@ module.exports = ( function () {
     "use strict";
 
     function Stage() {
-        this.hmdCalibrationPose = null;
-
         var vrDisplay;
 
-        var stageRoot = new THREE.Object3D();
-        stageRoot.matrixAutoUpdate = false;
-        this.stageRoot = stageRoot;
+        var rootObject = new THREE.Object3D();
+        rootObject.matrixAutoUpdate = false;
+        this.rootObject = rootObject;
 
         function updateSittingToStandingTransform() {
             if (vrDisplay && vrDisplay.stageParameters && vrDisplay.stageParameters.sittingToStandingTransform) {
+                rootObject.matrix.fromArray(vrDisplay.stageParameters.sittingToStandingTransform);
+                rootObject.matrix.decompose(rootObject.position, rootObject.quaternion, rootObject.scale);
+                rootObject.updateMatrixWorld(true);
                 console.log('sittingToStandingTransform:\n' + vrDisplay.stageParameters.sittingToStandingTransform);
-                stageRoot.matrix.fromArray(vrDisplay.stageParameters.sittingToStandingTransform);
-                stageRoot.matrix.decompose(stageRoot.position, stageRoot.quaternion, stageRoot.scale);
-                console.log('  position: %f, %f, %f', stageRoot.position.x, stageRoot.position.y, stageRoot.position.z);
-                console.log('  rotation: %f, %f, %f', stageRoot.rotation.x, stageRoot.rotation.y, stageRoot.rotation.z);
-                console.log('  quaternion: %f, %f, %f, %f', stageRoot.quaternion.x, stageRoot.quaternion.y, stageRoot.quaternion.z, stageRoot.quaternion.w);
-                console.log('  scale: %f, %f, %f', stageRoot.scale.x, stageRoot.scale.y, stageRoot.scale.z);
+                console.log('  position: %f, %f, %f', rootObject.position.x, rootObject.position.y, rootObject.position.z);
+                console.log('  rotation: %f, %f, %f', rootObject.rotation.x, rootObject.rotation.y, rootObject.rotation.z);
+                console.log('  quaternion: %f, %f, %f, %f', rootObject.quaternion.x, rootObject.quaternion.y, rootObject.quaternion.z, rootObject.quaternion.w);
+                console.log('  scale: %f, %f, %f', rootObject.scale.x, rootObject.scale.y, rootObject.scale.z);
             } else {
                 console.warn('no sittingToStandingTransform provided by the VRDisplay');
-                stageRoot.position.y = 1.2;
-                stageRoot.updateMatrix();
             }
         }
 
@@ -40,15 +37,10 @@ module.exports = ( function () {
             console.warn('your browser does not support the latest WebVR API');
         }
 
-        this.updateCalibrationPose = function ( pose, t ) {
-            if (pose) console.log(pose);
-            if (t) console.log(t);
-        }.bind(this);
-
         this.save = function () {
             console.log('saving poses of stage objects...');
             var transforms = {};
-            stageRoot.children.forEach( function (object) {
+            rootObject.children.forEach( function (object) {
                 if (object.name) {
                     object.updateMatrix();
                     object.updateMatrixWorld();
@@ -75,7 +67,7 @@ module.exports = ( function () {
                 }
             }
             console.log('loading poses of stage objects...');
-            stageRoot.children.forEach( function (object) {
+            rootObject.children.forEach( function (object) {
                 if (object.name && transforms[object.name]) {
                     var transform = transforms[object.name];
                     object.position.fromArray(transform.position);
@@ -83,7 +75,7 @@ module.exports = ( function () {
                     object.updateMatrix();
                 }
             } );
-            stageRoot.updateMatrixWorld(true);
+            rootObject.updateMatrixWorld(true);
         }.bind(this);
 
     }

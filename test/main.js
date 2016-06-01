@@ -2,23 +2,30 @@
 window.onLoad = function () {
     "use strict";
 
-    // menu setup:
-    var overlay = document.getElementById('overlay');
-    var infoElement = document.createElement('div');
-    infoElement.style['background-color'] = 'rgba(100, 100, 70, 0.7)';
-    infoElement.style['margin-top'] = '2vh';
-    infoElement.style.padding = '0.5vw';
-    overlay.appendChild(infoElement);
-    var plaintext = document.createElement('plaintext');
-    plaintext.style['font-size'] = '5pt';
-    plaintext.innerHTML = 'WebVRConfig = ' + JSON.stringify(window.WebVRConfig, undefined, 2);
-    infoElement.appendChild(plaintext);
-
     THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
     var objectSelector = new YAWVRB.Utils.ObjectSelector();
 
     var stage = new YAWVRB.Stage();
+
+    // menu setup:
+
+    var overlay = document.getElementById('overlay');
+
+    var infoElement = document.createElement('div');
+    infoElement.style['background-color'] = 'rgba(100, 100, 70, 0.7)';
+    infoElement.style['margin-top'] = '2vh';
+    infoElement.style.padding = '0.5vw';
+    overlay.appendChild(infoElement);
+
+    var plaintext = document.createElement('plaintext');
+    plaintext.style['font-size'] = '5pt';
+    plaintext.innerHTML = 'WebVRConfig = ' + JSON.stringify(window.WebVRConfig, undefined, 2);
+    infoElement.appendChild(plaintext);
+
+    overlay.style.display = 'none';
+
+    // create app:
 
     var app = ( function () {
         var euler = new THREE.Euler(0, 0, 0, 'YXZ');
@@ -26,7 +33,7 @@ window.onLoad = function () {
             onResetVRSensor: function (lastRotation, lastPosition) {
                 console.log('lastRotation: %f, lastPosition: (%f, %f, %f)', lastRotation, lastPosition.x, lastPosition.y, lastPosition.z);
                 // maintain poses of stage objects:
-                stage.stageRoot.children.forEach( function (object) {
+                stage.rootObject.children.forEach( function (object) {
                     // maintain rotation of object (relative heading of object w.r.t. HMD):
                     if (object === app.camera) return;
                     euler.setFromQuaternion(object.quaternion);
@@ -39,7 +46,7 @@ window.onLoad = function () {
                     object.updateMatrix();
                 } );
                 stage.updateSittingToStandingTransform();
-                stage.stageRoot.updateMatrixWorld(true);
+                stage.rootObject.updateMatrixWorld(true);
             }
         }, {
             canvas: document.getElementById('webgl-canvas'),
@@ -48,8 +55,9 @@ window.onLoad = function () {
         });
     } )();
 
-    stage.stageRoot.add(app.camera);
-    app.scene.add(stage.stageRoot);
+    stage.rootObject.add(app.camera);
+
+    app.scene.add(stage.rootObject);
 
     function toggleHTMLMenu() {
         if (overlay.style.display === 'none') {
@@ -58,6 +66,8 @@ window.onLoad = function () {
             overlay.style.display = 'none';
         }
     }
+
+    // xbox gamepad:
 
     var xboxGamepadCommands = {
         toggleVR: {buttons: [YAWVRB.Gamepads.BUTTONS.start], commandDown: app.toggleVR},
@@ -70,6 +80,9 @@ window.onLoad = function () {
         turnUD: {axes: [YAWVRB.Gamepads.AXES.RSY]},
         toggleFloat: {buttons: [YAWVRB.Gamepads.BUTTONS.leftStick]}
     };
+
+    // vive controller 1:
+
     var viveAGamepadCommands = {
         toggleVR: {buttons: [3], commandDown: app.toggleVR},
         moveFB: {axes: [YAWVRB.Gamepads.AXES.LSY], flipAxes: true},
@@ -77,8 +90,18 @@ window.onLoad = function () {
     };
     var viveATool = YAWVRB.Gamepads.makeTool();
     viveATool.mesh.visible = false;
-    stage.stageRoot.add(viveATool.mesh);
     var viveAConnected = false;
+    stage.rootObject.add(viveATool.mesh);
+
+    // vive controller 2:
+
+    var viveBGamepadCommands = {
+        turnRL: {axes: [YAWVRB.Gamepads.AXES.LSX]}
+    };
+    var viveBTool = YAWVRB.Gamepads.makeTool();
+    viveBTool.mesh.visible = false;
+    stage.rootObject.add(viveBTool.mesh);
+
     YAWVRB.Gamepads.setOnGamepadConnected( function (e) {
         if (/xbox/i.test(e.gamepad.id) || /xinput/i.test(e.gamepad.id)) {
             YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, xboxGamepadCommands);
@@ -88,28 +111,13 @@ window.onLoad = function () {
                 viveATool.setGamepad(e.gamepad);
                 viveATool.mesh.visible = true;
                 viveAConnected = true;
+            } else {
+                YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, viveBGamepadCommands);
+                viveBTool.setGamepad(e.gamepad);
+                viveBTool.mesh.visible = true;
             }
         }
     } );
-
-    var keyboard = new YAWVRB.Keyboard(window, YAWVRB.Utils.combineObjects(YAWVRB.Keyboard.STANDARD_COMMANDS, {
-        toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: app.toggleVR},
-        resetVRSensor: {buttons: [YAWVRB.Keyboard.KEYCODES.Z], commandDown: app.resetVRSensor},
-        cycleSelection: {buttons: [YAWVRB.Keyboard.KEYCODES.CLOSEDBRACKET], commandDown: objectSelector.cycleSelection},
-        cyclePrevSelection: {buttons: [YAWVRB.Keyboard.KEYCODES.OPENBRACKET], commandDown: objectSelector.cycleSelection.bind(objectSelector, -1)},
-        toggleWireframe: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER1], commandDown: function () { app.toggleWireframe(); }},
-        toggleNormalMaterial: {buttons: [YAWVRB.Keyboard.KEYCODES.NUMBER2], commandDown: function () { app.toggleNormalMaterial(); }},
-        toggleHTMLMenu: {buttons: [YAWVRB.Keyboard.KEYCODES.M], commandDown: toggleHTMLMenu}
-    }));
-    var keyboardObject = keyboard.stageObject;
-    const INCH2METERS = 0.0254;
-    keyboardObject.position.z = -12 * INCH2METERS;
-    keyboardObject.position.y = -5 * INCH2METERS;
-    keyboardObject.updateMatrix();
-    ( new YAWVRB.Utils.TextLabel({object: keyboardObject}) ).setText('Keyboard');
-    objectSelector.addSelectable(keyboardObject);
-    keyboardObject.name = 'keyboard';
-    stage.stageRoot.add(keyboardObject);
 
     stage.load();
 
@@ -145,11 +153,11 @@ window.onLoad = function () {
 
                 function animate(t) {
                     var dt = 0.001 * (t - lt);
-                    var moveFB = keyboard.moveForward - keyboard.moveBackward,
-                        moveRL = keyboard.moveRight - keyboard.moveLeft,
-                        moveUD = keyboard.moveUp - keyboard.moveDown,
-                        turnRL = keyboard.turnRight - keyboard.turnLeft,
-                        turnUD = keyboard.turnUp - keyboard.turnDown;
+                    var moveFB = 0,
+                        moveRL = 0,
+                        moveUD = 0,
+                        turnRL = 0,
+                        turnUD = 0;
                     var values = YAWVRB.Gamepads.update();
                     for (var i = 0; i < values.length; i++) {
                         var vals = values[i];
@@ -165,8 +173,12 @@ window.onLoad = function () {
                         if (vals.turnUD) turnUD += vals.turnUD;
                     }
                     YAWVRB.Utils.moveObject(objectSelector.selection, dt, moveFB, moveRL, moveUD, turnRL, turnUD);
+
                     viveATool.update(dt);
+                    viveBTool.update(dt);
+
                     app.render();
+
                     lt = t;
                     requestAnimationFrame(animate);
                 }
