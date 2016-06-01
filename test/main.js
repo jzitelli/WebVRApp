@@ -59,14 +59,6 @@ window.onLoad = function () {
 
     app.scene.add(stage.rootObject);
 
-    function toggleHTMLMenu() {
-        if (overlay.style.display === 'none') {
-            overlay.style.display = 'block';
-        } else {
-            overlay.style.display = 'none';
-        }
-    }
-
     // xbox gamepad:
 
     var xboxGamepadCommands = {
