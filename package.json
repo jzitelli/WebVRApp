@@ -40,12 +40,13 @@
     "cannon": "git://github.com/jzitelli/cannon.js.git",
     "browserify": "latest",
     "watchify": "latest",
-    "eslint": "latest"
+    "eslint": "latest",
+    "mkdirp": "latest"
   },
   "scripts": {
     "lint": "eslint src/*.js && eslint test/*.js",
-    "build": "npm run lint && browserify src/yawvrb.js -o build/yawvrb.js",
-    "postinstall": "mkdir build && npm run build",
+    "build": "npm run lint && mkdirp build && browserify src/yawvrb.js -o build/yawvrb.js",
+    "postinstall": "npm run build",
     "start": "npm run build && cd ./test && python tornado_server.py",
     "watch": "watchify src/yawvrb.js -o build/yawvrb.js"
   }
