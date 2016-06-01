@@ -28,7 +28,7 @@ module.exports = ( function () {
         tipMaterial: new CANNON.Material(),
         useShadowMesh: true,
         shadowMaterial: new THREE.MeshBasicMaterial({color: 0x212121}),
-        shadowLightPosition: new THREE.Vector4(0, 8, 3, 0.1),
+        shadowLightPosition: new THREE.Vector4(0, 7, 0, 0.1),
         shadowPlane: 0.002
     };
     function makeTool(options) {
