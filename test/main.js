@@ -31,7 +31,11 @@ window.onLoad = function () {
         moveD: {buttons: [YAWVRB.Keyboard.KEYCODES.Z]},
         turnL: {buttons: [YAWVRB.Keyboard.KEYCODES.LEFTARROW]},
         turnR: {buttons: [YAWVRB.Keyboard.KEYCODES.RIGHTARROW]},
-        toggleSelect: {buttons: [YAWVRB.Keyboard.KEYCODES.N], commandDown: function () { selectionEnabled = !selectionEnabled; }}
+        turnU: {buttons: [YAWVRB.Keyboard.KEYCODES.UPARROW]},
+        turnD: {buttons: [YAWVRB.Keyboard.KEYCODES.DOWNARROW]},
+        toggleSelect: {buttons: [YAWVRB.Keyboard.KEYCODES.N], commandDown: function () { selectionEnabled = !selectionEnabled; }},
+        cycleSelection: {buttons: [YAWVRB.Keyboard.KEYCODES[']']], commandDown: objectSelector.cycleSelection},
+        cyclePrevSelection: {buttons: [YAWVRB.Keyboard.KEYCODES['[']], commandDown: objectSelector.cycleSelection.bind(objectSelector, -1)}
     };
     var keyboard = new YAWVRB.Keyboard(window, keyboardCommands);
 
@@ -94,6 +98,14 @@ window.onLoad = function () {
             }
         }
     } );
+
+    // leap motion controller:
+
+    var leapTool = YAWVRB.LeapMotion.makeTool();
+    leapTool.leapController.connect();
+    app.stage.rootObject.add(leapTool.toolRoot);
+    app.scene.add(leapTool.toolShadowMesh);
+    objectSelector.addSelectable(leapTool.toolRoot);
 
     app.stage.load();
 
@@ -165,6 +177,8 @@ window.onLoad = function () {
 
                     viveATool.update(dt);
                     viveBTool.update(dt);
+
+                    leapTool.updateTool(dt);
 
                     app.render();
 
