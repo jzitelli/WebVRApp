@@ -3,11 +3,25 @@ module.exports = ( function () {
     "use strict";
 
     function Stage() {
-        var vrDisplay;
-
         var rootObject = new THREE.Object3D();
         rootObject.matrixAutoUpdate = false;
+
         this.rootObject = rootObject;
+
+        var vrDisplay;
+
+        if (navigator.getVRDisplays) {
+            console.log('checking VRDisplays for stage parameters...');
+            navigator.getVRDisplays().then( function (displays) {
+                for (var i = 0; i < displays.length; i++) {
+                    vrDisplay = displays[i];
+                    console.log('%s:\n%s', vrDisplay.displayName, JSON.stringify(vrDisplay, undefined, 2));
+                    updateSittingToStandingTransform();
+                }
+            } );
+        } else {
+            console.warn('your browser does not support the latest WebVR API');
+        }
 
         function updateSittingToStandingTransform() {
             if (vrDisplay && vrDisplay.stageParameters && vrDisplay.stageParameters.sittingToStandingTransform) {
@@ -22,19 +36,6 @@ module.exports = ( function () {
             } else {
                 console.warn('no sittingToStandingTransform provided by the VRDisplay');
             }
-        }
-
-        if (navigator.getVRDisplays) {
-            console.log('checking VRDisplays for stage parameters...');
-            navigator.getVRDisplays().then( function (displays) {
-                for (var i = 0; i < displays.length; i++) {
-                    vrDisplay = displays[i];
-                    console.log('%s:\n%s', vrDisplay.displayName, JSON.stringify(vrDisplay, undefined, 2));
-                    updateSittingToStandingTransform();
-                }
-            } );
-        } else {
-            console.warn('your browser does not support the latest WebVR API');
         }
 
         this.save = function () {
@@ -54,7 +55,7 @@ module.exports = ( function () {
             console.log(JSON.stringify(transforms, undefined, 2));
             localStorage.setItem('stagePoses', JSON.stringify(transforms, undefined, 2));
             return transforms;
-        }.bind(this);
+        };
 
         this.load = function (transforms) {
             if (!transforms) {
@@ -76,7 +77,7 @@ module.exports = ( function () {
                 }
             } );
             rootObject.updateMatrixWorld(true);
-        }.bind(this);
+        };
 
     }
 

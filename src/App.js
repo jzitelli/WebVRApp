@@ -1,19 +1,19 @@
 /* global THREE */
+var Stage = require('./Stage.js');
 var Utils = require('./Utils.js');
 
 const DEFAULT_OPTIONS = {
-    useImmediatePose: false,
     onResetVRSensor: function (lastRotation, lastPosition) {
         console.log('lastRotation: ' + lastRotation);
         console.log('lastPosition: ' + lastPosition);
     }
 };
 
-function App(scene, config, rendererOptions) {
+module.exports = function (scene, config, rendererOptions) {
     "use strict";
     config = Utils.combineObjects(DEFAULT_OPTIONS, config || {});
-    console.log('YAWVRB.App config:');
-    console.log(config);
+
+    this.config = config;
 
     scene = scene || new THREE.Scene();
 
@@ -22,6 +22,7 @@ function App(scene, config, rendererOptions) {
     rendererOptions = rendererOptions || {};
 
     this.renderer = new THREE.WebGLRenderer(rendererOptions);
+
     var domElement = this.renderer.domElement;
 
     if (!rendererOptions.canvas) {
@@ -40,10 +41,16 @@ function App(scene, config, rendererOptions) {
     this.vrControls = new THREE.VRControls(this.camera, function(error) { throw new Error(error); });
     this.vrControlsEnabled = true;
 
+    this.useImmediatePose = false;
+
+    this.stage = new Stage();
+    this.stage.rootObject.add(this.camera);
+    this.scene.add(this.stage.rootObject);
+
     // public methods:
 
     this.render = function () {
-        if (this.vrControlsEnabled) this.vrControls.update(config.useImmediatePose);
+        if (this.vrControlsEnabled) this.vrControls.update(this.useImmediatePose);
         this.vrEffect.render(this.scene, this.camera);
     }.bind(this);
 
@@ -58,9 +65,18 @@ function App(scene, config, rendererOptions) {
         }
     }.bind(this);
 
+    this.toggleUseImmediatePose = function () {
+        if (this.useImmediatePose) {
+            this.useImmediatePose = false;
+        } else {
+            this.useImmediatePose = true;
+        }
+    }.bind(this);
+
     this.resetVRSensor = ( function () {
-        var onResetVRSensor = config.onResetVRSensor;
         var lastPosition = new THREE.Vector3();
+        var euler = new THREE.Euler(0, 0, 0, 'YXZ');
+        var onResetVRSensor = config.onResetVRSensor;
         return function () {
             if (this.vrControlsEnabled) {
                 this.vrControls.update(true);
@@ -68,6 +84,33 @@ function App(scene, config, rendererOptions) {
                 var lastRotation = this.camera.rotation.y;
                 this.vrControls.resetPose();
                 this.vrControls.update(true);
+
+                // maintain correspondence between virtual / physical poses of stage objects:
+                this.stage.rootObject.children.forEach( function (object) {
+                    // maintain rotation of object (relative heading of object w.r.t. HMD):
+                    if (object === this.camera) return;
+                    euler.setFromQuaternion(object.quaternion);
+                    euler.y -= lastRotation;
+                    object.quaternion.setFromEuler(euler);
+                    // maintain position of object w.r.t. HMD:
+                    object.position.sub(lastPosition);
+                    object.position.applyAxisAngle(THREE.Object3D.DefaultUp, -lastRotation);
+                    object.position.add(this.camera.position);
+                    object.updateMatrix();
+                }.bind(this) );
+
+                this.stage.rootObject.updateMatrixWorld(true);
+
+                // this.stage.children.forEach( function (child) {
+                //     euler.setFromQuaternion(child.quaternion);
+                //     euler.y -= lastRotation;
+                //     child.quaternion.setFromAxisAngle(THREE.Object3D.DefaultUp, euler.y);
+                //     child.position.sub(lastPosition);
+                //     child.position.applyAxisAngle(THREE.Object3D.DefaultUp, -lastRotation);
+                //     child.position.add(this.camera.position);
+                //     child.updateMatrix();
+                // } );
+
                 if (onResetVRSensor) {
                     onResetVRSensor(lastRotation, lastPosition);
                 }
@@ -215,6 +258,4 @@ function App(scene, config, rendererOptions) {
     document.addEventListener(domElement.mozRequestFullScreen ? 'mozfullscreenchange' : 'webkitfullscreenchange',
         onFullscreenChange, false);
     window.addEventListener("beforeunload", beforeUnload, false);
-}
-
-module.exports = App;
+};

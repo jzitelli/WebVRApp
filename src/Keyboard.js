@@ -285,19 +285,5 @@ module.exports = ( function () {
         Keyboard.CODEKEYS[Keyboard.KEYCODES[k]] = k;
     }
 
-    Keyboard.STANDARD_COMMANDS = {
-        moveForward: {buttons: [Keyboard.KEYCODES.W]},
-        moveBackward: {buttons: [Keyboard.KEYCODES.S]},
-        moveLeft: {buttons: [Keyboard.KEYCODES.A]},
-        moveRight: {buttons: [Keyboard.KEYCODES.D]},
-        moveUp: {buttons: [Keyboard.KEYCODES.E]},
-        moveDown: {buttons: [Keyboard.KEYCODES.Q]},
-        turnLeft: {buttons: [Keyboard.KEYCODES.LEFTARROW]},
-        turnRight: {buttons: [Keyboard.KEYCODES.RIGHTARROW]},
-        turnUp: {buttons: [Keyboard.KEYCODES.UPARROW]},
-        turnDown: {buttons: [Keyboard.KEYCODES.DOWNARROW]},
-        toggleMenu: {buttons: [Keyboard.KEYCODES.ENTER]}
-    };
-
     return Keyboard;
 } )();
