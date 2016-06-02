@@ -15,13 +15,10 @@ window.onLoad = function () {
         });
     } )();
 
-    var objectSelector = new YAWVRB.Utils.ObjectSelector();
+    app.stage.rootObject.add(app.camera);
 
-    var avatar = new THREE.Object3D();
-    app.scene.add(avatar);
-    avatar.add(app.camera);
-    avatar.position.y = 1.25;
-    avatar.updateMatrix();
+    var objectSelector = new YAWVRB.Utils.ObjectSelector();
+    var selectionEnabled = false;
 
     // keyboard:
 
@@ -33,7 +30,8 @@ window.onLoad = function () {
         moveU: {buttons: [YAWVRB.Keyboard.KEYCODES.Q]},
         moveD: {buttons: [YAWVRB.Keyboard.KEYCODES.Z]},
         turnL: {buttons: [YAWVRB.Keyboard.KEYCODES.LEFTARROW]},
-        turnR: {buttons: [YAWVRB.Keyboard.KEYCODES.RIGHTARROW]}
+        turnR: {buttons: [YAWVRB.Keyboard.KEYCODES.RIGHTARROW]},
+        toggleSelect: {buttons: [YAWVRB.Keyboard.KEYCODES.N], commandDown: function () { selectionEnabled = !selectionEnabled; }}
     };
     var keyboard = new YAWVRB.Keyboard(window, keyboardCommands);
 
@@ -156,10 +154,10 @@ window.onLoad = function () {
                         if (vals.turnUD) turnUD += vals.turnUD;
                     }
 
-                    if (objectSelector.selection) {
+                    if (selectionEnabled && objectSelector.selection) {
                         YAWVRB.Utils.moveObject(objectSelector.selection, dt, moveFB, moveRL, moveUD, turnRL, turnUD);
                     } else {
-                        YAWVRB.Utils.moveObject(avatar, dt, moveFB, moveRL, moveUD, turnRL, 0);
+                        YAWVRB.Utils.moveObject(app.stage.rootObject, dt, moveFB, moveRL, moveUD, turnRL, 0);
                     }
 
                     viveATool.update(dt);

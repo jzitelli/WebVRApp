@@ -35,9 +35,8 @@
   },
   "devDependencies": {
     "three.js": "git://github.com/jzitelli/three.js.git#dev",
-    "leapjs": "latest",
-    "gfxtablet": "git://github.com/jzitelli/GfxTablet.js.git",
     "cannon": "git://github.com/jzitelli/cannon.js.git",
+    "leapjs": "latest",
     "browserify": "latest",
     "watchify": "latest",
     "eslint": "latest",

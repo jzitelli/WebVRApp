@@ -13,7 +13,7 @@ config = {
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.split(__file__)[0], os.path.pardir))
 
-GFXTABLET_DIR = os.path.join(ROOT_DIR, "node_modules", "gfxtablet")
+GFXTABLET_DIR = os.path.join(ROOT_DIR, "GfxTablet")
 import sys
 sys.path.insert(0, GFXTABLET_DIR)
 from GfxTablet import GfxTabletHandler
@@ -23,7 +23,7 @@ class MainHandler(RequestHandler):
         self.render("template.html", overlay_html="")
 
 def main():
-    handlers = [#(r'/gfxtablet', GfxTabletHandler),
+    handlers = [(r'/gfxtablet', GfxTabletHandler),
                 (r'/(.+)', StaticFileHandler, {'path': ROOT_DIR}),
                 (r'/', MainHandler)]
     app = Application(handlers,

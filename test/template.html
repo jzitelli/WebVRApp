@@ -11,14 +11,6 @@
 
     <link rel="stylesheet" href="/test/stylesheet.css">
 
-  </head>
-
-  <body onload="onLoad()">
-
-    <canvas id='webgl-canvas'></canvas>
-
-    {{ overlay_html }}
-
     <script>
     var WebVRConfig = {
       BUFFER_SCALE: 0.5, // Default: 1.0.
@@ -39,6 +31,14 @@
     };
     </script>
 
+  </head>
+
+  <body onload="onLoad()">
+
+    <canvas id='webgl-canvas'></canvas>
+
+    {{ overlay_html }}
+
     <script src="/node_modules/three.js/build/three.min.js"></script>
     <script src="/node_modules/three.js/examples/js/effects/VREffect.js"></script>
     <script src="/node_modules/three.js/examples/js/controls/VRControls.js"></script>
@@ -50,7 +50,7 @@
 
     <script src="/node_modules/cannon/build/cannon.min.js"></script>
 
-    <script src="/node_modules/gfxtablet/src/GfxTablet.js"></script>
+    <script src="/GfxTablet/GfxTablet.js"></script>
 
     <script src="/build/yawvrb.js"></script>
 
