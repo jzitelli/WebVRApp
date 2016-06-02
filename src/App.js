@@ -69,6 +69,7 @@ module.exports = function (scene, config, rendererOptions) {
             this.useImmediatePose = false;
         } else {
             this.useImmediatePose = true;
+            console.log('using immediate pose');
         }
     }.bind(this);
 

@@ -58,7 +58,8 @@ window.onLoad = function () {
     var viveAGamepadCommands = {
         toggleVR: {buttons: [3], commandDown: app.toggleVR},
         moveFB: {axes: [YAWVRB.Gamepads.AXES.LSY], flipAxes: true},
-        moveRL: {axes: [YAWVRB.Gamepads.AXES.LSX]}
+        moveRL: {axes: [YAWVRB.Gamepads.AXES.LSX]},
+        toggleFloat: {buttons: [0]}
     };
     var viveATool = YAWVRB.Gamepads.makeTool();
     viveATool.mesh.visible = false;
@@ -69,7 +70,8 @@ window.onLoad = function () {
 
     var viveBGamepadCommands = {
         toggleUseImmediatePose: {buttons: [3], commandDown: app.toggleUseImmediatePose},
-        turnRL: {axes: [YAWVRB.Gamepads.AXES.LSX]}
+        turnRL: {axes: [YAWVRB.Gamepads.AXES.LSX]},
+        turnUD: {axes: [YAWVRB.Gamepads.AXES.LSY]}
     };
     var viveBTool = YAWVRB.Gamepads.makeTool();
     viveBTool.mesh.visible = false;
@@ -81,6 +83,7 @@ window.onLoad = function () {
         } else if (/openvr/i.test(e.gamepad.id)) {
             if (!viveAConnected) {
                 viveAConnected = true;
+                selectionEnabled = true;
                 YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, viveAGamepadCommands);
                 viveATool.setGamepad(e.gamepad);
                 viveATool.mesh.visible = true;
