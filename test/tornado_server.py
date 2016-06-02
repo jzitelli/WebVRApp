@@ -20,10 +20,7 @@ from GfxTablet import GfxTabletHandler
 
 class MainHandler(RequestHandler):
     def get(self):
-        self.render("template.html", overlay_html=r"""
-<div id='overlay'>
-</div>
-""")
+        self.render("template.html", overlay_html="")
 
 def main():
     handlers = [#(r'/gfxtablet', GfxTabletHandler),

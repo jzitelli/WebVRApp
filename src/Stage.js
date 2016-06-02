@@ -8,6 +8,8 @@ module.exports = ( function () {
 
         this.rootObject = rootObject;
 
+        this.hasStageParameters = false;
+
         var vrDisplay;
 
         if (navigator.getVRDisplays) {
@@ -23,12 +25,13 @@ module.exports = ( function () {
             console.warn('your browser does not support the latest WebVR API');
         }
 
-        function updateSittingToStandingTransform() {
+        var updateSittingToStandingTransform = function () {
             if (vrDisplay && vrDisplay.stageParameters && vrDisplay.stageParameters.sittingToStandingTransform) {
+                console.log('sittingToStandingTransform:\n' + vrDisplay.stageParameters.sittingToStandingTransform);
                 rootObject.matrix.fromArray(vrDisplay.stageParameters.sittingToStandingTransform);
                 rootObject.matrix.decompose(rootObject.position, rootObject.quaternion, rootObject.scale);
-                rootObject.updateMatrixWorld(true);
-                console.log('sittingToStandingTransform:\n' + vrDisplay.stageParameters.sittingToStandingTransform);
+                rootObject.matrixWorldNeedsUpdate = true;
+                this.hasStageParameters = true;
                 console.log('  position: %f, %f, %f', rootObject.position.x, rootObject.position.y, rootObject.position.z);
                 console.log('  rotation: %f, %f, %f', rootObject.rotation.x, rootObject.rotation.y, rootObject.rotation.z);
                 console.log('  quaternion: %f, %f, %f, %f', rootObject.quaternion.x, rootObject.quaternion.y, rootObject.quaternion.z, rootObject.quaternion.w);
@@ -36,7 +39,7 @@ module.exports = ( function () {
             } else {
                 console.warn('no sittingToStandingTransform provided by the VRDisplay');
             }
-        }
+        }.bind(this);
 
         this.save = function () {
             console.log('saving poses of stage objects...');

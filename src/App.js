@@ -44,7 +44,6 @@ module.exports = function (scene, config, rendererOptions) {
     this.useImmediatePose = false;
 
     this.stage = new Stage();
-    this.stage.rootObject.add(this.camera);
     this.scene.add(this.stage.rootObject);
 
     // public methods:

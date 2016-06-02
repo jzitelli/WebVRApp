@@ -4,39 +4,42 @@ window.onLoad = function () {
 
     THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
-    var objectSelector = new YAWVRB.Utils.ObjectSelector();
-
     // create app:
 
     var app = ( function () {
         //var euler = new THREE.Euler(0, 0, 0, 'YXZ');
-        return new YAWVRB.App(undefined, {
-            onResetVRSensor: function (lastRotation, lastPosition) {
-                console.log('lastRotation: %f, lastPosition: (%f, %f, %f)', lastRotation, lastPosition.x, lastPosition.y, lastPosition.z);
-                // maintain poses of stage objects:
-                // stage.rootObject.children.forEach( function (object) {
-                //     // maintain rotation of object (relative heading of object w.r.t. HMD):
-                //     if (object === app.camera) return;
-                //     euler.setFromQuaternion(object.quaternion);
-                //     euler.y -= lastRotation;
-                //     object.quaternion.setFromEuler(euler);
-                //     // maintain position of object w.r.t. HMD:
-                //     object.position.sub(lastPosition);
-                //     object.position.applyAxisAngle(THREE.Object3D.DefaultUp, -lastRotation);
-                //     object.position.add(app.camera.position);
-                //     object.updateMatrix();
-                // } );
-                // stage.updateSittingToStandingTransform();
-                // stage.rootObject.updateMatrixWorld(true);
-            }
-        }, {
+        return new YAWVRB.App(undefined, undefined, {
             canvas: document.getElementById('webgl-canvas'),
             antialias: !YAWVRB.Utils.isMobile(),
             alpha: true
         });
     } )();
 
-    objectSelector.addSelectable(app.stage.rootObject);
+    var objectSelector = new YAWVRB.Utils.ObjectSelector();
+
+    var avatar = new THREE.Object3D();
+    app.scene.add(avatar);
+    avatar.add(app.camera);
+    avatar.position.y = 1.25;
+    avatar.updateMatrix();
+
+    // keyboard:
+
+    var keyboardCommands = {
+        moveF: {buttons: [YAWVRB.Keyboard.KEYCODES.W]},
+        moveB: {buttons: [YAWVRB.Keyboard.KEYCODES.S]},
+        moveL: {buttons: [YAWVRB.Keyboard.KEYCODES.A]},
+        moveR: {buttons: [YAWVRB.Keyboard.KEYCODES.D]},
+        moveU: {buttons: [YAWVRB.Keyboard.KEYCODES.Q]},
+        moveD: {buttons: [YAWVRB.Keyboard.KEYCODES.Z]},
+        turnL: {buttons: [YAWVRB.Keyboard.KEYCODES.LEFTARROW]},
+        turnR: {buttons: [YAWVRB.Keyboard.KEYCODES.RIGHTARROW]}
+    };
+    var keyboard = new YAWVRB.Keyboard(window, keyboardCommands);
+
+    var visualKeyboard = YAWVRB.Keyboard.makeStageObject();
+    app.stage.rootObject.add(visualKeyboard);
+    objectSelector.addSelectable(visualKeyboard);
 
     // xbox gamepad:
 
@@ -67,7 +70,7 @@ window.onLoad = function () {
     // vive controller 2:
 
     var viveBGamepadCommands = {
-        resetVRSensor: {buttons: [3], commandDown: app.resetVRSensor},
+        toggleUseImmediatePose: {buttons: [3], commandDown: app.toggleUseImmediatePose},
         turnRL: {axes: [YAWVRB.Gamepads.AXES.LSX]}
     };
     var viveBTool = YAWVRB.Gamepads.makeTool();
@@ -125,14 +128,20 @@ window.onLoad = function () {
             function startAnimateLoop() {
                 var lt = 0;
 
+                requestAnimationFrame(animate);
+
                 function animate(t) {
+
                     var dt = 0.001 * (t - lt);
-                    var moveFB = 0,
-                        moveRL = 0,
-                        moveUD = 0,
-                        turnRL = 0,
+
+                    var moveFB = keyboard.moveF - keyboard.moveB,
+                        moveRL = keyboard.moveR - keyboard.moveL,
+                        moveUD = keyboard.moveU - keyboard.moveD,
+                        turnRL = keyboard.turnR - keyboard.turnL,
                         turnUD = 0;
+
                     var values = YAWVRB.Gamepads.update();
+
                     for (var i = 0; i < values.length; i++) {
                         var vals = values[i];
                         if (vals.moveFB) {
@@ -147,7 +156,11 @@ window.onLoad = function () {
                         if (vals.turnUD) turnUD += vals.turnUD;
                     }
 
-                    YAWVRB.Utils.moveObject(objectSelector.selection, dt, moveFB, moveRL, moveUD, turnRL, turnUD);
+                    if (objectSelector.selection) {
+                        YAWVRB.Utils.moveObject(objectSelector.selection, dt, moveFB, moveRL, moveUD, turnRL, turnUD);
+                    } else {
+                        YAWVRB.Utils.moveObject(avatar, dt, moveFB, moveRL, moveUD, turnRL, 0);
+                    }
 
                     viveATool.update(dt);
                     viveBTool.update(dt);
@@ -158,7 +171,6 @@ window.onLoad = function () {
                     requestAnimationFrame(animate);
                 }
 
-                requestAnimationFrame(animate);
             }
 
         });

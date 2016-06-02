@@ -18,7 +18,6 @@ module.exports = ( function () {
         const MOVESPEED = 0.3;
         var euler = new THREE.Euler(0, 0, 0, 'YXZ');
         return function (object, dt, moveFB, moveRL, moveUD, turnRL, turnUD) {
-            if (!object) return;
             if (moveFB || moveRL || moveUD || turnRL || turnUD) {
                 euler.setFromQuaternion(object.quaternion);
                 euler.y -= (turnRL) * dt;
