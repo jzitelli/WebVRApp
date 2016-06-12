@@ -15,7 +15,7 @@ window.onLoad = function () {
         });
     } )();
 
-    app.stage.rootObject.add(app.camera);
+    app.stage.add(app.camera);
 
     var objectSelector = new YAWVRB.Utils.ObjectSelector();
     var selectionEnabled = false;
@@ -40,7 +40,7 @@ window.onLoad = function () {
     var keyboard = new YAWVRB.Keyboard(window, keyboardCommands);
 
     var visualKeyboard = YAWVRB.Keyboard.makeStageObject();
-    app.stage.rootObject.add(visualKeyboard);
+    app.stage.add(visualKeyboard);
     objectSelector.addSelectable(visualKeyboard);
 
     // xbox gamepad:
@@ -65,10 +65,9 @@ window.onLoad = function () {
         moveRL: {axes: [YAWVRB.Gamepads.AXES.LSX]},
         toggleFloat: {buttons: [0]}
     };
-    var viveATool = YAWVRB.Gamepads.makeTool();
+    var viveATool = YAWVRB.Gamepads.makeTool({toolColor: 0xff0000});
     viveATool.mesh.visible = false;
-    var viveAConnected = false;
-    app.stage.rootObject.add(viveATool.mesh);
+    app.stage.add(viveATool.mesh);
 
     // vive controller 2:
 
@@ -77,10 +76,11 @@ window.onLoad = function () {
         turnRL: {axes: [YAWVRB.Gamepads.AXES.LSX]},
         turnUD: {axes: [YAWVRB.Gamepads.AXES.LSY]}
     };
-    var viveBTool = YAWVRB.Gamepads.makeTool();
+    var viveBTool = YAWVRB.Gamepads.makeTool({toolColor: 0x00ff00});
     viveBTool.mesh.visible = false;
-    app.stage.rootObject.add(viveBTool.mesh);
+    app.stage.add(viveBTool.mesh);
 
+    var viveAConnected = false;
     YAWVRB.Gamepads.setOnGamepadConnected( function (e) {
         if (/xbox/i.test(e.gamepad.id) || /xinput/i.test(e.gamepad.id)) {
             YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, xboxGamepadCommands);
@@ -103,11 +103,9 @@ window.onLoad = function () {
 
     var leapTool = YAWVRB.LeapMotion.makeTool();
     leapTool.leapController.connect();
-    app.stage.rootObject.add(leapTool.toolRoot);
+    app.stage.add(leapTool.toolRoot);
     app.scene.add(leapTool.toolShadowMesh);
     objectSelector.addSelectable(leapTool.toolRoot);
-
-    app.stage.load();
 
     ( function () {
         // load the WebVRDesk scene and start
@@ -172,7 +170,7 @@ window.onLoad = function () {
                     if (selectionEnabled && objectSelector.selection) {
                         YAWVRB.Utils.moveObject(objectSelector.selection, dt, moveFB, moveRL, moveUD, turnRL, turnUD);
                     } else {
-                        YAWVRB.Utils.moveObject(app.stage.rootObject, dt, moveFB, moveRL, moveUD, turnRL, 0);
+                        YAWVRB.Utils.moveObject(app.stage, dt, moveFB, moveRL, moveUD, turnRL, 0);
                     }
 
                     viveATool.update(dt);

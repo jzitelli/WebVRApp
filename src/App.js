@@ -1,5 +1,4 @@
 /* global THREE */
-var Stage = require('./Stage.js');
 var Utils = require('./Utils.js');
 
 const DEFAULT_OPTIONS = {
@@ -43,8 +42,10 @@ module.exports = function (scene, config, rendererOptions) {
 
     this.useImmediatePose = false;
 
-    this.stage = new Stage();
-    this.scene.add(this.stage.rootObject);
+    this.stage = new THREE.Object3D();
+    this.stage.matrixAutoUpdate = false;
+
+    this.scene.add(this.stage);
 
     // public methods:
 
@@ -86,7 +87,7 @@ module.exports = function (scene, config, rendererOptions) {
                 this.vrControls.update(true);
 
                 // maintain correspondence between virtual / physical poses of stage objects:
-                this.stage.rootObject.children.forEach( function (object) {
+                this.stage.children.forEach( function (object) {
                     // maintain rotation of object (relative heading of object w.r.t. HMD):
                     if (object === this.camera) return;
                     euler.setFromQuaternion(object.quaternion);
@@ -99,7 +100,7 @@ module.exports = function (scene, config, rendererOptions) {
                     object.updateMatrix();
                 }.bind(this) );
 
-                this.stage.rootObject.updateMatrixWorld(true);
+                this.stage.updateMatrixWorld(true);
 
                 // this.stage.children.forEach( function (child) {
                 //     euler.setFromQuaternion(child.quaternion);
@@ -150,14 +151,19 @@ module.exports = function (scene, config, rendererOptions) {
         };
     } )().bind(this);
 
-    // WebVR setup
-
     this.vrDisplay = null;
+
+    // WebVR setup:
 
     if (navigator.getVRDisplays) {
         navigator.getVRDisplays().then( function (displays) {
             if (displays.length > 0) {
                 this.vrDisplay = displays[0];
+                if (this.vrDisplay.stageParameters && this.vrDisplay.stageParameters.sittingToStandingTransform) {
+                    this.stage.matrix.fromArray(this.vrDisplay.stageParameters.sittingToStandingTransform);
+                    this.stage.matrix.decompose(this.stage.position, this.stage.quaternion, this.stage.scale);
+                    this.stage.matrixWorldNeedsUpdate = true;
+                }
                 if (config.onGotVRDisplay) {
                     config.onGotVRDisplay(this.vrDisplay);
                 }
