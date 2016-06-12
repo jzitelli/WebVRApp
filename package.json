@@ -13,6 +13,7 @@
     "build/",
     "src/",
     "test/",
+    ".eslintrc.json",
     "favicon.ico",
     "LICENSE",
     "README.md"
@@ -31,16 +32,16 @@
     "WebVR"
   ],
   "dependencies": {
-    "webvr-polyfill": "git://github.com/jzitelli/webvr-polyfill.git"
+    "webvr-polyfill": "git://github.com/jzitelli/webvr-polyfill.git",
+    "eslint": "latest",
+    "browserify": "latest",
+    "mkdirp": "latest"
   },
   "devDependencies": {
     "three.js": "git://github.com/jzitelli/three.js.git#dev",
     "cannon": "git://github.com/jzitelli/cannon.js.git",
     "leapjs": "latest",
-    "browserify": "latest",
-    "watchify": "latest",
-    "eslint": "latest",
-    "mkdirp": "latest"
+    "watchify": "latest"
   },
   "scripts": {
     "lint": "eslint src/*.js && eslint test/*.js",
