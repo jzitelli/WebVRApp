@@ -158,6 +158,9 @@ module.exports = function (scene, config, rendererOptions) {
         navigator.getVRDisplays().then( function (displays) {
             if (displays.length > 0) {
                 this.vrDisplay = displays[0];
+                if (config.onGotVRDisplay) {
+                    config.onGotVRDisplay(this.vrDisplay);
+                }
             }
         }.bind(this) );
     } else {
