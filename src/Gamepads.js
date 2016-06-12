@@ -11,11 +11,6 @@ module.exports = ( function () {
     var gamepadCommands = [];
     var xboxGamepads = [];
     var vrGamepads = [];
-    var viveMeshA = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.06, 0.13), new THREE.MeshLambertMaterial({color: 0xff2222}));
-    var viveMeshB = new THREE.Mesh(new THREE.BoxBufferGeometry(0.06, 0.06, 0.13), new THREE.MeshLambertMaterial({color: 0x22ff22}));
-    viveMeshA.matrixAutoUpdate = false;
-    viveMeshB.matrixAutoUpdate = false;
-    var vrGamepadMeshes = [viveMeshA, viveMeshB];
 
     const DEFAULT_OPTIONS = {
         toolLength: 0.15,
@@ -35,7 +30,7 @@ module.exports = ( function () {
         options = Utils.combineObjects(DEFAULT_OPTIONS, options || {});
         console.log('OpenVR tool options:');
         console.log(options);
-        var toolGeom = new THREE.CylinderGeometry(options.toolRadius, options.toolRadius, options.toolLength, 10, 1, false);
+        var toolGeom = new THREE.CylinderGeometry(options.toolRadius, options.toolRadius, options.toolLength, 13, 1, false);
         toolGeom.translate(0, -0.5 * options.toolLength, 0);
         toolGeom.rotateX(-0.5 * Math.PI);
         var bufferGeom = new THREE.BufferGeometry();
@@ -54,7 +49,7 @@ module.exports = ( function () {
         }
         var toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.KINEMATIC});
         toolBody.material = options.tipMaterial;
-        toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, options.tipLength, 8),
+        toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, options.tipLength, 13),
             new CANNON.Vec3(0, 0, 0.5 * options.tipLength));
         var position = new THREE.Vector3();
         var velocity = new THREE.Vector3();
@@ -233,9 +228,6 @@ module.exports = ( function () {
             RSX: 2,
             RSY: 3
         },
-        viveMeshA: viveMeshA,
-        viveMeshB: viveMeshB,
-        vrGamepadMeshes: vrGamepadMeshes,
         setGamepadCommands: setGamepadCommands,
         setOnGamepadConnected: setOnGamepadConnected,
         update: update,
