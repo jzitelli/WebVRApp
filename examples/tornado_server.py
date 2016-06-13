@@ -18,14 +18,16 @@ import sys
 sys.path.insert(0, GFXTABLET_DIR)
 from GfxTablet import GfxTabletHandler
 
-class MainHandler(RequestHandler):
+class BasicExampleHandler(RequestHandler):
     def get(self):
-        self.render("template.html", overlay_html="")
+        self.render("template.html", overlay_html="", main_script="/examples/basic.js")
+
+
 
 def main():
     handlers = [(r'/gfxtablet', GfxTabletHandler),
                 (r'/(.+)', StaticFileHandler, {'path': ROOT_DIR}),
-                (r'/', MainHandler)]
+                (r'/', BasicExampleHandler)]
     app = Application(handlers,
                       debug=config.get('DEBUG', False),
                       static_path=ROOT_DIR,

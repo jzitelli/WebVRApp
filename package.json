@@ -1,7 +1,7 @@
 {
   "name": "yawvrb",
   "description": "YAWVRB",
-  "version": "0.77.0",
+  "version": "0.78.0",
   "author": "Jeffrey Zitelli (https://github.com/jzitelli)",
   "license": "MIT",
   "repository": {
@@ -12,7 +12,7 @@
   "files": [
     "build/",
     "src/",
-    "test/",
+    "examples/",
     ".eslintrc.json",
     "favicon.ico",
     "LICENSE",
@@ -40,14 +40,14 @@
   "devDependencies": {
     "three.js": "git://github.com/jzitelli/three.js.git#dev",
     "cannon": "git://github.com/jzitelli/cannon.js.git",
-    "leapjs": "latest",
+    "leapjs": "0.6.4",
     "watchify": "latest"
   },
   "scripts": {
-    "lint": "eslint src/*.js && eslint test/*.js",
+    "lint": "eslint src/*.js && eslint examples/*.js",
     "build": "npm run lint && mkdirp build && browserify src/yawvrb.js -o build/yawvrb.js",
     "postinstall": "npm run build",
-    "start": "npm run build && cd ./test && python tornado_server.py",
+    "start": "npm run build && cd ./examples && python tornado_server.py",
     "watch": "watchify src/yawvrb.js -o build/yawvrb.js"
   }
 }

@@ -6,14 +6,11 @@ window.onLoad = function () {
 
     // create app:
 
-    var app = ( function () {
-        //var euler = new THREE.Euler(0, 0, 0, 'YXZ');
-        return new YAWVRB.App(undefined, undefined, {
-            canvas: document.getElementById('webgl-canvas'),
-            antialias: !YAWVRB.Utils.isMobile(),
-            alpha: true
-        });
-    } )();
+    var app = new YAWVRB.App(undefined, undefined, {
+        canvas: document.getElementById('webgl-canvas'),
+        antialias: !YAWVRB.Utils.isMobile(),
+        alpha: true
+    });
 
     app.stage.add(app.camera);
 
@@ -111,14 +108,14 @@ window.onLoad = function () {
         // load the WebVRDesk scene and start
         var objectLoader = new THREE.ObjectLoader();
         var textureLoader = new THREE.TextureLoader();
-        var deskTexture = textureLoader.load('/test/models/textures/deskTexture.png');
+        var deskTexture = textureLoader.load('/examples/models/textures/deskTexture.png');
         var deskMaterial = new THREE.MeshBasicMaterial({map: deskTexture});
-        var roomTexture = textureLoader.load('/test/models/textures/roomTexture.png');
+        var roomTexture = textureLoader.load('/examples/models/textures/roomTexture.png');
         var roomMaterial = new THREE.MeshBasicMaterial({map: roomTexture});
-        var chairTexture = textureLoader.load('/test/models/textures/chairTexture.png');
+        var chairTexture = textureLoader.load('/examples/models/textures/chairTexture.png');
         var chairMaterial = new THREE.MeshBasicMaterial({map: chairTexture});
 
-        objectLoader.load("/test/models/WebVRDesk.json", function (scene) {
+        objectLoader.load("/examples/models/WebVRDesk.json", function (scene) {
             while (scene.children.length > 0) {
                 var child = scene.children[0];
                 scene.remove(child);
