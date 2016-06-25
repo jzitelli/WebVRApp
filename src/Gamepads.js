@@ -31,13 +31,8 @@ module.exports = ( function () {
         options = Utils.combineObjects(DEFAULT_OPTIONS, options || {});
         console.log('OpenVR tool options:');
         console.log(options);
-        var toolGeom = new THREE.CylinderGeometry(options.toolRadius, options.toolRadius, options.toolLength, options.numSegments, 1, false);
-        toolGeom.translate(0, -0.5 * options.toolLength, 0);
+        var toolGeom = new THREE.CylinderBufferGeometry(options.toolRadius, options.toolRadius, options.toolLength, options.numSegments, 1, false);
         toolGeom.rotateX(-0.5 * Math.PI);
-        var bufferGeom = new THREE.BufferGeometry();
-        bufferGeom.fromGeometry(toolGeom);
-        toolGeom.dispose();
-        toolGeom = bufferGeom;
         var toolMaterial = new THREE.MeshLambertMaterial({color: options.toolColor, transparent: true});
         var toolMesh = new THREE.Mesh(toolGeom, toolMaterial);
         var toolShadowMesh;
@@ -50,14 +45,14 @@ module.exports = ( function () {
         }
         var toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.KINEMATIC});
         toolBody.material = options.tipMaterial;
-        toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, options.tipLength, options.numSegments),
-            new CANNON.Vec3(0, 0, 0.5 * options.tipLength));
+        toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, options.tipLength, options.numSegments));
         var position = new THREE.Vector3();
         var velocity = new THREE.Vector3();
         var quaternion = new THREE.Quaternion();
         var worldPosition = new THREE.Vector3();
         var worldQuaternion = new THREE.Quaternion();
         var worldScale = new THREE.Vector3();
+        var lastPosition = new THREE.Vector3();
         var vrGamepad;
         function setGamepad(gamepad) {
             vrGamepad = gamepad;
@@ -67,25 +62,20 @@ module.exports = ( function () {
                 toolMesh.position.fromArray(vrGamepad.pose.position);
                 toolMesh.quaternion.fromArray(vrGamepad.pose.orientation);
                 toolMesh.updateMatrix();
-                toolMesh.updateMatrixWorld();
+                position.copy(toolMesh.position);
+                var parent = toolMesh.parent;
+                parent.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
+                position.applyMatrix4(parent.matrixWorld);
+                toolBody.position.copy(position);
+                velocity.subVectors(position, lastPosition);
+                velocity.multiplyScalar(1 / dt);
+                toolBody.velocity.copy(velocity);
+                quaternion.multiplyQuaternions(worldQuaternion, toolMesh.quaternion);
+                toolBody.quaternion.copy(quaternion);
+                lastPosition.copy(position);
                 if (toolShadowMesh) {
                     toolShadowMesh.updateMatrix();
                     toolShadowMesh.updateMatrixWorld();
-                }
-                position.copy(toolMesh.position);
-                velocity.copy(toolBody.interpolatedPosition);
-                var parent = toolMesh.parent;
-                if (parent) {
-                    parent.updateMatrix();
-                    parent.updateMatrixWorld();
-                    parent.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
-                    position.applyMatrix4(parent.matrixWorld);
-                    quaternion.multiplyQuaternions(worldQuaternion, toolMesh.quaternion);
-                    toolBody.position.copy(position);
-                    toolBody.quaternion.copy(quaternion);
-                    velocity.sub(position);
-                    velocity.multiplyScalar(-1 / dt);
-                    toolBody.velocity.copy(velocity);
                 }
             }
         }
