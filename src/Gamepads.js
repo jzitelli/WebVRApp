@@ -25,7 +25,8 @@ module.exports = ( function () {
         shadowMaterial: new THREE.MeshBasicMaterial({color: 0x212121}),
         shadowLightPosition: new THREE.Vector4(0, 7, 0, 0.1),
         shadowPlane: 0.002,
-        numSegments: 10
+        numSegments: 10,
+        offset: undefined
     };
     function makeTool(options) {
         options = Utils.combineObjects(DEFAULT_OPTIONS, options || {});
@@ -33,6 +34,10 @@ module.exports = ( function () {
         console.log(options);
         var toolGeom = new THREE.CylinderBufferGeometry(options.toolRadius, options.toolRadius, options.toolLength, options.numSegments, 1, false);
         toolGeom.rotateX(-0.5 * Math.PI);
+        if (options.offset) {
+            toolGeom.translate(options.offset[0], options.offset[1], options.offset[2]);
+            options.offset = new CANNON.Vec3(options.offset[0], options.offset[1], options.offset[2]);
+        }
         var toolMaterial = new THREE.MeshLambertMaterial({color: options.toolColor, transparent: true});
         var toolMesh = new THREE.Mesh(toolGeom, toolMaterial);
         var toolShadowMesh;
@@ -45,34 +50,36 @@ module.exports = ( function () {
         }
         var toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.KINEMATIC});
         toolBody.material = options.tipMaterial;
-        toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, options.tipLength, options.numSegments));
-        var position = new THREE.Vector3();
-        var velocity = new THREE.Vector3();
-        var quaternion = new THREE.Quaternion();
-        var worldPosition = new THREE.Vector3();
-        var worldQuaternion = new THREE.Quaternion();
-        var worldScale = new THREE.Vector3();
-        var lastPosition = new THREE.Vector3();
+
+        if (options.useImplicitCylinder) {
+            toolBody.addShape(new CANNON.ImplicitCylinder(options.tipRadius, options.tipLength),
+                options.offset, (new CANNON.Quaternion()).setFromAxisAngle(CANNON.Vec3.UNIT_X, 0.5*Math.PI));
+        } else {
+            toolBody.addShape(new CANNON.Cylinder(options.tipRadius, options.tipRadius, options.tipLength, options.numSegments), options.offset);
+        }
+
         var vrGamepad;
         function setGamepad(gamepad) {
             vrGamepad = gamepad;
         }
+        var velocity = new THREE.Vector3();
+        var worldPosition = new THREE.Vector3();
+        var worldQuaternion = new THREE.Quaternion();
+        var worldScale = new THREE.Vector3();
+        var lastPosition = new THREE.Vector3();
         function update(dt) {
             if (vrGamepad && vrGamepad.pose) {
                 toolMesh.position.fromArray(vrGamepad.pose.position);
                 toolMesh.quaternion.fromArray(vrGamepad.pose.orientation);
                 toolMesh.updateMatrix();
-                position.copy(toolMesh.position);
-                var parent = toolMesh.parent;
-                parent.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
-                position.applyMatrix4(parent.matrixWorld);
-                toolBody.position.copy(position);
-                velocity.subVectors(position, lastPosition);
+                toolMesh.updateMatrixWorld();
+                toolMesh.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
+                toolBody.position.copy(worldPosition);
+                velocity.subVectors(worldPosition, lastPosition);
                 velocity.multiplyScalar(1 / dt);
                 toolBody.velocity.copy(velocity);
-                quaternion.multiplyQuaternions(worldQuaternion, toolMesh.quaternion);
-                toolBody.quaternion.copy(quaternion);
-                lastPosition.copy(position);
+                toolBody.quaternion.copy(worldQuaternion);
+                lastPosition.copy(worldPosition);
                 if (toolShadowMesh) {
                     toolShadowMesh.updateMatrix();
                     toolShadowMesh.updateMatrixWorld();
