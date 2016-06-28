@@ -105,7 +105,7 @@ module.exports = ( function () {
         gamepads = navigator.getGamepads();
         for (var i = 0; i < gamepads.length; i++) {
             var gamepad = gamepads[i];
-            if (!gamepad) continue;
+            if (!gamepad || !gamepad.id) continue;
             if (buttonsPresseds[i] === undefined) {
                 console.log('new gamepad: %s', gamepad.id);
                 if (/openvr/i.test(gamepad.id)) {
@@ -145,7 +145,7 @@ module.exports = ( function () {
         pollGamepads();
         for (var i = 0; i < gamepads.length; ++i) {
             var gamepad = gamepads[i];
-            if (!gamepad) continue;
+            if (!gamepad || !gamepad.id) continue;
             var buttonsPressed = buttonsPresseds[i];
             var commands = gamepadCommands[i] || {};
             // get all button/axes values:
