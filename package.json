@@ -18,19 +18,6 @@
     "LICENSE",
     "README.md"
   ],
-  "keywords": [
-    "three.js",
-    "cannon.js",
-    "GfxTablet",
-    "Google Cardboard",
-    "Leap Motion",
-    "Oculus Rift",
-    "HTC Vive",
-    "VR",
-    "virtual reality",
-    "WebGL",
-    "WebVR"
-  ],
   "dependencies": {
     "webvr-polyfill": "git://github.com/jzitelli/webvr-polyfill.git",
     "eslint": "latest",
@@ -44,7 +31,7 @@
     "watchify": "latest"
   },
   "scripts": {
-    "lint": "eslint src/*.js && eslint examples/*.js",
+    "lint": "eslint src/*.js && eslint examples/basic.js",
     "build": "npm run lint && mkdirp build && browserify src/yawvrb.js -o build/yawvrb.js",
     "postinstall": "npm run build",
     "start": "npm run build && cd ./examples && python tornado_server.py",
