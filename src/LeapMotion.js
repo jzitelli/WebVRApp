@@ -102,13 +102,14 @@ module.exports = ( function () {
         interactionBoxRoot.add(interactionPlaneMesh);
 
         // leap motion controller:
-        var boxGeom = new THREE.BoxGeometry(METERS2LEAP*INCH2METERS*3, METERS2LEAP*INCH2METERS*0.5, METERS2LEAP*INCH2METERS*1.2);
+        var boxGeom = new THREE.BoxGeometry(METERS2LEAP*INCH2METERS*(3+1/8), METERS2LEAP*INCH2METERS*7/16, METERS2LEAP*INCH2METERS*(1 + 3/16));
         var leapGeom = new THREE.BufferGeometry();
         leapGeom.fromGeometry(boxGeom);
         boxGeom.dispose();
         var leapMaterial = new THREE.MeshLambertMaterial({color: options.leapColor});
         var leapMesh = new THREE.Mesh(leapGeom, leapMaterial);
-        leapMesh.position.y = METERS2LEAP*INCH2METERS*0.25;
+        leapMesh.position.y = METERS2LEAP*INCH2METERS*(7/32);
+        leapMesh.updateMatrix();
         toolRoot.add(leapMesh);
 
         // the stick:
