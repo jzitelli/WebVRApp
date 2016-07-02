@@ -96,9 +96,14 @@ module.exports = ( function () {
     }
 
     var _onGamepadConnected = null;
+    var _onGamepadDisconnected = null;
 
     function setOnGamepadConnected(onGamepadConnected) {
         _onGamepadConnected = onGamepadConnected;
+    }
+
+    function setOnGamepadDisconnected(onGamepadDisconnected) {
+        _onGamepadDisconnected = onGamepadDisconnected;
     }
 
     function pollGamepads() {
@@ -137,6 +142,7 @@ module.exports = ( function () {
         for (var j = 0; j < buttonsPresseds[i].length; j++) {
             buttonsPresseds[i][j] = false;
         }
+        if (_onGamepadDisconnected) _onGamepadDisconnected(e);
     }
     window.addEventListener("gamepaddisconnected", onGamepadDisconnected);
 
@@ -145,8 +151,8 @@ module.exports = ( function () {
         pollGamepads();
         for (var i = 0; i < gamepads.length; ++i) {
             var gamepad = gamepads[i];
-            if (!gamepad || !gamepad.id) continue;
             var buttonsPressed = buttonsPresseds[i];
+            if (!gamepad || !buttonsPressed) continue;
             var commands = gamepadCommands[i] || {};
             // get all button/axes values:
             var axesValues = {};
@@ -228,6 +234,7 @@ module.exports = ( function () {
         },
         setGamepadCommands: setGamepadCommands,
         setOnGamepadConnected: setOnGamepadConnected,
+        setOnGamepadDisconnected: setOnGamepadDisconnected,
         update: update,
         makeTool: makeTool,
         vrGamepads: vrGamepads,
