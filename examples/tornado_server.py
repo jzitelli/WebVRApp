@@ -20,7 +20,7 @@ from GfxTablet import GfxTabletHandler
 
 class BasicExampleHandler(RequestHandler):
     def get(self):
-        self.render("template.html", overlay_html="", main_script="/examples/basic.js")
+        self.render("template.html", overlay_html="", main_script="/examples/webvrDesk.js")
 
 
 

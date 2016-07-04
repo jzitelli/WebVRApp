@@ -36,10 +36,6 @@ window.onLoad = function () {
     };
     var keyboard = new YAWVRB.Keyboard(window, keyboardCommands);
 
-    var visualKeyboard = YAWVRB.Keyboard.makeStageObject();
-    app.stage.add(visualKeyboard);
-    objectSelector.addSelectable(visualKeyboard);
-
     // xbox gamepad:
 
     var xboxGamepadCommands = {
@@ -78,6 +74,7 @@ window.onLoad = function () {
     app.stage.add(viveBTool.mesh);
 
     var viveAConnected = false;
+
     YAWVRB.Gamepads.setOnGamepadConnected( function (e) {
         if (/xbox/i.test(e.gamepad.id) || /xinput/i.test(e.gamepad.id)) {
             YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, xboxGamepadCommands);
@@ -93,6 +90,11 @@ window.onLoad = function () {
                 viveBTool.setGamepad(e.gamepad);
                 viveBTool.mesh.visible = true;
             }
+        } else if (/3232/i.test(e.gamepad.id)) {
+            // bluetooth mini controller included w/ Destek viewer
+            YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, {
+                logButtonPress: {buttons: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], function (i) { console.log('pressed button %d', i); }}
+            });
         }
     } );
 

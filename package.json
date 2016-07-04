@@ -30,7 +30,7 @@
     "watchify": "*"
   },
   "scripts": {
-    "lint": "eslint src/*.js && eslint examples/basic.js",
+    "lint": "eslint src/*.js && eslint examples/webvrDesk.js",
     "build": "npm run lint && mkdirp build && browserify src/yawvrb.js -o build/yawvrb.js",
     "postinstall": "npm run build",
     "start": "npm run build && cd ./examples && python tornado_server.py",
