@@ -112,7 +112,7 @@ module.exports = ( function () {
             var gamepad = gamepads[i];
             if (!gamepad || !gamepad.id) continue;
             if (buttonsPresseds[i] === undefined) {
-                console.log('new gamepad: %s', gamepad.id);
+                console.log('new gamepad: %s - %d buttons - %d axes', gamepad.id, gamepad.buttons.length, gamepad.axes.length);
                 if (/openvr/i.test(gamepad.id)) {
                     vrGamepads.push(gamepad);
                 } else if (/xbox/i.test(gamepad.id) || /xinput/i.test(gamepad.id)) {
