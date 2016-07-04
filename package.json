@@ -20,15 +20,15 @@
   ],
   "dependencies": {
     "webvr-polyfill": "git://github.com/jzitelli/webvr-polyfill.git",
-    "eslint": "latest",
-    "browserify": "latest",
-    "mkdirp": "latest"
+    "eslint": "*",
+    "browserify": "*",
+    "mkdirp": "*"
   },
   "devDependencies": {
     "three.js": "git://github.com/jzitelli/three.js.git#dev",
     "cannon": "git://github.com/jzitelli/cannon.js.git",
     "leapjs": "0.6.4",
-    "watchify": "latest"
+    "watchify": "*"
   },
   "scripts": {
     "lint": "eslint src/*.js && eslint examples/basic.js",
