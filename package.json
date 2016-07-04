@@ -10,7 +10,6 @@
   },
   "bugs": "https://github.com/jzitelli/yawvrb/issues",
   "files": [
-    "build/",
     "src/",
     "examples/",
     ".eslintrc.json",
@@ -19,13 +18,13 @@
     "README.md"
   ],
   "dependencies": {
-    "webvr-polyfill": "git://github.com/jzitelli/webvr-polyfill.git",
     "eslint": "*",
     "browserify": "*",
     "mkdirp": "*"
   },
   "devDependencies": {
     "three.js": "git://github.com/jzitelli/three.js.git#dev",
+    "webvr-polyfill": "git://github.com/jzitelli/webvr-polyfill.git",
     "cannon": "git://github.com/jzitelli/cannon.js.git",
     "leapjs": "0.6.4",
     "watchify": "*"
