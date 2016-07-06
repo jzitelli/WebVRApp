@@ -96,7 +96,9 @@ window.onLoad = function () {
             YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, {
                 logButtonPress: {buttons: [0,1,2,3,4,5,6,7,8,10,11,12,13,14],
                                  commandDown: function (i) { console.log('pressed button %d', i); }},
-                toggleVR: {buttons: [9], commandDown: app.toggleVR}
+                toggleVR: {buttons: [9], commandDown: app.toggleVR},
+                moveFB: {axes: [0]},
+                moveRL: {axes: [1], flipAxes: true}
             });
         }
     } );
