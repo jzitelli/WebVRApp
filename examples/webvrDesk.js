@@ -90,13 +90,12 @@ window.onLoad = function () {
                 viveBTool.setGamepad(e.gamepad);
                 viveBTool.mesh.visible = true;
             }
-        } else if (/3232/i.test(e.gamepad.id)) {
+        } else if (/RC-B01_V05-B629/i.test(e.gamepad.id) || /3232/i.test(e.gamepad.id)) {
             // bluetooth mini controller included w/ Destek viewer
             console.log(e.gamepad.buttons.length);
             YAWVRB.Gamepads.setGamepadCommands(e.gamepad.index, {
-                logButtonPress: {buttons: [0,1,2,3,4,5,6,7,8,10,11,12,13,14],
+                logButtonPress: {buttons: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14],
                                  commandDown: function (i) { console.log('pressed button %d', i); }},
-                toggleVR: {buttons: [9], commandDown: app.toggleVR},
                 moveFB: {axes: [0]},
                 moveRL: {axes: [1], flipAxes: true}
             });
