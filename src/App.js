@@ -176,13 +176,7 @@ module.exports = function (scene, config, rendererOptions) {
     this.toggleVR = function () {
         var vrDisplay = this.vrDisplay;
         if (vrDisplay && !vrDisplay.isPresenting && vrDisplay.capabilities.canPresent) {
-            this.vrEffect.requestPresent().then( function () {
-                // if (vrDisplay.capabilities.hasExternalDisplay) {
-                //     var eyeParams = vrDisplay.getEyeParameters( 'left' );
-                //     this.renderer.setSize(2*eyeParams.renderWidth, eyeParams.renderHeight);
-                // }
-                // requestPointerLock();
-            }.bind(this) );
+            this.vrEffect.requestPresent();
         } else if (vrDisplay && vrDisplay.isPresenting) {
             this.vrEffect.exitPresent().then( function () {
                 console.log('exited VR presentation');
