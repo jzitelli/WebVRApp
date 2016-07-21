@@ -5,24 +5,31 @@ from operator import itemgetter
 
 from tornado.web import Application, RequestHandler, StaticFileHandler
 from tornado.ioloop import IOLoop
+import jinja2
 
 config = {
     'DEBUG': True,
     'PORT' : 5000
 }
 
-ROOT_DIR = os.path.abspath(os.path.join(os.path.split(__file__)[0], os.path.pardir))
+EXAMPLES_DIR = os.path.split(__file__)[0]
+ROOT_DIR = os.path.abspath(os.path.join(EXAMPLES_DIR, os.path.pardir))
 
 GFXTABLET_DIR = os.path.join(ROOT_DIR, "GfxTablet")
 import sys
 sys.path.insert(0, GFXTABLET_DIR)
 from GfxTablet import GfxTabletHandler
 
+
+env = jinja2.Environment(loader=jinja2.FileSystemLoader(EXAMPLES_DIR))
+template = env.get_template('template.html')
+
+
 class BasicExampleHandler(RequestHandler):
     def get(self):
-        self.render("template.html", overlay_html="", main_script="/examples/webvrDesk.js")
-
-
+        # i prefer templating with jinja for now...
+        #self.render("template.html", overlay_html="", main_script="/examples/webvrDesk.js")
+        self.write(template.render(overlay_html="", main_script="/examples/webvrDesk.js"))
 
 def main():
     handlers = [(r'/gfxtablet', GfxTabletHandler),
