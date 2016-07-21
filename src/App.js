@@ -177,10 +177,10 @@ module.exports = function (scene, config, rendererOptions) {
         var vrDisplay = this.vrDisplay;
         if (vrDisplay && !vrDisplay.isPresenting && vrDisplay.capabilities.canPresent) {
             this.vrEffect.requestPresent().then( function () {
-                if (vrDisplay.capabilities.hasExternalDisplay) {
-                    var eyeParams = vrDisplay.getEyeParameters( 'left' );
-                    this.renderer.setSize(2*eyeParams.renderWidth, eyeParams.renderHeight);
-                }
+                // if (vrDisplay.capabilities.hasExternalDisplay) {
+                //     var eyeParams = vrDisplay.getEyeParameters( 'left' );
+                //     this.renderer.setSize(2*eyeParams.renderWidth, eyeParams.renderHeight);
+                // }
                 // requestPointerLock();
             }.bind(this) );
         } else if (vrDisplay && vrDisplay.isPresenting) {
