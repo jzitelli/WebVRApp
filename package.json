@@ -18,16 +18,16 @@
     "README.md"
   ],
   "dependencies": {
-    "eslint": "*",
-    "browserify": "*",
-    "mkdirp": "*"
+    "eslint": "^3.2.2",
+    "browserify": "^13.1.0",
+    "mkdirp": "^0.5.1"
   },
   "devDependencies": {
-    "three.js": "git://github.com/jzitelli/three.js.git#dev",
+    "three": "git://github.com/jzitelli/three.js.git#dev",
     "webvr-polyfill": "git://github.com/jzitelli/webvr-polyfill.git",
     "cannon": "git://github.com/jzitelli/cannon.js.git",
     "leapjs": "0.6.4",
-    "watchify": "*"
+    "watchify": "^3.7.0"
   },
   "scripts": {
     "lint": "eslint src/*.js && eslint examples/webvrDesk.js",

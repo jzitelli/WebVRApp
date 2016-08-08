@@ -329,7 +329,7 @@ module.exports = ( function () {
         rightRoot.add(palms[1]);
 
         // var textureLoader = new THREE.TextureLoader();
-        // var spriteTexture = textureLoader.load('/node_modules/three.js/examples/textures/sprite1.png'); , function (texture) {
+        // var spriteTexture = textureLoader.load('/node_modules/three/examples/textures/sprite1.png'); , function (texture) {
         // } );
         // var spriteMaterial = new THREE.SpriteMaterial({map: spriteTexture});
         // var sphereSprite = new THREE.Sprite(spriteMaterial);
