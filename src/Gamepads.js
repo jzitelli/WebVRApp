@@ -20,7 +20,7 @@ module.exports = ( function () {
         toolMass: 0.04,
         toolColor: 0xeebb99,
         tipColor: 0x99bbee,
-        tipMaterial: new CANNON.Material(),
+        tipMaterial: undefined,
         useShadowMesh: true,
         shadowMaterial: new THREE.MeshBasicMaterial({color: 0x212121}),
         shadowLightPosition: new THREE.Vector4(0, 7, 0, 0.1),
@@ -49,7 +49,7 @@ module.exports = ( function () {
             toolMesh.castShadow = true;
         }
         var toolBody = new CANNON.Body({mass: options.toolMass, type: CANNON.Body.KINEMATIC});
-        toolBody.material = options.tipMaterial;
+        toolBody.material = options.tipMaterial || new CANNON.Material();
 
         if (options.useImplicitCylinder) {
             toolBody.addShape(new CANNON.ImplicitCylinder(options.tipRadius, options.tipLength),
