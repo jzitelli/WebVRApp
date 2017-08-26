@@ -32,7 +32,8 @@ window.onLoad = function () {
         turnD: {buttons: [YAWVRB.Keyboard.KEYCODES.DOWNARROW]},
         toggleSelect: {buttons: [YAWVRB.Keyboard.KEYCODES.N], commandDown: function () { selectionEnabled = !selectionEnabled; }},
         cycleSelection: {buttons: [YAWVRB.Keyboard.KEYCODES[']']], commandDown: objectSelector.cycleSelection},
-        cyclePrevSelection: {buttons: [YAWVRB.Keyboard.KEYCODES['[']], commandDown: objectSelector.cycleSelection.bind(objectSelector, -1)}
+        cyclePrevSelection: {buttons: [YAWVRB.Keyboard.KEYCODES['[']], commandDown: objectSelector.cycleSelection.bind(objectSelector, -1)},
+        toggleVR: {buttons: [YAWVRB.Keyboard.KEYCODES.V], commandDown: app.toggleVR}
     };
     var keyboard = new YAWVRB.Keyboard(window, keyboardCommands);
 
